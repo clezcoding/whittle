@@ -1,0 +1,42 @@
+name: Dependabot automerge label
+
+# Kodiak does the merging (.kodiak.toml). This workflow only decides whether a
+# Dependabot pull request has earned the "automerge" label. It never checks out
+# or runs code from the pull request and holds no write access to contents.
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  label:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      # Patch and minor updates merge by themselves once "CI passed" is green.
+      # A major update, or anything touching Tauri, waits for a human.
+      - name: Label safe updates
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATES: ${{ steps.meta.outputs.updated-dependencies-json }}
+        run: |
+          set -euo pipefail
+          if echo "$UPDATES" | jq -e 'any(.[]; .updateType == "version-update:semver-major" or (.dependencyName | test("tauri"; "i")))' >/dev/null; then
+            echo "Major or Tauri update: leaving it for a human."
+            exit 0
+          fi
+          gh pr edit "$PR_URL" --add-label automerge

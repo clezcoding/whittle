@@ -26,3 +26,12 @@ design:
 safety:
   - changed-files:
       - any-glob-to-any-file: ["crates/whittle-core/src/safety.rs", "crates/whittle-core/src/journal.rs", "crates/whittle-core/src/quarantine.rs", "apps/gui/src-tauri/capabilities/**", "apps/gui/src-tauri/src/system.rs"]
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: ["Cargo.lock", "apps/gui/pnpm-lock.yaml", ".github/dependabot.yml"]
+security:
+  - changed-files:
+      - any-glob-to-any-file: ["SECURITY.md", "deny.toml", ".gitleaks.toml", ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml", ".github/workflows/dependency-review.yml", ".pre-commit-config.yaml"]
+release:
+  - changed-files:
+      - any-glob-to-any-file: [".github/workflows/release.yml", ".github/release.yml", "CHANGELOG.md", "docs/RELEASING.md", "scripts/check-version.sh", "scripts/render-homebrew.sh"]

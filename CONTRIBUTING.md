@@ -33,6 +33,9 @@ Anything that touches files must go through `Safety::check` and respect `Context
 - Branch from `main`, keep the change focused.
 - Title in the form `type: subject` (`feat`, `fix`, `rule`, `docs`, `refactor`, `test`, `ci`, `deps`), lower case. A bot checks it.
 - Labels are added automatically from the files you change.
+- **CI passed** is the one required check. A change that only touches docs skips the heavy jobs and is green within seconds; anything under `crates/`, `apps/` or `rules/` runs the full set (about three minutes).
+- Maintainers add the `automerge` label; [Kodiak](https://kodiakhq.com) then squash-merges as soon as CI is green. `do-not-merge` or `wip` stops it; `autoupdate` keeps the branch current with `main`.
+- Dependabot patch and minor updates get `automerge` by themselves. Major updates and Tauri bumps wait for a person.
 - Add a line under *Unreleased* in `CHANGELOG.md` for anything a user would notice.
 
 ## Adding a rule

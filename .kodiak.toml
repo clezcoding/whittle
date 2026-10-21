@@ -1,0 +1,38 @@
+# Kodiak merge bot: https://kodiakhq.com/docs/config-reference
+# Install the GitHub App once: https://github.com/apps/kodiakhq
+version = 1
+
+[merge]
+# A pull request merges itself as soon as every required check ("CI passed") is
+# green and it carries this label. Nothing merges without it.
+automerge_label = "automerge"
+method = "squash"
+delete_branch_on_merge = true
+notify_on_conflict = true
+prioritize_ready_to_merge = true
+# Never merge while one of these is set, even with the automerge label.
+blocking_labels = ["do-not-merge", "wip", "breaking", "needs-info"]
+require_automerge_label = true
+
+[merge.automerge_dependencies]
+# Fallback for single-package Dependabot titles ("Bump x from 1.0.0 to 1.0.1").
+# Grouped updates cannot be parsed from the title; dependabot-label.yml adds the
+# automerge label to those after checking the real update types.
+versions = ["minor", "patch"]
+usernames = ["dependabot"]
+
+[merge.message]
+title = "pull_request_title"
+body = "pull_request_body"
+include_coauthors = true
+include_pull_request_url = true
+include_pr_number = true
+body_type = "markdown"
+strip_html_comments = true
+
+[update]
+# Keeps a pull request up to date with main when it carries this label, which
+# the "strict" branch protection on main would otherwise make you do by hand.
+autoupdate_label = "autoupdate"
+always = false
+require_automerge_label = true
