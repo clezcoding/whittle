@@ -13,7 +13,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v11
         with:
           days-before-stale: 60
           days-before-close: 14
@@ -31,7 +31,7 @@ jobs:
           close-issue-message: Closed because of inactivity. Reopen any time with new details.
           close-pr-message: Closed because of inactivity. Reopen any time.
       - name: Close issues that are waiting for details
-        uses: actions/stale@v9
+        uses: actions/stale@v11
         with:
           days-before-stale: 14
           days-before-close: 7

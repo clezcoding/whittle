@@ -14,6 +14,6 @@ jobs:
     steps:
       # pull_request_target runs with write access: it only reads the config from the
       # base branch and never checks out or runs code from the pull request.
-      - uses: actions/labeler@v5
+      - uses: actions/labeler@v7
         with:
           sync-labels: true
