@@ -1,0 +1,37 @@
+name: Rule (new or wrong)
+description: A cache or leftover Whittle should know about, or one it gets wrong
+labels: [rule, triage]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is this about?
+      options: [Add a new location, A rule is too aggressive (false positive), A rule has the wrong risk level, A rule misses something]
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: App or tool that creates it, and its version
+    validations:
+      required: true
+  - type: textarea
+    id: path
+    attributes:
+      label: Path or glob
+      description: For example `~/Library/Caches/com.example.App`
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: safe
+    attributes:
+      label: What happens when it is gone?
+      description: Is it rebuilt automatically? Does the app lose settings, logins or data?
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Which risk level fits?
+      options: [Safe (rebuilt without you noticing), Caution (probably unneeded), Manual (only you can tell), Not sure]

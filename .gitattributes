@@ -1,0 +1,12 @@
+* text=auto eol=lf
+*.png binary
+*.icns binary
+*.ico binary
+*.woff2 binary
+*.woff binary
+*.command text eol=lf
+*.sh text eol=lf
+Cargo.lock linguist-generated
+pnpm-lock.yaml linguist-generated
+docs/screenshots/* linguist-generated
+assets/** linguist-generated

@@ -1,0 +1,25 @@
+[package]
+name = "whittle-cli"
+description = "Whittle command line: a Swiss army knife for tidying your Mac."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "whittle"
+path = "src/main.rs"
+
+[dependencies]
+whittle-core = { path = "../whittle-core" }
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive"] }
+owo-colors = "4.4.0"
+serde_json = "1.0.154"
+
+[dev-dependencies]
+assert_cmd = "2.2.2"
+predicates = "3.1.4"
+serde_json = "1.0.154"
+tempfile = "3.27.0"

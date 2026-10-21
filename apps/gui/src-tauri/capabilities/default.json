@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Whittle talks to its own Rust commands and listens to scan progress. It gets no file-system, shell or network plugins.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

@@ -1,0 +1,28 @@
+# Layout used by `whittle tidy`. Copy this file to ~/.config/whittle/tidy.yaml to change it
+# (your file replaces the built-in layout; folder names can be in any language).
+
+in_progress_extensions: [crdownload, download, part, partial, tmp, opdownload, aria2]
+
+# File-name prefixes macOS uses for screenshots and screen recordings (English, German, ...).
+screenshot_prefixes: ["Screenshot", "Screen Shot", "Bildschirmfoto", "Capture d’écran", "Captura de pantalla", "Schermafbeelding"]
+recording_prefixes: ["Screen Recording", "Bildschirmaufnahme", "Enregistrement de l’écran", "Grabación de pantalla"]
+
+screenshots:
+  folder: Screenshots
+  group_by: month   # none | year | month
+recordings:
+  folder: Screen Recordings
+  group_by: month
+
+categories:
+  - { folder: Images,        group_by: year,  extensions: [jpg, jpeg, png, gif, webp, heic, heif, tif, tiff, bmp, svg, avif, raw, cr2, nef, arw, dng] }
+  - { folder: Videos,        group_by: none,  extensions: [mp4, mov, mkv, avi, webm, m4v, wmv] }
+  - { folder: Audio,         group_by: none,  extensions: [mp3, wav, flac, aac, m4a, aiff, ogg, opus] }
+  - { folder: Documents,     group_by: none,  extensions: [pdf, doc, docx, odt, rtf, txt, md, pages, epub, mobi] }
+  - { folder: Spreadsheets,  group_by: none,  extensions: [xls, xlsx, csv, numbers, ods] }
+  - { folder: Presentations, group_by: none,  extensions: [ppt, pptx, key, odp] }
+  - { folder: Archives,      group_by: none,  extensions: [zip, rar, 7z, tar, gz, tgz, bz2, xz] }
+  - { folder: Installers,    group_by: none,  extensions: [dmg, pkg, iso, xip] }
+  - { folder: Design,        group_by: none,  extensions: [psd, ai, sketch, fig, xd, indd, afdesign, afphoto] }
+  - { folder: Fonts,         group_by: none,  extensions: [ttf, otf, woff, woff2] }
+  - { folder: Code & Data,   group_by: none,  extensions: [json, yaml, yml, toml, xml, sql, ipynb, py, js, ts, tsx, jsx, rs, go, sh, swift, kt, java, c, cpp, h, rb, php, html, css] }

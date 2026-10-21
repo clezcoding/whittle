@@ -1,0 +1,25 @@
+class Whittle < Formula
+  desc "Swiss army knife for your Mac: find leftovers, clear caches, tidy folders"
+  homepage "https://github.com/clezcoding/whittle"
+  version "@VERSION@"
+  license any_of: ["MIT", "Apache-2.0"]
+
+  on_macos do
+    on_arm do
+      url "https://github.com/clezcoding/whittle/releases/download/v@VERSION@/whittle-v@VERSION@-aarch64-apple-darwin.tar.gz"
+      sha256 "@SHA_ARM@"
+    end
+    on_intel do
+      url "https://github.com/clezcoding/whittle/releases/download/v@VERSION@/whittle-v@VERSION@-x86_64-apple-darwin.tar.gz"
+      sha256 "@SHA_INTEL@"
+    end
+  end
+
+  def install
+    bin.install "whittle"
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/whittle --version")
+  end
+end

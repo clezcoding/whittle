@@ -1,0 +1,195 @@
+# Whittle built-in rules: caches, logs and regenerable developer data.
+#
+# Every rule says WHERE to look and HOW RISKY removal is. Whittle never deletes anything on its
+# own: rules only produce findings. See rules/README.md for the full schema.
+#
+# Adding a rule is the easiest way to contribute: one entry, one pull request.
+
+rules:
+  # ---------------------------------------------------------------- system & apps
+  - id: user-caches
+    name: App caches
+    category: caches
+    risk: safe
+    regenerable: true
+    note: Apps rebuild their caches on demand.
+    paths: ["~/Library/Caches/*"]
+    exclude: ["com.apple.*", "CloudKit", "Homebrew", "Yarn", "pip", "CocoaPods", "go-build", "JetBrains", "org.swift.*", "TemporaryItems"]
+    min_age_days: 14
+    min_size: 5000000
+    platform: macos
+
+  - id: user-logs
+    name: Old logs
+    category: caches
+    risk: safe
+    regenerable: true
+    note: Log files older than two weeks, including crash reports.
+    paths: ["~/Library/Logs/*"]
+    exclude: ["com.apple.*"]
+    min_age_days: 14
+    min_size: 1000000
+    platform: macos
+
+  - id: electron-gpu-caches
+    name: Electron app caches
+    category: caches
+    risk: safe
+    regenerable: true
+    note: GPU, shader and code caches of Electron apps (Slack, Discord, VS Code, Notion ...).
+    paths:
+      - "~/Library/Application Support/*/GPUCache"
+      - "~/Library/Application Support/*/Code Cache"
+      - "~/Library/Application Support/*/DawnCache"
+      - "~/Library/Application Support/*/CachedData"
+      - "~/Library/Application Support/*/Cache"
+      - "~/Library/Application Support/*/Service Worker/CacheStorage"
+    min_age_days: 7
+    min_size: 5000000
+    platform: macos
+
+  - id: installers-in-downloads
+    name: Old installers
+    category: downloads
+    risk: caution
+    regenerable: false
+    note: Disk images and installer packages in Downloads that are older than 30 days.
+    paths:
+      - "~/Downloads/*.dmg"
+      - "~/Downloads/*.pkg"
+      - "~/Downloads/*.iso"
+      - "~/Downloads/*.xip"
+    min_age_days: 30
+    min_size: 1000000
+
+  - id: ios-backups
+    name: iPhone / iPad backups
+    category: backups
+    risk: manual
+    regenerable: false
+    note: Local device backups. Only you know if you still need them. Needs Full Disk Access.
+    paths: ["~/Library/Application Support/MobileSync/Backup/*"]
+    min_age_days: 90
+    needs_full_disk_access: true
+    platform: macos
+
+  # ---------------------------------------------------------------- Xcode & Apple dev
+  - id: xcode-derived-data
+    name: Xcode DerivedData
+    category: dev
+    risk: safe
+    regenerable: true
+    note: Build products and indexes. Xcode rebuilds them.
+    paths: ["~/Library/Developer/Xcode/DerivedData/*"]
+    exclude: ["ModuleCache.noindex"]
+    min_age_days: 7
+    platform: macos
+
+  - id: xcode-device-support
+    name: Xcode device support files
+    category: dev
+    risk: safe
+    regenerable: true
+    note: Debug symbols copied from devices. Downloaded again when you connect that OS version.
+    paths:
+      - "~/Library/Developer/Xcode/iOS DeviceSupport/*"
+      - "~/Library/Developer/Xcode/watchOS DeviceSupport/*"
+      - "~/Library/Developer/Xcode/tvOS DeviceSupport/*"
+    min_age_days: 30
+    platform: macos
+
+  - id: xcode-archives
+    name: Xcode archives
+    category: dev
+    risk: caution
+    regenerable: false
+    note: Archived app builds. Keep the ones you may need for symbolication or re-submission.
+    paths: ["~/Library/Developer/Xcode/Archives/*/*"]
+    min_age_days: 180
+    platform: macos
+
+  - id: simulator-caches
+    name: Simulator caches
+    category: dev
+    risk: safe
+    regenerable: true
+    paths: ["~/Library/Developer/CoreSimulator/Caches/*"]
+    min_age_days: 14
+    platform: macos
+
+  # ---------------------------------------------------------------- package managers
+  - id: homebrew-downloads
+    name: Homebrew downloads
+    category: dev
+    risk: safe
+    regenerable: true
+    note: Downloaded bottles and sources. `brew install` fetches them again.
+    paths: ["~/Library/Caches/Homebrew/downloads/*", "~/Library/Caches/Homebrew/Cask/*"]
+    min_age_days: 14
+    platform: macos
+
+  - id: npm-cache
+    name: npm cache
+    category: dev
+    risk: safe
+    regenerable: true
+    paths: ["~/.npm/_cacache"]
+    granularity: whole
+    min_size: 50000000
+
+  - id: yarn-cache
+    name: Yarn cache
+    category: dev
+    risk: safe
+    regenerable: true
+    paths: ["~/Library/Caches/Yarn", "~/.yarn/berry/cache"]
+    granularity: whole
+    min_size: 50000000
+
+  - id: pip-cache
+    name: pip cache
+    category: dev
+    risk: safe
+    regenerable: true
+    paths: ["~/Library/Caches/pip", "~/.cache/pip"]
+    granularity: whole
+    min_size: 50000000
+
+  - id: cocoapods-cache
+    name: CocoaPods cache
+    category: dev
+    risk: safe
+    regenerable: true
+    paths: ["~/Library/Caches/CocoaPods"]
+    granularity: whole
+    min_size: 50000000
+    platform: macos
+
+  - id: cargo-registry
+    name: Cargo registry downloads
+    category: dev
+    risk: safe
+    regenerable: true
+    note: Crate archives and extracted sources. Cargo downloads them again.
+    paths: ["~/.cargo/registry/cache/*", "~/.cargo/registry/src/*"]
+    min_age_days: 30
+    min_size: 20000000
+
+  - id: go-build-cache
+    name: Go build cache
+    category: dev
+    risk: safe
+    regenerable: true
+    paths: ["~/Library/Caches/go-build", "~/.cache/go-build"]
+    granularity: whole
+    min_size: 50000000
+
+  - id: gradle-caches
+    name: Gradle caches
+    category: dev
+    risk: caution
+    regenerable: true
+    note: Rebuilding takes a while on the next Gradle run.
+    paths: ["~/.gradle/caches/*"]
+    min_age_days: 60
+    min_size: 100000000

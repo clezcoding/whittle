@@ -1,0 +1,28 @@
+name: Feature request
+description: Suggest something Whittle should do
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem do you want to solve?
+      description: Describe the situation, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like Whittle to do?
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: How can it stay safe?
+      description: Whittle never removes anything without a preview and a way back. If your idea deletes or moves files, how would it do that?
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Can you help?
+      options:
+        - label: I would be willing to open a pull request

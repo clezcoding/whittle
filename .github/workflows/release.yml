@@ -1,0 +1,227 @@
+name: Release
+
+# Push a tag like v0.1.0 to build and publish a release:
+#   - Whittle_<version>_universal.dmg   (Apple Silicon + Intel)
+#   - whittle-<tag>-<target>.tar.gz     (command line, one per architecture)
+#   - SHA256SUMS
+# then update the Homebrew tap. Run it by hand (workflow_dispatch) for a dry run that only builds.
+#
+# Without Apple secrets the app is ad-hoc signed. Add them (see docs/RELEASING.md) and the same
+# workflow signs and notarizes automatically.
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release_id: ${{ steps.release.outputs.id }}
+      tag: ${{ steps.release.outputs.tag }}
+      prerelease: ${{ steps.release.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versions must agree with the tag
+        if: github.ref_type == 'tag'
+        run: bash scripts/check-version.sh "${GITHUB_REF_NAME#v}"
+      - name: Versions must agree with each other
+        if: github.ref_type != 'tag'
+        run: bash scripts/check-version.sh
+      - name: Create the draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" != "tag" ]; then
+            echo "Dry run: building without publishing."
+            echo "id=" >> "$GITHUB_OUTPUT"; echo "tag=dry-run" >> "$GITHUB_OUTPUT"; echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          TAG="$GITHUB_REF_NAME"
+          PRE=false; [[ "$TAG" == *-* ]] && PRE=true
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            args=(--draft --verify-tag --title "Whittle $TAG" --generate-notes)
+            [ "$PRE" = true ] && args+=(--prerelease)
+            gh release create "$TAG" "${args[@]}"
+          fi
+          echo "id=$(gh release view "$TAG" --json databaseId -q .databaseId)" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRE" >> "$GITHUB_OUTPUT"
+
+  app:
+    name: macOS app (universal)
+    needs: prepare
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/gui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/gui/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: apps/gui
+
+      - name: Is a signing certificate configured?
+        id: sign
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        run: |
+          if [ -n "$APPLE_CERTIFICATE" ]; then echo "signed=true" >> "$GITHUB_OUTPUT"; else echo "signed=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Build (ad-hoc signed)
+        if: steps.sign.outputs.signed != 'true'
+        id: build_adhoc
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/gui
+          releaseId: ${{ needs.prepare.outputs.release_id }}
+          args: --target universal-apple-darwin --bundles app,dmg
+
+      - name: Build (Developer ID signed and notarized)
+        if: steps.sign.outputs.signed == 'true'
+        id: build_signed
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/gui
+          releaseId: ${{ needs.prepare.outputs.release_id }}
+          args: --target universal-apple-darwin --bundles app,dmg
+
+      - name: Keep the DMG from a dry run
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-dmg
+          path: target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          retention-days: 3
+
+  cli:
+    name: Command line (${{ matrix.target }})
+    needs: prepare
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [aarch64-apple-darwin, x86_64-apple-darwin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - run: cargo build --release --locked -p whittle-cli --target ${{ matrix.target }}
+      - name: Package
+        id: pack
+        run: |
+          NAME="whittle-${{ needs.prepare.outputs.tag }}-${{ matrix.target }}"
+          mkdir "$NAME"
+          cp "target/${{ matrix.target }}/release/whittle" LICENSE-MIT LICENSE-APACHE README.md "$NAME/"
+          tar -czf "$NAME.tar.gz" "$NAME"
+          echo "file=$NAME.tar.gz" >> "$GITHUB_OUTPUT"
+      - name: Run it (native architecture only)
+        if: matrix.target == 'aarch64-apple-darwin'
+        run: ./target/${{ matrix.target }}/release/whittle --version
+      - name: Attach to the release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ needs.prepare.outputs.tag }}" "${{ steps.pack.outputs.file }}" --clobber
+      - name: Keep the archive from a dry run
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-${{ matrix.target }}
+          path: ${{ steps.pack.outputs.file }}
+          retention-days: 3
+
+  publish:
+    name: Checksums and publish
+    if: github.ref_type == 'tag'
+    needs: [prepare, app, cli]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Write SHA256SUMS and publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          mkdir dist && cd dist
+          gh release download "$TAG" --pattern '*.dmg' --pattern '*.tar.gz'
+          sha256sum * | tee SHA256SUMS
+          gh release upload "$TAG" SHA256SUMS --clobber
+          gh release edit "$TAG" --draft=false
+
+  homebrew:
+    name: Update Homebrew tap
+    if: github.ref_type == 'tag' && needs.prepare.outputs.prerelease == 'false'
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Is the tap token configured?
+        id: token
+        env:
+          T: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -n "$T" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::warning::HOMEBREW_TAP_TOKEN is not set, so the tap was not updated. See docs/RELEASING.md."; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.ok == 'true'
+        with:
+          repository: clezcoding/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+      - name: Render formula and cask, then push
+        if: steps.token.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          gh release download "$TAG" --pattern SHA256SUMS --repo "$GITHUB_REPOSITORY"
+          bash scripts/render-homebrew.sh "${TAG#v}" SHA256SUMS tap
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Tap already up to date."; exit 0; fi
+          git commit -m "whittle ${TAG#v}"
+          git push

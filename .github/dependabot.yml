@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Europe/Berlin }
+    open-pull-requests-limit: 5
+    labels: [dependencies, rust]
+    commit-message: { prefix: "deps(rust)" }
+    groups:
+      tauri: { patterns: ["tauri*"] }
+      rust-minor-patch: { update-types: [minor, patch], exclude-patterns: ["tauri*"] }
+
+  - package-ecosystem: npm
+    directory: /apps/gui
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Europe/Berlin }
+    open-pull-requests-limit: 5
+    labels: [dependencies, frontend]
+    commit-message: { prefix: "deps(gui)" }
+    groups:
+      tauri: { patterns: ["@tauri-apps/*"] }
+      react: { patterns: ["react", "react-dom", "@types/react*"] }
+      tooling: { patterns: ["vite*", "@vitejs/*", "vitest*", "typescript"] }
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday, time: "06:00", timezone: Europe/Berlin }
+    labels: [dependencies, ci]
+    commit-message: { prefix: "ci" }
+    groups:
+      actions: { patterns: ["*"] }

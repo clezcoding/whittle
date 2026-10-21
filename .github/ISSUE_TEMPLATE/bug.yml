@@ -1,0 +1,59 @@
+name: Bug report
+description: Something in Whittle does not work as it should
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. If Whittle **removed something it should not have**, say so in the title; that is the most serious kind of bug. Check `whittle history` and `whittle undo` first, the item is probably still in quarantine.
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did it happen?
+      options: [Desktop app, Command line, Install script, Homebrew, Not sure]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Whittle version
+      description: Output of `whittle --version`, or the number in the app under Settings > About.
+      placeholder: whittle 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and chip
+      placeholder: macOS 15.1, Apple M2
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the app
+        2. Press Scan
+        3. ...
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or screenshot
+      description: Paths may contain your name. Feel free to replace it with `~`.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues
+          required: true
+        - label: I removed anything private from the text above
+          required: true

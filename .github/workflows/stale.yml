@@ -1,0 +1,43 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: pinned,security,safety,good first issue,help wanted
+          exempt-pr-labels: pinned,security,safety
+          only-labels: ""
+          stale-issue-message: >
+            This issue has had no activity for 60 days. It will be closed in 14 days unless there is
+            news. Add a comment or the `pinned` label to keep it open.
+          stale-pr-message: >
+            This pull request has had no activity for 60 days. It will be closed in 14 days unless
+            you push or comment. Feel free to reopen it later.
+          close-issue-message: Closed because of inactivity. Reopen any time with new details.
+          close-pr-message: Closed because of inactivity. Reopen any time.
+      - name: Close issues that are waiting for details
+        uses: actions/stale@v9
+        with:
+          days-before-stale: 14
+          days-before-close: 7
+          only-labels: needs-info
+          stale-issue-label: stale
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          stale-issue-message: Still waiting for the details requested above. This will be closed in 7 days without a reply.
+          close-issue-message: Closed because the requested details did not arrive. Reopen with more information any time.

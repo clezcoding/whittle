@@ -1,0 +1,28 @@
+# Applied to pull requests by .github/workflows/labeler.yml
+rust:
+  - changed-files:
+      - any-glob-to-any-file: ["crates/**", "Cargo.toml", "Cargo.lock", "deny.toml"]
+frontend:
+  - changed-files:
+      - any-glob-to-any-file: ["apps/gui/src/**", "apps/gui/index.html", "apps/gui/public/**", "apps/gui/package.json", "apps/gui/vite.config.ts"]
+tauri:
+  - changed-files:
+      - any-glob-to-any-file: ["apps/gui/src-tauri/**"]
+rule:
+  - changed-files:
+      - any-glob-to-any-file: ["rules/**"]
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "README*.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md", "CODE_OF_CONDUCT.md"]
+ci:
+  - changed-files:
+      - any-glob-to-any-file: [".github/**", "scripts/**", "Makefile"]
+packaging:
+  - changed-files:
+      - any-glob-to-any-file: ["packaging/**", "scripts/install-mac.sh", "Install Whittle.command"]
+design:
+  - changed-files:
+      - any-glob-to-any-file: ["assets/**", "tools/brand/**", "apps/gui/src/styles.css"]
+safety:
+  - changed-files:
+      - any-glob-to-any-file: ["crates/whittle-core/src/safety.rs", "crates/whittle-core/src/journal.rs", "crates/whittle-core/src/quarantine.rs", "apps/gui/src-tauri/capabilities/**", "apps/gui/src-tauri/src/system.rs"]

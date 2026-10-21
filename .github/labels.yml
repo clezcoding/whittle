@@ -1,0 +1,23 @@
+# Source of truth for repository labels, synced by .github/workflows/sync-labels.yml
+- { name: bug,             color: d73a4a, description: Something does not work }
+- { name: enhancement,     color: a2eeef, description: New feature or request }
+- { name: rule,            color: e8d2ae, description: A cache or leftover location (YAML rules) }
+- { name: safety,          color: b60205, description: Touches the safety layer, journal, quarantine or app permissions }
+- { name: documentation,   color: 0075ca, description: Docs and README }
+- { name: rust,            color: dea584, description: Core or CLI }
+- { name: frontend,        color: 61dafb, description: Interface (React) }
+- { name: tauri,           color: ffc131, description: Desktop shell }
+- { name: design,          color: c5def5, description: Brand, assets, visual design }
+- { name: packaging,       color: 5319e7, description: Homebrew, installer, releases }
+- { name: ci,              color: 0e8a16, description: Workflows and automation }
+- { name: dependencies,    color: 0366d6, description: Dependency updates }
+- { name: breaking,        color: b60205, description: Breaking change }
+- { name: triage,          color: fbca04, description: Needs a first look }
+- { name: needs-info,      color: d876e3, description: Waiting for details from the reporter }
+- { name: good first issue, color: 7057ff, description: Good for newcomers }
+- { name: help wanted,     color: 008672, description: Extra attention is welcome }
+- { name: question,        color: d876e3, description: Further information is requested }
+- { name: duplicate,       color: cfd3d7, description: Already exists }
+- { name: wontfix,         color: ffffff, description: Will not be worked on }
+- { name: pinned,          color: 000000, description: Never closed by the stale bot }
+- { name: stale,           color: ededed, description: No recent activity }

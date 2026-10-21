@@ -1,0 +1,27 @@
+cask "whittle" do
+  version "@VERSION@"
+  sha256 "@SHA_DMG@"
+
+  url "https://github.com/clezcoding/whittle/releases/download/v#{version}/Whittle_#{version}_universal.dmg"
+  name "Whittle"
+  desc "Swiss army knife for your Mac: find leftovers, clear caches, tidy folders"
+  homepage "https://github.com/clezcoding/whittle"
+
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
+  depends_on macos: ">= :big_sur"
+
+  app "Whittle.app"
+
+  # Until releases are notarized, macOS Gatekeeper would block the first start.
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-dr", "com.apple.quarantine", "#{appdir}/Whittle.app"],
+                   must_succeed: false
+  end
+
+  zap trash: "~/.config/whittle"
+end

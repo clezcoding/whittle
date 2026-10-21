@@ -1,0 +1,24 @@
+# Categories for GitHub's automatically generated release notes.
+changelog:
+  exclude:
+    labels: [ignore-for-release]
+    authors: [dependabot, github-actions]
+  categories:
+    - title: "Safety"
+      labels: [safety, breaking]
+    - title: "Features"
+      labels: [enhancement]
+    - title: "Rules"
+      labels: [rule]
+    - title: "Fixes"
+      labels: [bug]
+    - title: "Design and interface"
+      labels: [frontend, design]
+    - title: "Documentation"
+      labels: [documentation]
+    - title: "Packaging and tooling"
+      labels: [packaging, ci, tauri]
+    - title: "Dependencies"
+      labels: [dependencies]
+    - title: "Other changes"
+      labels: ["*"]

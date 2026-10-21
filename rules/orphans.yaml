@@ -1,0 +1,44 @@
+# Names that the app-leftovers scanner never reports, even if no matching app is installed.
+# Entries are compared case-insensitively. A trailing `*` matches any suffix.
+
+ignore:
+  # Apple and the OS
+  - com.apple.*
+  - group.com.apple.*
+  - CrashReporter
+  - MobileSync
+  - AddressBook
+  - Knowledge
+  - Dock
+  - iCloud
+  - CloudDocs
+  - SyncServices
+  - FileProvider
+  - CloudKit
+  # Generic folders that belong to no single app
+  - Caches
+  - Logs
+  - Containers
+  - Group Containers
+  - Saved Application State
+  - WebKit
+  - Application Support
+  - Temp
+  - tmp
+  - DiagnosticReports
+  - Preferences
+  - ByHost
+  - com.google.Keystone*
+  # Tooling that is not an "app" but keeps data in Library
+  - Homebrew
+  - pip
+  - npm
+  - Yarn
+  - CocoaPods
+  - go-build
+  - JetBrains
+  - Code
+  - Cursor
+  - zed
+  - nvim
+  - fish
