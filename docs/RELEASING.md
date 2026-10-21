@@ -17,12 +17,23 @@ The **Release** workflow then:
 2. creates a draft release with notes generated from merged pull requests (grouped by label, see `.github/release.yml`)
 3. builds the universal `Whittle_<version>_universal.dmg` with `tauri-action`
 4. builds the command line for Apple Silicon and Intel as `whittle-v<version>-<target>.tar.gz`
-5. writes `SHA256SUMS` and publishes the release
+5. creates a CycloneDX SBOM, writes `SHA256SUMS`, signs every file with Sigstore (keyless, `*.sigstore.json`), records a build-provenance attestation and publishes the release
 6. renders the Homebrew formula and cask and pushes them to `clezcoding/homebrew-tap`
 
 A tag with a hyphen (`v0.2.0-rc.1`) is published as a pre-release and skips Homebrew.
 
 **Dry run:** *Actions, Release, Run workflow* builds everything and keeps the files as workflow artifacts, without publishing.
+
+**Verifying:** how users check a release is in [SECURITY.md](../SECURITY.md#verifying-a-release). After publishing, do it once yourself:
+
+```sh
+gh release download v0.2.0 --dir /tmp/check && cd /tmp/check
+cosign verify-blob --bundle SHA256SUMS.sigstore.json \
+  --certificate-identity-regexp '^https://github\.com/clezcoding/whittle/\.github/workflows/release\.yml@refs/tags/v' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com SHA256SUMS
+```
+
+The release workflow uses no build caches on purpose, so a release is always built from a clean slate and a poisoned cache cannot reach a signed file.
 
 ## One-time setup
 

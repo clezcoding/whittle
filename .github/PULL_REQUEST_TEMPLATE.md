@@ -17,6 +17,10 @@
 
 ## Checks
 
+- [ ] Tests added or changed for the behaviour (a bug fix has a test that fails without it)
+- [ ] Commits are signed off (`git commit -s`), unless you are the maintainer
+
 - [ ] `make check` passes locally
 - [ ] Screenshots attached for visible changes
 - [ ] README / docs updated when behaviour changed
+- [ ] `docs/ASSURANCE.md` updated if the safety layer, capabilities or release workflow changed

@@ -32,6 +32,9 @@
   <a href="https://kodiakhq.com"><img alt="merged by Kodiak" src="https://img.shields.io/badge/merged_by-Kodiak-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
   <a href=".pre-commit-config.yaml"><img alt="pre-commit enabled" src="https://img.shields.io/badge/pre--commit-enabled-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=pre-commit&logoColor=white"></a>
   <a href=".github/workflows"><img alt="actions per SHA gepinnt" src="https://img.shields.io/badge/actions-per_SHA_gepinnt-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=githubactions&logoColor=white"></a>
+  <a href="SECURITY.md#verifying-a-release"><img alt="Releases mit Sigstore signiert" src="https://img.shields.io/badge/Releases-signiert_(Sigstore)-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="docs/ASSURANCE.md"><img alt="Assurance Case" src="https://img.shields.io/badge/Assurance-Case-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="docs/OPENSSF.md"><img alt="OpenSSF-Checkliste" src="https://img.shields.io/badge/OpenSSF-Checkliste-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
 </p>
 
 <p align="center">
@@ -360,7 +363,9 @@ Whittle entsteht offen und geht mit der eigenen Lieferkette so sorgfältig um wi
 | **Ein Pflicht-Check** | *CI passed* schützt `main`. Pull Requests, die nur Doku ändern, überspringen die schweren Jobs. Code-Änderungen führen Rust (macOS und Linux), die Oberfläche, die Desktop-Hülle, Lizenzen und Advisories und ein echtes `.app`-Bundle parallel aus, in etwa drei Minuten. |
 | **Automerge** | [Kodiak](https://kodiakhq.com) mergt einen Pull Request mit dem Label `automerge` per Squash, sobald die CI grün ist. Dependabot-Patch- und Minor-Updates bekommen das Label selbst. Majors und Tauri-Updates warten auf einen Menschen. Konfiguration: [`.kodiak.toml`](.kodiak.toml). |
 | **Lieferkette** | Jede GitHub Action ist auf einen Commit-SHA gepinnt, Runner sind gehärtet, [CodeQL](.github/workflows/codeql.yml), [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle), Dependency Review und `cargo deny` laufen bei jeder Änderung, und Dependabot hält alles aktuell. |
-| **Releases** | Ein `v*`-Tag baut das universelle DMG und die Kommandozeilen-Archive, schreibt SHA-256-Summen und aktualisiert den Homebrew-Tap. Siehe [`docs/RELEASING.md`](docs/RELEASING.md). |
+| **Releases** | Ein `v*`-Tag baut das universelle DMG und die Kommandozeilen-Archive und schreibt dann SHA-256-Summen, eine Software-Stückliste (SBOM), pro Datei eine Sigstore-Signatur und Build-Provenance; danach wird der Homebrew-Tap aktualisiert. [Download prüfen](SECURITY.md#verifying-a-release) · [`docs/RELEASING.md`](docs/RELEASING.md). |
+| **Tests** | Unit- und Integrationstests, Property-Tests für die Sicherheitsschicht, drei Fuzz-Targets mit AddressSanitizer ([`fuzz/`](fuzz)) und eine Abdeckungsgrenze von 80 % der Zeilen. |
+| **Sicherheitspraxis** | Schriftlicher [Assurance Case](docs/ASSURANCE.md) mit Bedrohungsmodell, eine [OpenSSF-Checkliste](docs/OPENSSF.md) Kriterium für Kriterium, [Governance](GOVERNANCE.md), eine [Sicherheitsrichtlinie](SECURITY.md) mit Reaktionszeiten und zizmor-Prüfung jedes Workflows. |
 | **Labels** | Pull Requests werden anhand der geänderten Dateien beschriftet (`rust`, `frontend`, `tauri`, `rule`, `safety`, `security`, `ci`, `release`, `documentation` …), und die Release Notes werden danach gruppiert. |
 
 ## Mitmachen

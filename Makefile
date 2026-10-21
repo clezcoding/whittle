@@ -1,4 +1,4 @@
-.PHONY: dev app install cli test check hooks hygiene
+.PHONY: dev app install cli test check hooks hygiene coverage fuzz
 
 dev:       ## run the desktop app with live reload
 	cd apps/gui && pnpm install && pnpm tauri dev
@@ -22,6 +22,12 @@ check:     ## what CI runs
 	cd apps/gui && pnpm install --frozen-lockfile && pnpm typecheck && pnpm test && pnpm build
 	./scripts/check-repo-hygiene.sh
 	./scripts/check-version.sh
+
+coverage:  ## line coverage of the engine and the CLI (needs cargo-llvm-cov)
+	cargo llvm-cov -p whittle-core -p whittle-cli --fail-under-lines 80 --summary-only
+
+fuzz:      ## fuzz one target for a minute: make fuzz T=safety_check (needs nightly + cargo-fuzz)
+	cargo +nightly fuzz run $(or $(T),safety_check) -- -max_total_time=60
 
 hygiene:   ## fail on files that do not belong in the repository
 	./scripts/check-repo-hygiene.sh --all

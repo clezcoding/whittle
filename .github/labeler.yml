@@ -1,7 +1,7 @@
 # Applied to pull requests by .github/workflows/labeler.yml
 rust:
   - changed-files:
-      - any-glob-to-any-file: ["crates/**", "Cargo.toml", "Cargo.lock", "deny.toml"]
+      - any-glob-to-any-file: ["crates/**", "fuzz/**", "Cargo.toml", "Cargo.lock", "deny.toml"]
 frontend:
   - changed-files:
       - any-glob-to-any-file: ["apps/gui/src/**", "apps/gui/index.html", "apps/gui/public/**", "apps/gui/package.json", "apps/gui/vite.config.ts"]
@@ -13,7 +13,7 @@ rule:
       - any-glob-to-any-file: ["rules/**"]
 documentation:
   - changed-files:
-      - any-glob-to-any-file: ["docs/**", "README*.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md", "CODE_OF_CONDUCT.md"]
+      - any-glob-to-any-file: ["docs/**", "README*.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md", "CODE_OF_CONDUCT.md", "GOVERNANCE.md"]
 ci:
   - changed-files:
       - any-glob-to-any-file: [".github/**", "scripts/**", "Makefile"]
@@ -25,13 +25,13 @@ design:
       - any-glob-to-any-file: ["assets/**", "tools/brand/**", "apps/gui/src/styles.css"]
 safety:
   - changed-files:
-      - any-glob-to-any-file: ["crates/whittle-core/src/safety.rs", "crates/whittle-core/src/journal.rs", "crates/whittle-core/src/quarantine.rs", "apps/gui/src-tauri/capabilities/**", "apps/gui/src-tauri/src/system.rs"]
+      - any-glob-to-any-file: ["crates/whittle-core/src/safety.rs", "crates/whittle-core/tests/safety_props.rs", "crates/whittle-core/src/journal.rs", "crates/whittle-core/src/quarantine.rs", "apps/gui/src-tauri/capabilities/**", "apps/gui/src-tauri/src/system.rs"]
 dependencies:
   - changed-files:
       - any-glob-to-any-file: ["Cargo.lock", "apps/gui/pnpm-lock.yaml", ".github/dependabot.yml"]
 security:
   - changed-files:
-      - any-glob-to-any-file: ["SECURITY.md", "deny.toml", ".gitleaks.toml", ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml", ".github/workflows/dependency-review.yml", ".pre-commit-config.yaml"]
+      - any-glob-to-any-file: ["SECURITY.md", "deny.toml", ".gitleaks.toml", ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml", ".github/workflows/dependency-review.yml", ".github/workflows/fuzz.yml", ".github/workflows/workflow-lint.yml", ".github/workflows/dco.yml", ".github/zizmor.yml", ".github/security-insights.yml", ".github/rulesets/**", ".clusterfuzzlite/**", "fuzz/**", "GOVERNANCE.md", "docs/ASSURANCE.md", "docs/OPENSSF.md", ".pre-commit-config.yaml"]
 release:
   - changed-files:
       - any-glob-to-any-file: [".github/workflows/release.yml", ".github/release.yml", "CHANGELOG.md", "docs/RELEASING.md", "scripts/check-version.sh", "scripts/render-homebrew.sh"]

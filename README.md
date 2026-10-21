@@ -32,6 +32,9 @@
   <a href="https://kodiakhq.com"><img alt="merged by Kodiak" src="https://img.shields.io/badge/merged_by-Kodiak-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
   <a href=".pre-commit-config.yaml"><img alt="pre-commit enabled" src="https://img.shields.io/badge/pre--commit-enabled-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=pre-commit&logoColor=white"></a>
   <a href=".github/workflows"><img alt="actions pinned to SHA" src="https://img.shields.io/badge/actions-pinned_to_SHA-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=githubactions&logoColor=white"></a>
+  <a href="SECURITY.md#verifying-a-release"><img alt="releases signed with Sigstore" src="https://img.shields.io/badge/releases-signed_(Sigstore)-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="docs/ASSURANCE.md"><img alt="assurance case" src="https://img.shields.io/badge/assurance-case-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="docs/OPENSSF.md"><img alt="OpenSSF best practices checklist" src="https://img.shields.io/badge/OpenSSF-checklist-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
 </p>
 
 <p align="center">
@@ -358,7 +361,9 @@ Whittle is built in the open and tries to be as careful about its own supply cha
 | **One required check** | *CI passed* gates `main`. Pull requests that only touch docs skip the heavy jobs; code changes run Rust (macOS and Linux), the interface, the desktop shell, licences and advisories and a real `.app` bundle, in parallel, in about three minutes. |
 | **Automerge** | [Kodiak](https://kodiakhq.com) squash-merges a pull request labelled `automerge` once CI is green. Dependabot patch and minor updates get that label by themselves; majors and Tauri bumps wait for a person. Config: [`.kodiak.toml`](.kodiak.toml). |
 | **Supply chain** | Every GitHub Action is pinned to a commit SHA, runners are hardened, [CodeQL](.github/workflows/codeql.yml), [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle), dependency review and `cargo deny` run on every change, and Dependabot keeps it all current. |
-| **Releases** | A `v*` tag builds the universal DMG and the command-line archives, writes SHA-256 sums and updates the Homebrew tap. See [`docs/RELEASING.md`](docs/RELEASING.md). |
+| **Releases** | A `v*` tag builds the universal DMG and the command-line archives, then writes SHA-256 sums, a software bill of materials, a Sigstore signature per file and build provenance, and updates the Homebrew tap. [How to verify a download](SECURITY.md#verifying-a-release) · [`docs/RELEASING.md`](docs/RELEASING.md). |
+| **Testing** | Unit and integration tests, property tests for the safety layer, three fuzz targets with AddressSanitizer ([`fuzz/`](fuzz)), and a coverage floor of 80 % of lines. |
+| **Security practice** | Written [assurance case](docs/ASSURANCE.md) with threat model, a criterion-by-criterion [OpenSSF Best Practices checklist](docs/OPENSSF.md), [governance](GOVERNANCE.md), a [security policy](SECURITY.md) with response times, and zizmor linting of every workflow. |
 | **Labels** | Pull requests are labelled from the files they touch (`rust`, `frontend`, `tauri`, `rule`, `safety`, `security`, `ci`, `release`, `documentation` …) and the release notes are grouped by them. |
 
 ## Contributing
