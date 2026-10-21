@@ -7,11 +7,31 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/clezcoding/whittle/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/ci.yml?branch=main&label=CI&labelColor=0e1012&color=e8d2ae"></a>
-  <a href="https://github.com/clezcoding/whittle/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/clezcoding/whittle?include_prereleases&labelColor=0e1012&color=e8d2ae"></a>
-  <img alt="Platform: macOS 11+" src="https://img.shields.io/badge/macOS-11%2B-0e1012?labelColor=0e1012&color=e8d2ae&logo=apple&logoColor=white">
-  <img alt="Rust" src="https://img.shields.io/badge/Rust-core-0e1012?labelColor=0e1012&color=e8d2ae&logo=rust&logoColor=white">
-  <a href="LICENSE-MIT"><img alt="License: MIT or Apache-2.0" src="https://img.shields.io/badge/license-MIT%20or%20Apache--2.0-0e1012?labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/ci.yml?branch=main&label=CI&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/codeql.yml?branch=main&label=CodeQL&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/clezcoding/whittle/badge"></a>
+  <a href="https://github.com/clezcoding/whittle/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/clezcoding/whittle?include_prereleases&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/clezcoding/whittle/total?label=Downloads&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/clezcoding/whittle?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+</p>
+
+<p align="center">
+  <img alt="macOS 11+" src="https://img.shields.io/badge/macOS-11%2B-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=apple&logoColor=white">
+  <img alt="Universal binary" src="https://img.shields.io/badge/Apple_silicon_%2B_Intel-universal-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae">
+  <img alt="Rust core" src="https://img.shields.io/badge/Rust-core-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=rust&logoColor=white">
+  <img alt="Tauri v2" src="https://img.shields.io/badge/Tauri-v2-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=tauri&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=react&logoColor=white">
+  <a href="https://github.com/clezcoding/homebrew-tap"><img alt="Homebrew tap" src="https://img.shields.io/badge/Homebrew-tap-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=homebrew&logoColor=white"></a>
+  <a href="LICENSE-MIT"><img alt="License: MIT or Apache-2.0" src="https://img.shields.io/badge/license-MIT_or_Apache--2.0-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+</p>
+
+<p align="center">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="#safety-is-the-product"><img alt="telemetry none" src="https://img.shields.io/badge/telemetry-none-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/pulls?q=is%3Apr+author%3Aapp%2Fdependabot"><img alt="Dependabot on" src="https://img.shields.io/badge/Dependabot-on-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=dependabot&logoColor=white"></a>
+  <a href="https://kodiakhq.com"><img alt="merged by Kodiak" src="https://img.shields.io/badge/merged_by-Kodiak-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href=".pre-commit-config.yaml"><img alt="pre-commit enabled" src="https://img.shields.io/badge/pre--commit-enabled-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=pre-commit&logoColor=white"></a>
+  <a href=".github/workflows"><img alt="actions pinned to SHA" src="https://img.shields.io/badge/actions-pinned_to_SHA-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=githubactions&logoColor=white"></a>
 </p>
 
 <p align="center">
@@ -23,6 +43,15 @@
   Whittle finds what uninstalled apps left behind, clears caches and build folders that rebuild themselves,<br>
   and tidies messy folders. Nothing is ever deleted without a way back.
 </p>
+
+<p align="center">
+  <a href="https://github.com/clezcoding/whittle/releases/latest"><b>⬇ Download for macOS</b></a> &nbsp;·&nbsp; <a href="#homebrew">Homebrew</a> &nbsp;·&nbsp; <a href="#the-command-line">CLI</a> &nbsp;·&nbsp; <a href="#from-source">From source</a>
+</p>
+
+```sh
+brew tap clezcoding/tap
+brew install --cask clezcoding/tap/whittle
+```
 
 <p align="center">
   <picture>
@@ -38,9 +67,21 @@
 
 ## Contents
 
-[What it does](#what-it-does) · [Safety](#safety-is-the-product) · [The app](#the-app) · [The command line](#the-command-line) · [Install](#install) · [Settings](#settings) · [Rules](#rules-are-data-not-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [Contributing](#contributing)
+[What it does](#what-it-does) · [See it work](#see-it-work) · [Safety](#safety-is-the-product) · [The app](#the-app) · [The command line](#the-command-line) · [Install](#install) · [Settings](#settings) · [Rules](#rules-are-data-not-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [How the project is run](#how-the-project-is-run) · [Contributing](#contributing)
+
+| **Undo, always** | **No network** | **No mystery items** | **Rules are data** |
+|---|---|---|---|
+| Clean moves to a quarantine. One command or one click puts everything back. | No telemetry, no account, no update check. The app is not allowed to make a request. | Every finding says what it is, why it is listed and what happens if it goes. | Where Whittle looks is YAML. A new cache location is one entry, no Rust. |
 
 ## What it does
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/modules-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/modules-light.svg">
+    <img alt="Five modules: caches and logs, dev projects, app leftovers, duplicates, tidy a folder" src="assets/readme/modules-dark.svg" width="100%">
+  </picture>
+</p>
 
 | | Finds | Typical size |
 |---|---|---|
@@ -54,11 +95,31 @@ Every finding comes with a plain-language reason: *what it is, why it is listed,
 
 Risk is a word and a shape, never only a colour:
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/risk-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/risk-light.svg">
+    <img alt="Risk levels: safe, review, manual" src="assets/readme/risk-dark.svg" width="100%">
+  </picture>
+</p>
+
 | | Meaning | Selected for you? |
 |---|---|---|
 | ● **Safe** | Regenerates on its own (caches, build folders). | Yes |
 | ◐ **Review** | Probably unneeded, for example data of an app you uninstalled. | No |
 | ○ **Manual** | Only you know (device backups, folders Whittle cannot place). Not counted in the headline number. | No |
+
+## See it work
+
+A scan reads, measures and explains. Nothing moves until you press *Clean*, and *Undo* brings it back. (Illustrative numbers; the picture loops and respects reduced motion.)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/scan-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/scan-light.svg">
+    <img alt="A scan finds 35.3 GB, a clean moves 31.6 GB to quarantine, undo restores it" src="assets/readme/scan-dark.svg" width="100%">
+  </picture>
+</p>
 
 ## Safety is the product
 
@@ -109,8 +170,15 @@ Keyboard: `⌘R` scan · `⌘1` to `⌘4` views · `⌘,` settings · `?` all sh
 The same engine, without the window. Everything is a dry run until you say otherwise.
 
 <p align="center">
-  <img alt="whittle scan, clean and undo in a terminal" src="docs/screenshots/cli.png" width="860">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/terminal-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/terminal-light.svg">
+    <img alt="A terminal session: whittle scan, whittle clean, whittle undo" src="assets/readme/terminal-dark.svg" width="100%">
+  </picture>
 </p>
+
+<details>
+<summary><b>All commands</b></summary>
 
 ```sh
 whittle scan                      # what could go? (changes nothing)
@@ -128,6 +196,8 @@ whittle ignore ~/Developer/keep   # never report or touch this path (shared with
 whittle apps                      # which installed apps Whittle detects
 whittle rules                     # list the built-in rules
 ```
+
+</details>
 
 ## Install
 
@@ -170,6 +240,9 @@ macOS hides some folders (Mail, Messages, Safari) from every app. To let Whittle
 
 The app and the command line share one file, `~/.config/whittle/settings.json`. Every setting applies immediately; damaged files fall back to the defaults and are kept as `settings.json.broken`.
 
+<details>
+<summary><b>All settings</b></summary>
+
 | Setting | Default | What it does |
 |---|---|---|
 | Default action | Quarantine | What *Clean* does: quarantine, Trash, or delete now |
@@ -179,6 +252,8 @@ The app and the command line share one file, `~/.config/whittle/settings.json`. 
 | Never touch | empty | Paths that are never listed and never changed |
 | Scan by default | caches, projects, orphans | Duplicates are opt-in because they read a lot |
 | Theme, motion | system | Dark, light, reduced motion |
+
+</details>
 
 ## Rules are data, not code
 
@@ -199,23 +274,68 @@ rules:
 
 ## FAQ
 
-**Is it safe?** It is designed around that question: see [Safety](#safety-is-the-product). Even so, read the list before you press *Clean*, and keep backups. No tool can know every file you care about.
+<details>
+<summary><b>Is it safe?</b></summary>
 
-**Why is an app's data listed when the app is installed?** It should not be. Whittle checks `/Applications`, Homebrew, Spotlight, installer receipts and embedded helpers, and reads app-group entitlements. If you find a false positive, choose *Never suggest this again* and please [open an issue](https://github.com/clezcoding/whittle/issues/new/choose) with `whittle apps` output.
+It is designed around that question: see [Safety](#safety-is-the-product). Even so, read the list before you press *Clean*, and keep backups. No tool can know every file you care about.
 
-**Does it speed up my Mac?** Not in the way "optimizer" apps promise. It frees disk space and removes clutter. It does not touch RAM, and it is not an antivirus.
+</details>
 
-**Does it phone home?** No. There is no network code, no analytics, no update check. Updates come from GitHub Releases or Homebrew, when you ask for them.
+<details>
+<summary><b>Why is an app's data listed when the app is installed?</b></summary>
 
-**Why is the app unsigned?** Signing and notarization need a paid Apple Developer ID. It is on the [roadmap](docs/ROADMAP.md); until then see the first-launch note above.
+It should not be. Whittle checks `/Applications`, Homebrew, Spotlight, installer receipts and embedded helpers, and reads app-group entitlements. If you find a false positive, choose *Never suggest this again* and please [open an issue](https://github.com/clezcoding/whittle/issues/new/choose) with `whittle apps` output.
 
-**Intel Macs?** Yes. Releases are universal binaries.
+</details>
+
+<details>
+<summary><b>Does it speed up my Mac?</b></summary>
+
+Not in the way "optimizer" apps promise. It frees disk space and removes clutter. It does not touch RAM, and it is not an antivirus.
+
+</details>
+
+<details>
+<summary><b>Does it phone home?</b></summary>
+
+No. There is no network code, no analytics, no update check. Updates come from GitHub Releases or Homebrew, when you ask for them.
+
+</details>
+
+<details>
+<summary><b>Why is the app unsigned?</b></summary>
+
+Signing and notarization need a paid Apple Developer ID. It is on the [roadmap](docs/ROADMAP.md); until then see the first-launch note above.
+
+</details>
+
+<details>
+<summary><b>Intel Macs?</b></summary>
+
+Yes. Releases are universal binaries.
+
+</details>
+
 
 ## Roadmap
 
-Signed and notarized releases, a pnpm migrator for npm projects, a Docker and runtimes audit, a port inspector, scheduled quiet scans. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+| | |
+|---|---|
+| ✅ **Shipped (0.1)** | Core engine, command line, desktop app, quarantine and undo, Homebrew tap, universal DMG, checksums |
+| 🔜 **Next** | Signed and notarized releases, a pnpm migrator for npm projects, a German interface |
+| 🧭 **Later** | Docker and runtimes audit, a port inspector, scheduled quiet scans |
+
+Details and reasons: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Project layout
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/arch-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/arch-light.svg">
+    <img alt="Rules feed whittle-core, which the command line and the Tauri app both use" src="assets/readme/arch-dark.svg" width="100%">
+  </picture>
+</p>
 
 ```
 crates/whittle-core   scan, plan, apply, undo, safety layer, settings (no UI)
@@ -228,6 +348,18 @@ docs/                 design system, architecture, roadmap, screenshots
 ```
 
 [ARCHITECTURE](docs/ARCHITECTURE.md) · [DESIGN](docs/DESIGN.md) · [ROADMAP](docs/ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
+
+## How the project is run
+
+Whittle is built in the open and tries to be as careful about its own supply chain as it is about your files.
+
+| | |
+|---|---|
+| **One required check** | *CI passed* gates `main`. Pull requests that only touch docs skip the heavy jobs; code changes run Rust (macOS and Linux), the interface, the desktop shell, licences and advisories and a real `.app` bundle, in parallel, in about three minutes. |
+| **Automerge** | [Kodiak](https://kodiakhq.com) squash-merges a pull request labelled `automerge` once CI is green. Dependabot patch and minor updates get that label by themselves; majors and Tauri bumps wait for a person. Config: [`.kodiak.toml`](.kodiak.toml). |
+| **Supply chain** | Every GitHub Action is pinned to a commit SHA, runners are hardened, [CodeQL](.github/workflows/codeql.yml), [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle), dependency review and `cargo deny` run on every change, and Dependabot keeps it all current. |
+| **Releases** | A `v*` tag builds the universal DMG and the command-line archives, writes SHA-256 sums and updates the Homebrew tap. See [`docs/RELEASING.md`](docs/RELEASING.md). |
+| **Labels** | Pull requests are labelled from the files they touch (`rust`, `frontend`, `tauri`, `rule`, `safety`, `security`, `ci`, `release`, `documentation` …) and the release notes are grouped by them. |
 
 ## Contributing
 

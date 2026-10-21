@@ -4,6 +4,13 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Changed
+- CI is faster: pull requests that only touch docs skip the heavy jobs, the app bundle and the Linux desktop-shell job run in parallel, and build caches are written on `main` only.
+- README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
+
+### Security
+- Every GitHub Action is pinned to a commit SHA; Harden-Runner on Linux jobs; the auto-merge workflow with write access was replaced by Kodiak.
+
 ## [0.1.0]
 
 First public release.
