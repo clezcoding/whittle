@@ -16,10 +16,9 @@ jobs:
     steps:
       - uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-message: |
+          issue_message: |
             Thanks for opening your first issue in Whittle. A maintainer will take a look.
             If Whittle removed something by mistake, run `whittle history` and `whittle undo`: items stay in quarantine for 30 days by default.
-          pr-message: |
+          pr_message: |
             Thanks for your first pull request. CI will run in a moment; `make check` runs the same checks locally.
             Rules are the easiest contribution, see rules/README.md.
