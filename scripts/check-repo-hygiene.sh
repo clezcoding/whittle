@@ -9,7 +9,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 # 1. Only these top-level entries may exist in the repository.
-ALLOWED_TOP='^(\.github|apps|assets|crates|docs|packaging|rules|scripts|tools|\.gitignore|\.gitattributes|\.editorconfig|\.gitleaks\.toml|Cargo\.toml|Cargo\.lock|rust-toolchain\.toml|rustfmt\.toml|clippy\.toml|deny\.toml|CHANGELOG\.md|CODE_OF_CONDUCT\.md|CONTRIBUTING\.md|LICENSE-APACHE|LICENSE-MIT|Makefile|README\.md|README\.de\.md|SECURITY\.md|SUPPORT\.md|GOVERNANCE\.md|Install Whittle\.command)$'
+ALLOWED_TOP='^(\.github|apps|assets|crates|docs|packaging|rules|scripts|tools|\.gitignore|\.gitattributes|\.editorconfig|\.gitleaks\.toml|\.kodiak\.toml|\.pre-commit-config\.yaml|Cargo\.toml|Cargo\.lock|rust-toolchain\.toml|rustfmt\.toml|clippy\.toml|deny\.toml|CHANGELOG\.md|CODE_OF_CONDUCT\.md|CONTRIBUTING\.md|LICENSE-APACHE|LICENSE-MIT|Makefile|README\.md|README\.de\.md|SECURITY\.md|SUPPORT\.md|GOVERNANCE\.md|Install Whittle\.command)$'
 
 # 2. These must never be tracked, anywhere.
 FORBIDDEN='(^|/)(\.DS_Store|node_modules|target|dist|\.env(\..*)?|Thumbs\.db|\.idea|\.claude|__pycache__)(/|$)|\.(tar|tgz|gz|zip|dmg|pkg|app|exe|msi|p12|pfx|pem|key|log|orig|rej|bak|swp|tmp|old)$|\.tar\.gz$| copy(\.|$)'

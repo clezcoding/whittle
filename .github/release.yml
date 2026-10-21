@@ -4,8 +4,8 @@ changelog:
     labels: [ignore-for-release]
     authors: [dependabot, github-actions]
   categories:
-    - title: "Safety"
-      labels: [safety, breaking]
+    - title: "Safety and security"
+      labels: [safety, security, breaking]
     - title: "Features"
       labels: [enhancement]
     - title: "Rules"

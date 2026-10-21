@@ -30,7 +30,7 @@ A tag with a hyphen (`v0.2.0-rc.1`) is published as a pre-release and skips Home
 |---|---|---|
 | `HOMEBREW_TAP_TOKEN` secret | lets the release workflow push to the tap | Create a fine-grained personal access token with **Contents: read and write** on `clezcoding/homebrew-tap` only, then *Settings, Secrets and variables, Actions, New repository secret* |
 | `clezcoding/homebrew-tap` repository | where `brew tap clezcoding/tap` looks | A public repository named exactly `homebrew-tap` |
-| Allow Actions to create pull requests / auto-merge | Dependabot auto-merge | *Settings, General, Allow auto-merge*; *Settings, Actions, General, Workflow permissions: read and write* |
+| [Kodiak](https://github.com/apps/kodiakhq) GitHub App | merges pull requests labelled `automerge` (and safe Dependabot updates) once **CI passed** is green; config in `.kodiak.toml` | Install the app for this repository only; no secrets needed |
 | Branch protection on `main` | keeps CI meaningful | Require the check named **CI passed**, require a pull request, block force pushes |
 
 ## Signing and notarization (optional, recommended)

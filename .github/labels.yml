@@ -11,6 +11,13 @@
 - { name: packaging,       color: 5319e7, description: Homebrew, installer, releases }
 - { name: ci,              color: 0e8a16, description: Workflows and automation }
 - { name: dependencies,    color: 0366d6, description: Dependency updates }
+- { name: security,        color: ee0701, description: Vulnerabilities, advisories, supply-chain hardening }
+- { name: release,         color: 1d76db, description: Version bumps, changelog, release workflow }
+- { name: automerge,       color: 0e8a16, description: Kodiak merges this pull request once CI passed }
+- { name: autoupdate,      color: c2e0c6, description: Kodiak keeps this branch up to date with main }
+- { name: do-not-merge,    color: b60205, description: Blocks Kodiak from merging }
+- { name: wip,             color: fbca04, description: Work in progress }
+- { name: ignore-for-release, color: ededed, description: Left out of the generated release notes }
 - { name: breaking,        color: b60205, description: Breaking change }
 - { name: triage,          color: fbca04, description: Needs a first look }
 - { name: needs-info,      color: d876e3, description: Waiting for details from the reporter }
