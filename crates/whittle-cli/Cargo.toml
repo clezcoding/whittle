@@ -12,7 +12,7 @@ name = "whittle"
 path = "src/main.rs"
 
 [dependencies]
-whittle-core = { path = "../whittle-core" }
+whittle-core = { path = "../whittle-core", version = "0.1.0" }
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
 owo-colors = "4.4.0"

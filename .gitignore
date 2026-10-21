@@ -106,7 +106,9 @@ SHA256SUMS*
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 .apdisk
-Icon?
+# Finder's custom-icon file is named "Icon" + a carriage return. Do NOT write `Icon?`: on
+# case-insensitive checkouts (macOS) it also matches the folder `icons/` and silently drops it.
+Icon[\r]
 *.icloud
 __MACOSX/
 
