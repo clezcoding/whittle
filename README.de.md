@@ -7,11 +7,31 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/clezcoding/whittle/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/ci.yml?branch=main&label=CI&labelColor=0e1012&color=e8d2ae"></a>
-  <a href="https://github.com/clezcoding/whittle/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/clezcoding/whittle?include_prereleases&labelColor=0e1012&color=e8d2ae"></a>
-  <img alt="Plattform: macOS 11+" src="https://img.shields.io/badge/macOS-11%2B-0e1012?labelColor=0e1012&color=e8d2ae&logo=apple&logoColor=white">
-  <img alt="Rust" src="https://img.shields.io/badge/Rust-Kern-0e1012?labelColor=0e1012&color=e8d2ae&logo=rust&logoColor=white">
-  <a href="LICENSE-MIT"><img alt="Lizenz: MIT oder Apache-2.0" src="https://img.shields.io/badge/Lizenz-MIT%20oder%20Apache--2.0-0e1012?labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/ci.yml?branch=main&label=CI&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/codeql.yml?branch=main&label=CodeQL&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/clezcoding/whittle/badge"></a>
+  <a href="https://github.com/clezcoding/whittle/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/clezcoding/whittle?include_prereleases&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/clezcoding/whittle/total?label=Downloads&style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/clezcoding/whittle?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+</p>
+
+<p align="center">
+  <img alt="macOS 11+" src="https://img.shields.io/badge/macOS-11%2B-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=apple&logoColor=white">
+  <img alt="Universal binary" src="https://img.shields.io/badge/Apple_Silicon_%2B_Intel-universal-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae">
+  <img alt="Rust core" src="https://img.shields.io/badge/Rust-core-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=rust&logoColor=white">
+  <img alt="Tauri v2" src="https://img.shields.io/badge/Tauri-v2-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=tauri&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=react&logoColor=white">
+  <a href="https://github.com/clezcoding/homebrew-tap"><img alt="Homebrew tap" src="https://img.shields.io/badge/Homebrew-tap-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=homebrew&logoColor=white"></a>
+  <a href="LICENSE-MIT"><img alt="License: MIT or Apache-2.0" src="https://img.shields.io/badge/Lizenz-MIT_oder_Apache--2.0-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+</p>
+
+<p align="center">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="#sicherheit-ist-das-produkt"><img alt="telemetry keine" src="https://img.shields.io/badge/telemetry-keine-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href="https://github.com/clezcoding/whittle/pulls?q=is%3Apr+author%3Aapp%2Fdependabot"><img alt="Dependabot on" src="https://img.shields.io/badge/Dependabot-on-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=dependabot&logoColor=white"></a>
+  <a href="https://kodiakhq.com"><img alt="merged by Kodiak" src="https://img.shields.io/badge/merged_by-Kodiak-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae"></a>
+  <a href=".pre-commit-config.yaml"><img alt="pre-commit enabled" src="https://img.shields.io/badge/pre--commit-enabled-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=pre-commit&logoColor=white"></a>
+  <a href=".github/workflows"><img alt="actions per SHA gepinnt" src="https://img.shields.io/badge/actions-per_SHA_gepinnt-0e1012?style=flat-square&labelColor=0e1012&color=e8d2ae&logo=githubactions&logoColor=white"></a>
 </p>
 
 <p align="center">
@@ -23,6 +43,15 @@
   Whittle findet, was deinstallierte Apps zurückgelassen haben, räumt Caches und Build-Ordner weg,<br>
   die sich von selbst neu aufbauen, und sortiert unordentliche Ordner. Nichts wird gelöscht, ohne dass es einen Weg zurück gibt.
 </p>
+
+<p align="center">
+  <a href="https://github.com/clezcoding/whittle/releases/latest"><b>⬇ Für macOS herunterladen</b></a> &nbsp;·&nbsp; <a href="#homebrew">Homebrew</a> &nbsp;·&nbsp; <a href="#die-kommandozeile">CLI</a> &nbsp;·&nbsp; <a href="#aus-dem-quelltext">Aus dem Quelltext</a>
+</p>
+
+```sh
+brew tap clezcoding/tap
+brew install --cask clezcoding/tap/whittle
+```
 
 <p align="center">
   <picture>
@@ -38,9 +67,21 @@
 
 ## Inhalt
 
-[Was es kann](#was-es-kann) · [Sicherheit](#sicherheit-ist-das-produkt) · [Die App](#die-app) · [Die Kommandozeile](#die-kommandozeile) · [Installation](#installation) · [Einstellungen](#einstellungen) · [Regeln](#regeln-sind-daten-kein-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [Mitmachen](#mitmachen)
+[Was es kann](#was-es-kann) · [Live ansehen](#live-ansehen) · [Sicherheit](#sicherheit-ist-das-produkt) · [Die App](#die-app) · [Die Kommandozeile](#die-kommandozeile) · [Installation](#installation) · [Einstellungen](#einstellungen) · [Regeln](#regeln-sind-daten-kein-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [Wie das Projekt läuft](#wie-das-projekt-läuft) · [Mitmachen](#mitmachen)
+
+| **Immer rückgängig** | **Kein Netzwerk** | **Keine Rätsel** | **Regeln sind Daten** |
+|---|---|---|---|
+| Aufräumen verschiebt in eine Quarantäne. Ein Befehl oder ein Klick holt alles zurück. | Keine Telemetrie, kein Konto, keine Update-Prüfung. Die App darf keine Anfrage stellen. | Jeder Fund sagt, was er ist, warum er gelistet wird und was passiert, wenn er weg ist. | Wo Whittle sucht, steht in YAML. Ein neuer Cache-Ort ist ein Eintrag, kein Rust. |
 
 ## Was es kann
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/modules-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/modules-light.svg">
+    <img alt="Fünf Module: Caches und Logs, Dev-Projekte, App-Reste, Duplikate, Ordner aufräumen" src="assets/readme/modules-dark.svg" width="100%">
+  </picture>
+</p>
 
 | | Findet | Typische Größe |
 |---|---|---|
@@ -54,11 +95,31 @@ Jeder Fund kommt mit einer Erklärung in klaren Worten: *was es ist, warum es ge
 
 Das Risiko ist ein Wort und eine Form, nie nur eine Farbe:
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/risk-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/risk-light.svg">
+    <img alt="Risikostufen: sicher, prüfen, manuell" src="assets/readme/risk-dark.svg" width="100%">
+  </picture>
+</p>
+
 | | Bedeutung | Vorausgewählt? |
 |---|---|---|
 | ● **Sicher** | Entsteht von selbst neu (Caches, Build-Ordner). | Ja |
 | ◐ **Prüfen** | Wahrscheinlich unnötig, etwa Daten einer deinstallierten App. | Nein |
 | ○ **Manuell** | Nur du weißt es (Geräte-Backups, Ordner, die Whittle nicht einordnen kann). Zählt nicht in die Schlagzeile. | Nein |
+
+## Live ansehen
+
+Ein Scan liest, misst und erklärt. Nichts bewegt sich, bis du *Aufräumen* drückst, und *Rückgängig* holt es zurück. (Beispielzahlen; die Grafik läuft in einer Schleife und respektiert „Bewegung reduzieren“.)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/scan-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/scan-light.svg">
+    <img alt="Ein Scan findet 35,3 GB, Aufräumen verschiebt 31,6 GB in die Quarantäne, Rückgängig holt sie zurück" src="assets/readme/scan-dark.svg" width="100%">
+  </picture>
+</p>
 
 ## Sicherheit ist das Produkt
 
@@ -111,8 +172,15 @@ Tastatur: `⌘R` scannen · `⌘1` bis `⌘4` Ansichten · `⌘,` Einstellungen 
 Dieselbe Engine, ohne Fenster. Alles ist ein Probelauf, bis du etwas anderes sagst.
 
 <p align="center">
-  <img alt="whittle scan, clean und undo im Terminal" src="docs/screenshots/cli.png" width="860">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/terminal-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/terminal-light.svg">
+    <img alt="Eine Terminal-Sitzung: whittle scan, whittle clean, whittle undo" src="assets/readme/terminal-dark.svg" width="100%">
+  </picture>
 </p>
+
+<details>
+<summary><b>Alle Befehle</b></summary>
 
 ```sh
 whittle scan                      # was könnte weg? (ändert nichts)
@@ -130,6 +198,8 @@ whittle ignore ~/Developer/keep   # diesen Pfad nie melden oder anfassen (gilt a
 whittle apps                      # welche installierten Apps Whittle erkennt
 whittle rules                     # eingebaute Regeln auflisten
 ```
+
+</details>
 
 ## Installation
 
@@ -172,6 +242,9 @@ macOS versteckt einige Ordner (Mail, Nachrichten, Safari) vor jeder App. Damit W
 
 App und Kommandozeile teilen sich eine Datei: `~/.config/whittle/settings.json`. Jede Einstellung gilt sofort. Eine beschädigte Datei fällt auf die Standardwerte zurück und bleibt als `settings.json.broken` erhalten.
 
+<details>
+<summary><b>Alle Einstellungen</b></summary>
+
 | Einstellung | Standard | Wirkung |
 |---|---|---|
 | Standardaktion | Quarantäne | Was *Aufräumen* tut: Quarantäne, Papierkorb oder sofort löschen |
@@ -181,6 +254,8 @@ App und Kommandozeile teilen sich eine Datei: `~/.config/whittle/settings.json`.
 | Nie anfassen | leer | Pfade, die nie gelistet und nie verändert werden |
 | Standardmäßig scannen | Caches, Projekte, App-Reste | Duplikate sind optional, weil sie viel lesen |
 | Design, Bewegung | System | Dunkel, hell, reduzierte Bewegung |
+
+</details>
 
 ## Regeln sind Daten, kein Code
 
@@ -201,23 +276,68 @@ rules:
 
 ## FAQ
 
-**Ist es sicher?** Es ist um genau diese Frage herum gebaut: siehe [Sicherheit](#sicherheit-ist-das-produkt). Trotzdem: Lies die Liste, bevor du auf *Aufräumen* drückst, und halte Backups bereit. Kein Werkzeug kennt jede Datei, die dir wichtig ist.
+<details>
+<summary><b>Ist es sicher?</b></summary>
 
-**Warum werden Daten einer App gelistet, obwohl sie installiert ist?** Das sollte nicht passieren. Whittle prüft `/Applications`, Homebrew, Spotlight, Installer-Belege und eingebettete Helfer und liest App-Group-Entitlements. Findest du einen Fehlalarm, wähle *Nie wieder vorschlagen* und [eröffne bitte ein Issue](https://github.com/clezcoding/whittle/issues/new/choose) mit der Ausgabe von `whittle apps`.
+Es ist um genau diese Frage herum gebaut: siehe [Sicherheit](#sicherheit-ist-das-produkt). Trotzdem: Lies die Liste, bevor du auf *Aufräumen* drückst, und halte Backups bereit. Kein Werkzeug kennt jede Datei, die dir wichtig ist.
 
-**Macht es meinen Mac schneller?** Nicht so, wie „Optimizer“-Apps es versprechen. Es schafft Speicherplatz und räumt auf. Es berührt den Arbeitsspeicher nicht und ist kein Virenscanner.
+</details>
 
-**Telefoniert es nach Hause?** Nein. Es gibt keinen Netzwerkcode, keine Analytics, keine Update-Prüfung. Updates kommen von GitHub Releases oder Homebrew, wenn du sie willst.
+<details>
+<summary><b>Warum werden Daten einer App gelistet, obwohl sie installiert ist?</b></summary>
 
-**Warum ist die App nicht signiert?** Signieren und Notarisieren braucht eine kostenpflichtige Apple-Developer-ID. Das steht auf der [Roadmap](docs/ROADMAP.md). Bis dahin gilt der Hinweis zum ersten Start oben.
+Das sollte nicht passieren. Whittle prüft `/Applications`, Homebrew, Spotlight, Installer-Belege und eingebettete Helfer und liest App-Group-Entitlements. Findest du einen Fehlalarm, wähle *Nie wieder vorschlagen* und [eröffne bitte ein Issue](https://github.com/clezcoding/whittle/issues/new/choose) mit der Ausgabe von `whittle apps`.
 
-**Intel-Macs?** Ja. Releases sind Universal-Binaries.
+</details>
+
+<details>
+<summary><b>Macht es meinen Mac schneller?</b></summary>
+
+Nicht so, wie „Optimizer“-Apps es versprechen. Es schafft Speicherplatz und räumt auf. Es berührt den Arbeitsspeicher nicht und ist kein Virenscanner.
+
+</details>
+
+<details>
+<summary><b>Telefoniert es nach Hause?</b></summary>
+
+Nein. Es gibt keinen Netzwerkcode, keine Analytics, keine Update-Prüfung. Updates kommen von GitHub Releases oder Homebrew, wenn du sie willst.
+
+</details>
+
+<details>
+<summary><b>Warum ist die App nicht signiert?</b></summary>
+
+Signieren und Notarisieren braucht eine kostenpflichtige Apple-Developer-ID. Das steht auf der [Roadmap](docs/ROADMAP.md). Bis dahin gilt der Hinweis zum ersten Start oben.
+
+</details>
+
+<details>
+<summary><b>Intel-Macs?</b></summary>
+
+Ja. Releases sind Universal-Binaries.
+
+</details>
+
 
 ## Roadmap
 
-Signierte und notarisierte Releases, ein pnpm-Migrator für npm-Projekte, Docker- und Runtime-Audit, Port-Inspektor, geplante stille Scans, deutsche Oberfläche. Siehe [`docs/ROADMAP.md`](docs/ROADMAP.md).
+| | |
+|---|---|
+| ✅ **Fertig (0.1)** | Kern-Engine, Kommandozeile, Desktop-App, Quarantäne und Rückgängig, Homebrew-Tap, universelles DMG, Prüfsummen |
+| 🔜 **Als Nächstes** | Signierte und notarisierte Releases, ein pnpm-Migrator für npm-Projekte, deutsche Oberfläche |
+| 🧭 **Später** | Docker- und Runtime-Audit, Port-Inspektor, geplante stille Scans |
+
+Details und Gründe: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Projektstruktur
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/arch-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/arch-light.svg">
+    <img alt="Regeln speisen whittle-core, das Kommandozeile und Tauri-App gemeinsam nutzen" src="assets/readme/arch-dark.svg" width="100%">
+  </picture>
+</p>
 
 ```
 crates/whittle-core   scannen, planen, anwenden, rückgängig, Sicherheitsschicht, Einstellungen (ohne UI)
@@ -230,6 +350,18 @@ docs/                 Designsystem, Architektur, Roadmap, Screenshots
 ```
 
 [ARCHITECTURE](docs/ARCHITECTURE.md) · [DESIGN](docs/DESIGN.md) · [ROADMAP](docs/ROADMAP.md) · [CHANGELOG](CHANGELOG.md)
+
+## Wie das Projekt läuft
+
+Whittle entsteht offen und geht mit der eigenen Lieferkette so sorgfältig um wie mit deinen Dateien.
+
+| | |
+|---|---|
+| **Ein Pflicht-Check** | *CI passed* schützt `main`. Pull Requests, die nur Doku ändern, überspringen die schweren Jobs. Code-Änderungen führen Rust (macOS und Linux), die Oberfläche, die Desktop-Hülle, Lizenzen und Advisories und ein echtes `.app`-Bundle parallel aus, in etwa drei Minuten. |
+| **Automerge** | [Kodiak](https://kodiakhq.com) mergt einen Pull Request mit dem Label `automerge` per Squash, sobald die CI grün ist. Dependabot-Patch- und Minor-Updates bekommen das Label selbst. Majors und Tauri-Updates warten auf einen Menschen. Konfiguration: [`.kodiak.toml`](.kodiak.toml). |
+| **Lieferkette** | Jede GitHub Action ist auf einen Commit-SHA gepinnt, Runner sind gehärtet, [CodeQL](.github/workflows/codeql.yml), [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle), Dependency Review und `cargo deny` laufen bei jeder Änderung, und Dependabot hält alles aktuell. |
+| **Releases** | Ein `v*`-Tag baut das universelle DMG und die Kommandozeilen-Archive, schreibt SHA-256-Summen und aktualisiert den Homebrew-Tap. Siehe [`docs/RELEASING.md`](docs/RELEASING.md). |
+| **Labels** | Pull Requests werden anhand der geänderten Dateien beschriftet (`rust`, `frontend`, `tauri`, `rule`, `safety`, `security`, `ci`, `release`, `documentation` …), und die Release Notes werden danach gruppiert. |
 
 ## Mitmachen
 
