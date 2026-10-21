@@ -34,7 +34,7 @@ jobs:
       tag: ${{ steps.release.outputs.tag }}
       prerelease: ${{ steps.release.outputs.prerelease }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Versions must agree with the tag
         if: github.ref_type == 'tag'
         run: bash scripts/check-version.sh "${GITHUB_REF_NAME#v}"
@@ -69,15 +69,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
       - uses: Swatinem/rust-cache@v2
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           package_json_file: apps/gui/package.json
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -95,7 +95,7 @@ jobs:
       - name: Build (ad-hoc signed)
         if: steps.sign.outputs.signed != 'true'
         id: build_adhoc
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -106,7 +106,7 @@ jobs:
       - name: Build (Developer ID signed and notarized)
         if: steps.sign.outputs.signed == 'true'
         id: build_signed
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -122,7 +122,7 @@ jobs:
 
       - name: Keep the DMG from a dry run
         if: github.ref_type != 'tag'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dry-run-dmg
           path: target/universal-apple-darwin/release/bundle/dmg/*.dmg
@@ -139,7 +139,7 @@ jobs:
       matrix:
         target: [aarch64-apple-darwin, x86_64-apple-darwin]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
@@ -165,7 +165,7 @@ jobs:
         run: gh release upload "${{ needs.prepare.outputs.tag }}" "${{ steps.pack.outputs.file }}" --clobber
       - name: Keep the archive from a dry run
         if: github.ref_type != 'tag'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dry-run-${{ matrix.target }}
           path: ${{ steps.pack.outputs.file }}
@@ -197,14 +197,14 @@ jobs:
     needs: [prepare, publish]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Is the tap token configured?
         id: token
         env:
           T: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
           if [ -n "$T" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::warning::HOMEBREW_TAP_TOKEN is not set, so the tap was not updated. See docs/RELEASING.md."; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.token.outputs.ok == 'true'
         with:
           repository: clezcoding/homebrew-tap
