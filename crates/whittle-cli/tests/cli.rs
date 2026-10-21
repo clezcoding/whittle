@@ -7,17 +7,27 @@ use std::fs;
 use std::path::Path;
 
 mod filetime_free {
-    //! Sets old modification times without extra dependencies, using `touch -d`.
+    //! Sets old modification times with the standard library, so it behaves the same on macOS
+    //! (BSD `touch` has no `-d "60 days ago"`) and on Linux.
+    use std::fs::{self, File};
     use std::path::Path;
-    use std::process::Command;
+    use std::time::{Duration, SystemTime};
+
     pub fn age_tree(path: &Path, days: u32) {
-        let when = format!("{days} days ago");
-        let status = Command::new("find")
-            .arg(path)
-            .args(["-exec", "touch", "-d", &when, "{}", "+"])
-            .status()
-            .expect("find/touch available");
-        assert!(status.success());
+        let when = SystemTime::now() - Duration::from_secs(u64::from(days) * 86_400);
+        age(path, when);
+    }
+
+    fn age(path: &Path, when: SystemTime) {
+        if path.is_dir() {
+            for entry in fs::read_dir(path).expect("read_dir") {
+                age(&entry.expect("entry").path(), when);
+            }
+        }
+        // A read-only handle is enough for futimens when we own the file; it also works on directories.
+        File::open(path)
+            .and_then(|f| f.set_modified(when))
+            .expect("set modification time");
     }
 }
 
