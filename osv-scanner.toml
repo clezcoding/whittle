@@ -1,0 +1,18 @@
+# Read by OpenSSF Scorecard (and osv-scanner) next to Cargo.lock.
+# Each entry is a known advisory that does not affect Whittle, with the reason.
+# The same advisories are listed in deny.toml for cargo-deny.
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0429"
+ignoreUntil = 2027-04-21
+reason = "glib 0.18 is pinned by Tauri's Linux GTK backend. Whittle ships for macOS only, where glib is not compiled; Linux builds exist for linting. Revisit when Tauri moves to a fixed gtk-rs."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0370"
+ignoreUntil = 2027-04-21
+reason = "proc-macro-error is unmaintained, used at compile time by Tauri's dependencies; it never runs inside Whittle."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0449"
+ignoreUntil = 2027-04-21
+reason = "unsafe-libyaml (via serde_yaml_ng) is unmaintained with no known vulnerability. It only parses Whittle's own rule files and the user's own rules."

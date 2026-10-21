@@ -10,6 +10,8 @@ targets = [
 version = 2
 yanked = "warn"
 ignore = [
+  # glib 0.18 (RUSTSEC-2024-0429) is pinned by Tauri's Linux GTK backend and is not compiled on macOS.
+  { id = "RUSTSEC-2024-0429", reason = "unsoundness in glib 0.18 pulled in by Tauri's Linux GTK backend; Whittle ships for macOS only" },
   # Pulled in by the Tauri / GTK build toolchain (proc macros only, nothing runs it at runtime).
   { id = "RUSTSEC-2024-0370", reason = "unmaintained proc-macro crate used at compile time by Tauri's dependencies" },
   # serde_yaml_ng -> unsafe-libyaml. Only reads the YAML rule files that ship with Whittle and the
