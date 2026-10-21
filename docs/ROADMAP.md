@@ -16,6 +16,8 @@ Rough order, not promises.
 - **Docker audit**: dangling images, build cache, stopped containers (read-only report first)
 - **Runtimes audit**: old Node, Python, Ruby, Java versions (nvm, pyenv, asdf, Homebrew casks)
 
+- **Replace `serde_yaml_ng`** with a maintained YAML parser (its `unsafe-libyaml` dependency is unmaintained; see `deny.toml`)
+
 ## Later
 - Port inspector (what listens where, kill with confirmation)
 - Git overview: repos with unpushed work, huge `.git` folders, stale branches
