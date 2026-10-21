@@ -14,7 +14,12 @@ jobs:
   greet:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/first-interaction@v3
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
         with:
           issue_message: |
             Thanks for opening your first issue in Whittle. A maintainer will take a look.
