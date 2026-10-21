@@ -144,6 +144,23 @@ export interface Permissions {
   effect: string
 }
 
+/** One scan rule, as `whittle_core::rules::Rule` serialises it. Shown on the Rules page. */
+export interface RuleInfo {
+  id: string
+  name: string
+  category: string
+  risk: Risk
+  regenerable: boolean
+  note: string | null
+  paths: string[]
+  granularity: 'each' | 'whole'
+  exclude: string[]
+  min_age_days: number
+  min_size: number
+  platform: string | null
+  needs_full_disk_access: boolean
+}
+
 /** Places the app may open. The addresses live in the Rust backend, not here. */
 export type External = 'full-disk-access' | 'repository' | 'releases' | 'issues' | 'discussions' | 'security'
 

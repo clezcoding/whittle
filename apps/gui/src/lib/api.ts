@@ -16,6 +16,7 @@ import type {
   ModuleId,
   Permissions,
   PurgeReport,
+  RuleInfo,
   RunSummary,
   ScanProgress,
   Settings,
@@ -86,6 +87,10 @@ export const api = {
 
   purge(olderThanDays: number): Promise<PurgeReport> {
     return isTauri ? call('purge', { olderThan: olderThanDays }) : mock.purge(olderThanDays)
+  },
+
+  rules(): Promise<RuleInfo[]> {
+    return isTauri ? call('list_rules') : mock.rules()
   },
 
   quarantineSize(): Promise<number> {

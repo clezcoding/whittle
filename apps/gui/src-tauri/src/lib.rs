@@ -157,6 +157,14 @@ async fn purge(state: State<'_, AppState>, older_than: u64) -> CmdResult<PurgeRe
         .map_err(err)
 }
 
+/// The rules Whittle scans with: the built-in ones plus the user's own, for the Rules page.
+#[tauri::command]
+fn list_rules(state: State<'_, AppState>) -> CmdResult<Vec<whittle_core::rules::Rule>> {
+    whittle_core::rules::RuleSet::load(&state.ctx())
+        .map(|set| set.rules)
+        .map_err(err)
+}
+
 #[tauri::command]
 fn quarantine_size(state: State<'_, AppState>) -> u64 {
     plan::quarantine_size(&state.ctx())
@@ -318,6 +326,7 @@ pub fn run() {
             last_scan: Mutex::new(HashMap::new()),
         })
         .invoke_handler(tauri::generate_handler![
+            list_rules,
             app_info,
             scan,
             apply_findings,

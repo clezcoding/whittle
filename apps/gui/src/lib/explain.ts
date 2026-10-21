@@ -32,6 +32,10 @@ export const NAV_HELP = {
   review: 'Look at every finding and choose what to clean.',
   tidy: 'Sort a messy folder into sub-folders by type and date.',
   history: 'Everything Whittle changed, with undo.',
+  insights: 'Charts of the last scan: categories, risk, age, the biggest items.',
+  apps: 'Findings grouped by app, dev tool and project.',
+  rules: 'The rules Whittle scans with, and what each one matched.',
+  quarantine: 'Items waiting to be removed for good. Put them back any time.',
   settings: 'Defaults, quarantine, never-touch list, appearance.',
 } as const
 

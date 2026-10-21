@@ -1,11 +1,21 @@
 // Demo data for running the interface in a plain browser (`pnpm dev`) without the Rust backend.
 // It mimics what `whittle-core` would return on a developer's Mac.
 
-import type { ApplyProgress, ApplyReport, Disposal, Failure, Finding, ModuleId, Permissions, PurgeReport, RunSummary, ScanProgress, Settings, TidyEntry, UndoReport } from '../types'
+import type { ApplyProgress, ApplyReport, Disposal, Failure, Finding, ModuleId, Permissions, PurgeReport, RuleInfo, RunSummary, ScanProgress, Settings, TidyEntry, UndoReport } from '../types'
 
 export const DEMO_HOME = '/Users/clez'
 const DAY = 86_400
 const now = () => Math.floor(Date.now() / 1000)
+
+/** Which built-in rule produced which demo finding, so the Rules page can show real matches. */
+const RULE_OF: Record<string, string> = {
+  a1: 'xcode-derived-data', a2: 'xcode-derived-data', a3: 'xcode-device-support',
+  b1: 'projects', b2: 'projects', b3: 'projects',
+  c1: 'user-caches', c2: 'user-caches', c3: 'user-logs', c4: 'electron-gpu-caches',
+  d1: 'orphans', d2: 'orphans', d3: 'orphans', d4: 'orphans',
+  e1: 'installers-in-downloads', e2: 'installers-in-downloads',
+  g1: 'ios-backups',
+}
 
 function f(
   id: string,
@@ -23,7 +33,7 @@ function f(
   return {
     id,
     module,
-    rule: id,
+    rule: RULE_OF[id] ?? id,
     category,
     title,
     path: DEMO_HOME + '/' + path,
@@ -55,6 +65,31 @@ export const MOCK_FINDINGS: Finding[] = [
   f('e1', 'caches', 'downloads', 'Old installers · Docker.dmg', 'Downloads/Docker.dmg', 0.6, 'caution', 'Disk images and installer packages in Downloads that are older than 30 days.', 80, false),
   f('e2', 'caches', 'downloads', 'Old installers · macOS-Sonoma.pkg', 'Downloads/macOS-Sonoma.pkg', 1.1, 'caution', 'Disk images and installer packages in Downloads that are older than 30 days.', 150, false),
   f('g1', 'caches', 'backups', 'iPhone / iPad backups · 00008110', 'Library/Application Support/MobileSync/Backup/00008110-001A', 12.3, 'manual', 'Local device backups. Only you know if you still need them. Needs Full Disk Access.', 400, false, 0.5),
+]
+
+const R = (r: Partial<RuleInfo> & Pick<RuleInfo, 'id' | 'name' | 'category' | 'paths'>): RuleInfo => ({
+  risk: 'safe', regenerable: true, note: null, granularity: 'each', exclude: [], min_age_days: 0, min_size: 0, platform: null, needs_full_disk_access: false, ...r,
+})
+
+/** The built-in rules of `rules/caches.yaml`, as the Rust backend lists them. */
+export const MOCK_RULES: RuleInfo[] = [
+  R({ id: 'user-caches', name: 'App caches', category: 'caches', note: 'Apps rebuild their caches on demand.', paths: ['~/Library/Caches/*'], exclude: ['com.apple.*', 'CloudKit', 'Homebrew', 'Yarn', 'pip', 'CocoaPods', 'go-build', 'JetBrains'], min_age_days: 14, min_size: 5_000_000, platform: 'macos' }),
+  R({ id: 'user-logs', name: 'Old logs', category: 'caches', note: 'Log files older than two weeks, including crash reports.', paths: ['~/Library/Logs/*'], exclude: ['com.apple.*'], min_age_days: 14, min_size: 1_000_000, platform: 'macos' }),
+  R({ id: 'electron-gpu-caches', name: 'Electron app caches', category: 'caches', note: 'GPU, shader and code caches of Electron apps (Slack, Discord, VS Code, Notion ...).', paths: ['~/Library/Application Support/*/GPUCache', '~/Library/Application Support/*/Code Cache', '~/Library/Application Support/*/DawnCache', '~/Library/Application Support/*/Cache'], min_age_days: 7, min_size: 5_000_000, platform: 'macos' }),
+  R({ id: 'installers-in-downloads', name: 'Old installers', category: 'downloads', risk: 'caution', regenerable: false, note: 'Disk images and installer packages in Downloads that are older than 30 days.', paths: ['~/Downloads/*.dmg', '~/Downloads/*.pkg', '~/Downloads/*.iso', '~/Downloads/*.xip'], min_age_days: 30, min_size: 1_000_000 }),
+  R({ id: 'ios-backups', name: 'iPhone / iPad backups', category: 'backups', risk: 'manual', regenerable: false, note: 'Local device backups. Only you know if you still need them. Needs Full Disk Access.', paths: ['~/Library/Application Support/MobileSync/Backup/*'], min_age_days: 90, needs_full_disk_access: true, platform: 'macos' }),
+  R({ id: 'xcode-derived-data', name: 'Xcode DerivedData', category: 'dev', note: 'Build products and indexes. Xcode rebuilds them.', paths: ['~/Library/Developer/Xcode/DerivedData/*'], exclude: ['ModuleCache.noindex'], min_age_days: 7, platform: 'macos' }),
+  R({ id: 'xcode-device-support', name: 'Xcode device support files', category: 'dev', note: 'Debug symbols copied from devices. Downloaded again when you connect that OS version.', paths: ['~/Library/Developer/Xcode/iOS DeviceSupport/*', '~/Library/Developer/Xcode/watchOS DeviceSupport/*', '~/Library/Developer/Xcode/tvOS DeviceSupport/*'], min_age_days: 30, platform: 'macos' }),
+  R({ id: 'xcode-archives', name: 'Xcode archives', category: 'dev', risk: 'caution', regenerable: false, note: 'Archived app builds. Keep the ones you may need for symbolication or re-submission.', paths: ['~/Library/Developer/Xcode/Archives/*/*'], min_age_days: 180, platform: 'macos' }),
+  R({ id: 'simulator-caches', name: 'Simulator caches', category: 'dev', paths: ['~/Library/Developer/CoreSimulator/Caches/*'], min_age_days: 14, platform: 'macos' }),
+  R({ id: 'homebrew-downloads', name: 'Homebrew downloads', category: 'dev', note: 'Downloaded bottles and sources. `brew install` fetches them again.', paths: ['~/Library/Caches/Homebrew/downloads/*', '~/Library/Caches/Homebrew/Cask/*'], min_age_days: 14, platform: 'macos' }),
+  R({ id: 'npm-cache', name: 'npm cache', category: 'dev', paths: ['~/.npm/_cacache'], granularity: 'whole', min_size: 50_000_000 }),
+  R({ id: 'yarn-cache', name: 'Yarn cache', category: 'dev', paths: ['~/Library/Caches/Yarn', '~/.yarn/berry/cache'], granularity: 'whole', min_size: 50_000_000 }),
+  R({ id: 'pip-cache', name: 'pip cache', category: 'dev', paths: ['~/Library/Caches/pip', '~/.cache/pip'], granularity: 'whole', min_size: 50_000_000 }),
+  R({ id: 'cocoapods-cache', name: 'CocoaPods cache', category: 'dev', paths: ['~/Library/Caches/CocoaPods'], granularity: 'whole', min_size: 50_000_000, platform: 'macos' }),
+  R({ id: 'cargo-registry', name: 'Cargo registry downloads', category: 'dev', note: 'Crate archives and extracted sources. Cargo downloads them again.', paths: ['~/.cargo/registry/cache/*', '~/.cargo/registry/src/*'], min_age_days: 30, min_size: 20_000_000 }),
+  R({ id: 'go-build-cache', name: 'Go build cache', category: 'dev', paths: ['~/Library/Caches/go-build', '~/.cache/go-build'], granularity: 'whole', min_size: 50_000_000 }),
+  R({ id: 'gradle-caches', name: 'Gradle caches', category: 'dev', risk: 'caution', note: 'Rebuilding takes a while on the next Gradle run.', paths: ['~/.gradle/caches/*'], min_age_days: 60, min_size: 100_000_000 }),
 ]
 
 const PHASES: Record<ModuleId, { label: string; total: number }[]> = {
@@ -129,6 +164,7 @@ export const mock: Handlers & {
   removeExclusion(path: string): Promise<Settings>
   ignoreFinding(id: string): Promise<Settings>
   permissions(): Promise<Permissions>
+  rules(): Promise<RuleInfo[]>
 } = {
   async scan(modules, onProgress) {
     const order: ModuleId[] = modules.length ? modules : ['caches', 'projects', 'orphans']
@@ -202,6 +238,10 @@ export const mock: Handlers & {
     if (!hit) throw new Error('That item is no longer in the last scan.')
     return mock.addExclusion(hit.path)
   },
+  async rules() {
+    await wait(120)
+    return MOCK_RULES
+  },
   async permissions() {
     return { full_disk_access: false, effect: 'Without Full Disk Access, macOS hides some app data from Whittle. It will miss leftovers in protected folders, but it never touches more than before.' }
   },
@@ -252,13 +292,29 @@ export const mock: Handlers & {
   },
 }
 
-/** Seeds some history so the demo's History screen is not empty. */
+/** Seeds some history so the demo's History and Quarantine screens are not empty. */
 export function seedDemoHistory() {
   if (runs.length) return
+  const mk = (ageDays: number, tag: string, items: number, gb: number, restored: number, undoable: number): RunSummary => ({
+    run: String(now() - ageDays * DAY).padStart(10, '0') + '-' + tag,
+    ts: now() - ageDays * DAY,
+    items,
+    bytes: Math.round(gb * 1e9),
+    restored,
+    undoable,
+  })
   runs = [
-    { run: String(now() - 3 * DAY).padStart(10, '0') + '-a1b2', ts: now() - 3 * DAY, items: 14, bytes: 6_200_000_000, restored: 0, undoable: 14 },
-    { run: String(now() - 19 * DAY).padStart(10, '0') + '-c3d4', ts: now() - 19 * DAY, items: 5, bytes: 1_100_000_000, restored: 5, undoable: 0 },
+    mk(3, 'a1b2', 14, 6.2, 0, 14),
+    mk(11, 'e5f6', 9, 3.4, 0, 9),
+    mk(19, 'c3d4', 5, 1.1, 5, 0),
+    mk(26, 'g7h8', 4, 2.3, 0, 4),
+    mk(52, 'i9j0', 22, 9.8, 0, 0),
   ]
-  quarantine = 6_200_000_000
-  quarantined[runs[0].run] = { items: [], bytes: 6_200_000_000 }
+  quarantine = 0
+  for (const r of runs) {
+    if (r.undoable > 0) {
+      quarantined[r.run] = { items: [], bytes: r.bytes }
+      quarantine += r.bytes
+    }
+  }
 }

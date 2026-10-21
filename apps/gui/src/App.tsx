@@ -1,21 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { About } from './components/About'
+import { CommandPalette, type Command } from './components/CommandPalette'
+import { Inspector } from './components/Inspector'
 import { Onboarding } from './components/Onboarding'
+import { ReportDialog } from './components/ReportDialog'
 import { Shortcuts } from './components/Shortcuts'
-import { Sidebar, type View } from './components/Sidebar'
+import { Sidebar, VIEW_ORDER, type View } from './components/Sidebar'
 import { api } from './lib/api'
 import { formatBytes } from './lib/format'
+import { buildReport } from './lib/insights'
 import { errorText, isExcluded } from './lib/paths'
 import { moduleWeights, overallFraction, rememberDurations } from './lib/timing'
-import type { ApplyRun, AppInfo, Disposal, External, Finding, ModuleId, ModuleRun, Permissions, RunSummary, ScanProgress, ScanRun, Settings as SettingsT } from './types'
+import type { ApplyRun, AppInfo, Disposal, External, Finding, ModuleId, ModuleRun, Permissions, RuleInfo, RunSummary, ScanProgress, ScanRun, Settings as SettingsT } from './types'
+import { Apps } from './views/Apps'
 import { History } from './views/History'
+import { Insights } from './views/Insights'
 import { Overview, type Phase } from './views/Overview'
+import { Quarantine } from './views/Quarantine'
 import { Review } from './views/Review'
+import { Rules } from './views/Rules'
 import { Settings, type SaveState } from './views/Settings'
 import { Tidy } from './views/Tidy'
 
 const DEFAULT_MODULES: ModuleId[] = ['caches', 'projects', 'orphans']
-const VIEWS: View[] = ['overview', 'review', 'tidy', 'history']
 
 const FALLBACK_SETTINGS: SettingsT = {
   onboarded: true,
@@ -34,7 +41,11 @@ export function App() {
   const [settings, setSettings] = useState<SettingsT | null>(null)
   const [permissions, setPermissions] = useState<Permissions | null>(null)
   const [save, setSave] = useState<SaveState>('idle')
-  const [dialog, setDialog] = useState<'about' | 'keys' | null>(null)
+  const [dialog, setDialog] = useState<'about' | 'keys' | 'report' | null>(null)
+  const [palette, setPalette] = useState(false)
+  const [inspectId, setInspectId] = useState<string | null>(null)
+  const [rules, setRules] = useState<RuleInfo[] | null>(null)
+  const [ruleFocus, setRuleFocus] = useState<string | null>(null)
   const [tour, setTour] = useState(false)
   const [view, setView] = useState<View>('overview')
   const [phase, setPhase] = useState<Phase>('idle')
@@ -77,6 +88,7 @@ export function App() {
       setSettings(FALLBACK_SETTINGS)
       setNotice({ text: `Could not read your settings, using the defaults. ${errorText(e)}` })
     })
+    void api.rules().then(setRules).catch(() => setRules([]))
     recheck()
   }, [refreshState, recheck])
 
@@ -269,19 +281,87 @@ export function App() {
     [findings, selected, refreshState, scan, prefs.quarantine_days],
   )
 
-  // ⌘R scan, ⌘1–4 views, ⌘, settings, ? shortcuts. Dialogs handle their own keys.
+  const selectMany = useCallback((ids: string[], on: boolean) => {
+    setSelected((sel) => {
+      const next = new Set(sel)
+      for (const id of ids) (on ? next.add(id) : next.delete(id))
+      return next
+    })
+  }, [])
+
+  const inspected = inspectId ? (findings.find((f) => f.id === inspectId) ?? null) : null
+  useEffect(() => {
+    if (inspectId && !inspected) setInspectId(null)
+  }, [inspectId, inspected])
+
+  const openRule = useCallback((id: string) => {
+    setInspectId(null)
+    setRuleFocus(id)
+    setView('rules')
+  }, [])
+
+  const commands = useMemo<Command[]>(() => {
+    const go = (v: View, label: string, keys?: string[]): Command => ({ id: `go-${v}`, group: 'Go to', label, keys, run: () => setView(v) })
+    const hasFindings = findings.length > 0
+    const safeIds = findings.filter((f) => f.risk === 'safe').map((f) => f.id)
+    const list: Command[] = [
+      go('overview', 'Overview', ['⌘', '1']),
+      go('review', 'Review', ['⌘', '2']),
+      go('tidy', 'Tidy a folder', ['⌘', '3']),
+      go('history', 'History', ['⌘', '4']),
+      go('insights', 'Insights', ['⌘', '5']),
+      go('apps', 'Apps', ['⌘', '6']),
+      go('rules', 'Rules', ['⌘', '7']),
+      go('quarantine', 'Quarantine', ['⌘', '8']),
+      go('settings', 'Settings', ['⌘', ',']),
+      { id: 'scan', group: 'Actions', label: phase === 'scanning' ? 'Scan is running…' : 'Scan now', keys: ['⌘', 'R'], words: 'start find', run: () => { if (phase !== 'scanning') void scan() } },
+    ]
+    if (hasFindings) {
+      list.push(
+        { id: 'select-safe', group: 'Actions', label: 'Select all safe findings', hint: `${safeIds.length} item${safeIds.length === 1 ? '' : 's'}`, words: 'pick check', run: () => setSelected(new Set(safeIds)) },
+        { id: 'clear-sel', group: 'Actions', label: 'Clear the selection', words: 'unselect none', run: () => setSelected(new Set()) },
+        { id: 'to-review', group: 'Actions', label: 'Review what is selected', hint: `${selected.size} selected`, words: 'clean', run: () => setView('review') },
+        { id: 'report', group: 'Actions', label: 'Copy the scan report', words: 'summary export share', run: () => setDialog('report') },
+      )
+    }
+    list.push(
+      { id: 'appearance-dark', group: 'Appearance', label: 'Use the dark theme', words: 'night', run: () => void updateSettings({ appearance: 'dark' }) },
+      { id: 'appearance-light', group: 'Appearance', label: 'Use the light theme', words: 'day', run: () => void updateSettings({ appearance: 'light' }) },
+      { id: 'appearance-system', group: 'Appearance', label: 'Follow the system theme', words: 'auto', run: () => void updateSettings({ appearance: 'system' }) },
+      { id: 'motion-reduced', group: 'Appearance', label: 'Reduce motion', words: 'animation calm', run: () => void updateSettings({ motion: 'reduced' }) },
+      { id: 'motion-full', group: 'Appearance', label: 'Use full motion', words: 'animation', run: () => void updateSettings({ motion: 'full' }) },
+      { id: 'keys', group: 'Help', label: 'Keyboard shortcuts', keys: ['?'], run: () => setDialog('keys') },
+      { id: 'tour', group: 'Help', label: 'Take the tour again', words: 'welcome onboarding', run: () => setTour(true) },
+      { id: 'about', group: 'Help', label: 'About Whittle', words: 'version licence', run: () => setDialog('about') },
+      { id: 'repo', group: 'Project', label: 'Open the repository on GitHub', words: 'source code', run: () => openExternal('repository') },
+      { id: 'releases', group: 'Project', label: 'Open releases', words: 'download update changelog', run: () => openExternal('releases') },
+      { id: 'issues', group: 'Project', label: 'Report a problem', words: 'bug issue feedback', run: () => openExternal('issues') },
+      { id: 'security', group: 'Project', label: 'Security policy', words: 'vulnerability report', run: () => openExternal('security') },
+    )
+    return list
+  }, [findings, selected.size, phase, scan, updateSettings, openExternal])
+
+  // ⌘K palette, ⌘R scan, ⌘1–8 views, ⌘, settings, ? shortcuts. Dialogs handle their own keys.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (dialog || tour || document.querySelector('.modal')) return
+      const mod = e.metaKey || e.ctrlKey
+      const blocked = dialog || tour || document.querySelector('.modal')
+      if (mod && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        if (blocked) return
+        setInspectId(null)
+        setPalette((p) => !p)
+        return
+      }
+      if (palette || inspectId || blocked) return
       const el = e.target as HTMLElement | null
       const typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)
-      const mod = e.metaKey || e.ctrlKey
       if (mod && e.key === ',') {
         e.preventDefault()
         setView('settings')
-      } else if (mod && /^[1-4]$/.test(e.key)) {
+      } else if (mod && /^[1-8]$/.test(e.key)) {
         e.preventDefault()
-        setView(VIEWS[Number(e.key) - 1])
+        setView(VIEW_ORDER[Number(e.key) - 1])
       } else if (mod && e.key.toLowerCase() === 'r') {
         e.preventDefault()
         if (phase !== 'scanning') void scan()
@@ -292,7 +372,7 @@ export function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dialog, tour, phase, scan])
+  }, [dialog, tour, palette, inspectId, phase, scan])
 
   const toggleModule = (m: ModuleId) => setModules((ms) => (ms.includes(m) ? ms.filter((x) => x !== m) : [...ms, m]))
 
