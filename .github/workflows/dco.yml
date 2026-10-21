@@ -1,0 +1,51 @@
+name: DCO
+
+# Developer Certificate of Origin: commits from outside contributors must carry a
+# "Signed-off-by:" line (git commit -s). The maintainer and bots are exempt. The workflow reads
+# commit metadata only and never checks out or runs code from the pull request.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+
+concurrency:
+  group: dco-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  sign-off:
+    name: Signed-off-by
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - name: Every commit is signed off
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          if [ "$AUTHOR" = "$OWNER" ] || [[ "$AUTHOR" == *"[bot]" ]]; then
+            echo "Exempt: $AUTHOR is the maintainer or a bot."
+            exit 0
+          fi
+          bad=0
+          while IFS=$'\t' read -r sha subject signed; do
+            if [ "$signed" != "true" ]; then
+              echo "::error::Commit ${sha:0:7} ($subject) has no Signed-off-by line. Run: git rebase --signoff main"
+              bad=1
+            fi
+          done < <(gh api --paginate "repos/$REPO/pulls/$PR/commits" \
+            --jq '.[] | [.sha, (.commit.message | split("\n")[0]), (.commit.message | test("(?m)^Signed-off-by: .+ <.+>$"))] | @tsv')
+          [ "$bad" -eq 0 ] && echo "All commits are signed off."
+          exit "$bad"

@@ -1,0 +1,76 @@
+# OpenSSF Security Insights (v2): machine-readable security facts about the project.
+# https://github.com/ossf/security-insights
+header:
+  schema-version: 2.0.0
+  last-reviewed: "2026-10-21"
+  last-updated: "2026-10-21"
+  project-si-source: https://raw.githubusercontent.com/clezcoding/whittle/main/.github/security-insights.yml
+project:
+  name: Whittle
+  homepage: https://github.com/clezcoding/whittle
+  administrators:
+    - name: clezcoding
+      primary: true
+      affiliation: Puzzless Foundation
+  repositories:
+    - name: whittle
+      url: https://github.com/clezcoding/whittle
+      comment: Source code, issues and releases.
+      status: active
+      accepts-change-request: true
+      accepts-automated-change-request: true
+      no-third-party-packages: false
+  vulnerability-reporting:
+    reports-accepted: true
+    bug-bounty-available: false
+    email-contact: null
+    security-policy: https://github.com/clezcoding/whittle/blob/main/SECURITY.md
+    comment: Private reporting through GitHub security advisories.
+  documentation:
+    detailed-guide: https://github.com/clezcoding/whittle/blob/main/README.md
+    code-of-conduct: https://github.com/clezcoding/whittle/blob/main/CODE_OF_CONDUCT.md
+    release-process: https://github.com/clezcoding/whittle/blob/main/docs/RELEASING.md
+    support-policy: https://github.com/clezcoding/whittle/blob/main/SUPPORT.md
+    signature-verification: https://github.com/clezcoding/whittle/blob/main/SECURITY.md#verifying-a-release
+repository:
+  status: active
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  bug-fixes-only: false
+  core-team:
+    - name: clezcoding
+      primary: true
+      affiliation: Puzzless Foundation
+  license:
+    url: https://github.com/clezcoding/whittle/blob/main/LICENSE-MIT
+    expression: MIT OR Apache-2.0
+  security:
+    assessments:
+      self:
+        comment: Assurance case with threat model, trust boundaries and secure design principles.
+        evidence: https://github.com/clezcoding/whittle/blob/main/docs/ASSURANCE.md
+        date: "2026-10-21"
+    tools:
+      - name: CodeQL
+        type: SAST
+        rulesets: [default]
+        integration: { adhoc: false, ci: true, release: false }
+        comment: Rust, JavaScript/TypeScript and GitHub Actions workflows.
+      - name: cargo-fuzz (ClusterFuzzLite)
+        type: fuzzer
+        rulesets: [built-in]
+        integration: { adhoc: true, ci: true, release: false }
+        comment: Safety layer, rule parser and settings parser, with AddressSanitizer.
+      - name: zizmor
+        type: SAST
+        rulesets: [default]
+        integration: { adhoc: true, ci: true, release: false }
+        comment: Static analysis of the GitHub Actions workflows.
+      - name: cargo-deny
+        type: SCA
+        rulesets: [advisories, bans, licenses, sources]
+        integration: { adhoc: true, ci: true, release: false }
+      - name: OpenSSF Scorecard
+        type: SCA
+        rulesets: [default]
+        integration: { adhoc: false, ci: true, release: false }

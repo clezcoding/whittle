@@ -3,7 +3,7 @@ name: Release
 # Push a tag like v0.1.0 to build and publish a release:
 #   - Whittle_<version>_universal.dmg   (Apple Silicon + Intel)
 #   - whittle-<tag>-<target>.tar.gz     (command line, one per architecture)
-#   - SHA256SUMS
+#   - SHA256SUMS, a CycloneDX SBOM, a Sigstore signature (.sigstore.json) per file, build provenance
 # then update the Homebrew tap. Release notes are generated from merged PRs when the release is published. Run it by hand (workflow_dispatch) for a dry run that only builds.
 #
 # Without Apple secrets the app is ad-hoc signed. Add them (see docs/RELEASING.md) and the same
@@ -40,6 +40,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Versions must agree with the tag
         if: github.ref_type == 'tag'
         run: bash scripts/check-version.sh "${GITHUB_REF_NAME#v}"
@@ -81,19 +83,20 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # No build caches in this workflow: a release is built from a clean slate, so a poisoned
+      # cache can never end up inside a signed artifact.
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: stable
           targets: aarch64-apple-darwin,x86_64-apple-darwin
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           package_json_file: apps/gui/package.json
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
-          cache: pnpm
-          cache-dependency-path: apps/gui/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
         working-directory: apps/gui
 
@@ -160,13 +163,12 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: stable
           targets: ${{ matrix.target }}
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        with:
-          key: ${{ matrix.target }}
       - run: cargo build --release --locked -p whittle-cli --target ${{ matrix.target }}
       - name: Package
         id: pack
@@ -193,32 +195,76 @@ jobs:
           retention-days: 3
 
   publish:
-    name: Checksums and publish
+    name: Checksums, signatures, provenance and publish
     if: github.ref_type == 'tag'
     needs: [prepare, app, cli]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write       # attach files and publish the release
+      id-token: write       # keyless signing (Sigstore) and build provenance
+      attestations: write   # store the provenance attestation
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
         with:
           egress-policy: audit
 
-      - name: Write SHA256SUMS and publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ needs.prepare.outputs.tag }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Collect the build output
         run: |
-          mkdir dist && cd dist
-          gh release download "$TAG" --pattern '*.dmg' --pattern '*.tar.gz'
-          sha256sum * | tee SHA256SUMS
-          gh release upload "$TAG" SHA256SUMS --clobber
+          mkdir dist
+          gh release download "$TAG" --dir dist --pattern '*.dmg' --pattern '*.tar.gz'
+
+      - name: Software bill of materials (CycloneDX)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: dist/whittle-${{ needs.prepare.outputs.tag }}.sbom.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Write SHA256SUMS
+        working-directory: dist
+        run: sha256sum -- * | tee SHA256SUMS
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign every file (Sigstore, keyless)
+        working-directory: dist
+        run: |
+          for f in *; do
+            cosign sign-blob --yes --bundle "$f.sigstore.json" "$f"
+          done
+          ls -l
+
+      - name: Build provenance (SLSA, stored as a GitHub attestation)
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.dmg
+            dist/*.tar.gz
+            dist/*.cdx.json
+
+      - name: Upload and publish
+        working-directory: dist
+        run: |
+          gh release upload "$TAG" SHA256SUMS ./*.sigstore.json ./*.cdx.json --clobber
           # tauri-action rewrites the release body while it uploads, so the notes are generated last
           # (grouped by label, see .github/release.yml), together with publishing.
           gh api -X POST "repos/$GH_REPO/releases/generate-notes" -f tag_name="$TAG" --jq .body > notes.md
-          gh release edit "$TAG" --title "Whittle $TAG" --notes-file notes.md --draft=false
+          {
+            cat notes.md
+            printf '\n\n### Verify this release\n\nEvery file carries a Sigstore signature (`*.sigstore.json`) and a build provenance attestation. See [SECURITY.md](https://github.com/%s/blob/main/SECURITY.md#verifying-a-release).\n' "$GH_REPO"
+          } > body.md
+          gh release edit "$TAG" --title "Whittle $TAG" --notes-file body.md --draft=false
 
   homebrew:
     name: Update Homebrew tap
@@ -232,6 +278,8 @@ jobs:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Is the tap token configured?
         id: token
         env:
@@ -239,6 +287,8 @@ jobs:
         run: |
           if [ -n "$T" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "::warning::HOMEBREW_TAP_TOKEN is not set, so the tap was not updated. See docs/RELEASING.md."; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
         if: steps.token.outputs.ok == 'true'
         with:
           repository: clezcoding/homebrew-tap

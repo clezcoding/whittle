@@ -16,6 +16,7 @@ Rough order, not promises.
 - **Docker audit**: dangling images, build cache, stopped containers (read-only report first)
 - **Runtimes audit**: old Node, Python, Ruby, Java versions (nvm, pyenv, asdf, Homebrew casks)
 
+- **OpenSSF Best Practices badge**: passing, then silver (checklist and gaps in [OPENSSF.md](OPENSSF.md)); open gaps are a second maintainer, signed tags, a reproducible bundle and a German interface
 - **Replace `serde_yaml_ng`** with a maintained YAML parser (its `unsafe-libyaml` dependency is unmaintained; see `deny.toml`)
 
 ## Later

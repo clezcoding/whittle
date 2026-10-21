@@ -1,0 +1,11 @@
+# zizmor: static analysis for the workflows (run by .github/workflows/workflow-lint.yml).
+rules:
+  dangerous-triggers:
+    ignore:
+      # These four react to pull requests from forks and therefore need `pull_request_target` for a
+      # write token. None of them checks out, builds or executes code from the pull request; they
+      # only read its metadata (title, labels, changed file names) and set labels or comments.
+      - welcome.yml
+      - pr-title.yml
+      - labeler.yml
+      - dependabot-label.yml

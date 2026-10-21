@@ -8,7 +8,16 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - CI is faster: pull requests that only touch docs skip the heavy jobs, the app bundle and the Linux desktop-shell job run in parallel, and build caches are written on `main` only.
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
+### Added
+- Signed releases: every release file gets a Sigstore signature and a build-provenance attestation, plus a CycloneDX SBOM and SHA-256 sums. How to verify: `SECURITY.md`.
+- Fuzzing (cargo-fuzz via ClusterFuzzLite, AddressSanitizer) for the safety layer, the rule parser and the settings parser; property tests for the safety layer.
+- Coverage workflow with a floor of 80 % of lines.
+- `GOVERNANCE.md`, `docs/ASSURANCE.md` (threat model, trust boundaries, secure design, countered weaknesses) and `docs/OPENSSF.md` (criterion-by-criterion OpenSSF Best Practices status).
+- DCO sign-off for outside contributors, zizmor linting of workflows, Security Insights file, importable branch ruleset.
+
 ### Security
+- Workspace lints: `unsafe_code` is forbidden in the engine and the command line.
+- Workflows: `persist-credentials: false` on every checkout, no build caches in the release workflow, Dependabot cooldown of 7 days, spoof-resistant author check in the Dependabot labeller.
 - Every GitHub Action is pinned to a commit SHA; Harden-Runner on Linux jobs; the auto-merge workflow with write access was replaced by Kodiak.
 
 ## [0.1.0]

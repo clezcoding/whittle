@@ -2,6 +2,8 @@
 resolver = "2"
 members = ["crates/whittle-core", "crates/whittle-cli", "apps/gui/src-tauri"]
 default-members = ["crates/whittle-core", "crates/whittle-cli", "apps/gui/src-tauri"]
+# The fuzz targets need nightly and live in their own workspace.
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.1.0"
@@ -9,6 +11,20 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/clezcoding/whittle"
 authors = ["clezcoding by Puzzless Foundation"]
+
+# Strict by default. `unsafe` is forbidden in the crates that touch files; Tauri's generated glue
+# in apps/gui/src-tauri is the one place that cannot promise that, so it opts out.
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+mem_forget = "deny"
+undocumented_unsafe_blocks = "deny"
 
 [profile.release]
 lto = "thin"

@@ -33,7 +33,7 @@ pub fn scan_progress(ctx: &Context, rules: &RuleSet, rep: &Reporter) -> Result<V
 
     // Phase 1: expand every rule's globs. Fast, and it tells us how much there is to measure.
     rep.phase("Looking up locations", 0.0, 0.08, active.len() as u64);
-    let gathered: Vec<Gathered> = active
+    let gathered: Vec<Gathered<'_>> = active
         .par_iter()
         .map(|rule| {
             let g = gather(ctx, rule);
