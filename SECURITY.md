@@ -31,3 +31,14 @@ Anything that lets Whittle, or something talking to it, touch files it should no
 - The app's Content-Security-Policy forbids network access and the Tauri capability set is `core:default`.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for details.
+
+## Known scanner findings
+
+Automated scanners report a few items that are understood and accepted. They are listed so nobody has to wonder.
+
+| Finding | Why it stays |
+|---|---|
+| `RUSTSEC-2024-0429` (glib 0.18) | Pinned by Tauri's Linux GTK backend. Whittle ships for macOS only; Linux builds exist for linting. Listed in `deny.toml` and `osv-scanner.toml` until Tauri moves on. |
+| `RUSTSEC-2024-0370` (proc-macro-error) | Unmaintained, compile-time only, brought in by Tauri's dependencies. |
+| `RUSTSEC-2024-0449` (unsafe-libyaml) | Unmaintained, no known vulnerability, parses only local rule files. |
+| OpenSSF Scorecard: *Code-Review*, *Fuzzing*, *CII-Best-Practices*, *Maintained* | One maintainer, so no second reviewer; every change still goes through a pull request and CI. Scorecard cannot detect `cargo fuzz`. The project is younger than 90 days. |
