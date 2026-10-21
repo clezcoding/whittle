@@ -20,6 +20,23 @@ permissions:
   contents: read
 
 jobs:
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Catches what a YAML parser does not: duplicate keys, bad expressions, wrong job references.
+      - run: pip install actionlint-py==1.7.12.25 && actionlint
+
   zizmor:
     name: zizmor
     runs-on: ubuntu-latest
