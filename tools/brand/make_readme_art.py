@@ -12,6 +12,8 @@ Outputs, each in a dark and a light variant (README picks with <picture>):
     risk-*.svg     the three risk levels
     modules-*.svg  the five things Whittle does
     arch-*.svg     rules -> core -> command line and app
+    views-*.svg    animated: the eight views of the app
+    palette-*.svg  animated: the command palette finding Xcode
 
 The animated files use CSS only (no script, no SMIL). The resting state of every
 element is the finished picture, so a viewer that blocks animation, or a reader
@@ -630,8 +632,87 @@ def arch_a(t):
     return svg_m(W, H, "".join(b), "Rules feed whittle-core, which the command line and the Tauri app both use", m)
 
 
+# ------------------------------------------------------------------ views (animated)
+def views_a(t):
+    W, H, D = 1600, 560, 16.0
+    m = Motion(D)
+    b = [f'<rect width="{W}" height="{H}" fill="{t["ground"]}"/>',
+         f'<rect x="50" y="40" width="1500" height="480" rx="16" fill="{t["surface"]}" stroke="{t["line"]}" stroke-width="2"/>',
+         f'<path d="M470 40 V520" stroke="{t["line"]}" stroke-width="2"/>',
+         mark(106, 92, 38, t["ink"], t["red"]),
+         text(SANS, "whittle", 30, 140, 103, t["ink"], tracking=-0.03)]
+    views = [("Overview", "1", "One number: what can go.", [0.92, 0.55, 0.3, 0.12]),
+             ("Review", "2", "Every finding, with a reason.", [0.8, 0.8, 0.8, 0.8]),
+             ("Tidy a folder", "3", "Sort a messy folder. Preview first.", [0.3, 0.55, 0.8, 0.45]),
+             ("History", "4", "Every run, with undo.", [0.5, 0.7, 0.35, 0.6]),
+             ("Insights", "5", "Where the space sits: category, risk, age.", [0.95, 0.7, 0.42, 0.2]),
+             ("Apps", "6", "Leftovers, grouped per app.", [0.6, 0.85, 0.4, 0.25]),
+             ("Rules", "7", "Where Whittle looks, as YAML.", [0.4, 0.4, 0.65, 0.4]),
+             ("Quarantine", "8", "What can still come back.", [0.75, 0.5, 0.35, 0.2])]
+    rh, ry = 46, 140
+    for i, (name, key, desc, bars) in enumerate(views):
+        y = ry + i * rh
+        b.append(text(SANS_REG, name, 24, 96, y + 32, t["ink"] if i == len(views) - 1 else t["muted"], tracking=-0.005))
+        b.append(text(MONO, "cmd " + key, 18, 440, y + 30, t["muted"], tracking=0.02, anchor="end"))
+        at = i * 2.0
+        b.append(m.pulse(f'<rect x="70" y="{y}" width="380" height="{rh - 6}" rx="9" fill="{t["raised"]}" stroke="{t["line"]}" stroke-width="2"/>'
+                         f'<path d="M70 {y + 6} L84 {y + 6} L76 {y + rh - 12} L72 {y + rh - 12} Z" fill="{t["red"]}"/>'
+                         + text(SANS, name, 24, 96, y + 32, t["ink"], tracking=-0.005), at, 2.0))
+        panel = [text(SANS, name, 76, 530, 150, t["ink"], tracking=-0.045),
+                 text(SANS_REG, desc, 30, 534, 206, t["muted"], tracking=0)]
+        for j, f in enumerate(bars):
+            yy = 286 + j * 54
+            panel.append(f'<rect x="534" y="{yy}" width="900" height="14" rx="7" fill="{t["line"]}"/>')
+            panel.append(m.grow(f'<rect x="534" y="{yy}" width="{900 * f:.0f}" height="14" rx="7" fill="{t["shaving"] if j else t["red"]}"/>', at + 0.25 + j * 0.12, 0.7))
+        last = i == len(views) - 1
+        b.append(m.show("".join(panel), at, None if last else at + 2.0, dy=10, fade=0.35))
+    return svg_m(W, H, "".join(b), "The app's views: overview, review, tidy, history, insights, apps, rules, quarantine", m)
+
+
+# ------------------------------------------------------------------ command palette (animated)
+def palette_a(t):
+    W, H, D = 1600, 560, 10.0
+    m = Motion(D)
+    b = [f'<rect width="{W}" height="{H}" fill="{t["ground"]}"/>']
+    x, y, w, h = 330, 50, 940, 460
+    b.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{t["surface"]}" stroke="{t["line"]}" stroke-width="2"/>')
+    b.append(f'<path d="M{x} {y + 90} H{x + w}" stroke="{t["line"]}" stroke-width="2"/>')
+    b.append(f'<circle cx="{x + 52}" cy="{y + 46}" r="11" fill="none" stroke="{t["muted"]}" stroke-width="3"/><path d="M{x + 60} {y + 54} l10 10" stroke="{t["muted"]}" stroke-width="3" stroke-linecap="round"/>')
+    q = "xcode"
+    for k in range(1, len(q) + 1):
+        a = 0.8 + (k - 1) * 0.28
+        until = 0.8 + k * 0.28 if k < len(q) else D - 0.7
+        b.append(m.show(text(SANS_REG, q[:k], 34, x + 96, y + 58, t["ink"], tracking=0), a, until, dy=0, fade=0.01))
+    b.append(m.loop(f'<rect x="{x + 96 + 100}" y="{y + 26}" width="3" height="40" fill="{t["red"]}"/>', "0%,49%{opacity:1}50%,100%{opacity:0}", 1.1))
+    b.append(text(MONO, "cmd K", 20, x + w - 36, y + 54, t["muted"], tracking=0.02, anchor="end"))
+    rows = [("FINDINGS", None, None), ("Xcode DerivedData", "dev \u00b7 safe", "14.6 GB"),
+            ("Xcode device support files", "dev \u00b7 safe", "5.2 GB"), ("RULES", None, None),
+            ("Xcode DerivedData", "rule \u00b7 xcode-derived-data", "")]
+    yy = y + 120
+    for i, (a, bsub, c) in enumerate(rows):
+        at = 2.6 + i * 0.25
+        if bsub is None:
+            row = text(MONO, a, 17, x + 40, yy + 18, t["muted"], tracking=0.08)
+            step = 44
+        else:
+            hot = i == 1
+            row = ""
+            if hot:
+                row += f'<rect x="{x + 20}" y="{yy - 4}" width="{w - 40}" height="64" rx="10" fill="{t["raised"]}"/><path d="M{x + 20} {yy + 4} L{x + 32} {yy + 4} L{x + 26} {yy + 52} L{x + 22} {yy + 52} Z" fill="{t["red"]}"/>'
+            row += text(SANS, a, 26, x + 48, yy + 26, t["ink"], tracking=-0.01) + text(MONO, bsub, 16, x + 48, yy + 50, t["muted"], tracking=0.02)
+            if c:
+                row += text(MONO, c, 22, x + w - 44, yy + 34, t["shaving"], tracking=0, anchor="end")
+            step = 70
+        b.append(m.show(row, at, None, dy=8, fade=0.35))
+        yy += step
+    foot = text(MONO, "up/down move    enter run    esc close", 16, x + 40, y + h - 24, t["muted"], tracking=0.04)
+    b.append(m.show(foot, 3.6, None, dy=0))
+    return svg_m(W, H, "".join(b), "The command palette: typing xcode finds findings and rules", m)
+
+
 ALL = (("banner", banner_a), ("flow", flow_a), ("layers", layers_a), ("scan", scan_a),
-       ("terminal", terminal_a), ("risk", risk_a), ("modules", modules_a), ("arch", arch_a))
+       ("terminal", terminal_a), ("risk", risk_a), ("modules", modules_a), ("arch", arch_a),
+       ("views", views_a), ("palette", palette_a))
 
 
 if __name__ == "__main__":
