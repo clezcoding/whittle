@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: https://img.shields.io https://api.scorecard.dev; style-src 'self'; script-src 'self'; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Whittle – a Swiss army knife for your Mac</title>
+<meta name="description" content="Whittle finds what uninstalled apps left behind, clears caches and build folders that rebuild themselves, and tidies messy folders. Quarantine first, undo always, no network. Open source, Rust and Tauri, for macOS.">
+<meta name="theme-color" content="#0e1012">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Whittle – shave your Mac down to what you use">
+<meta property="og:description" content="Caches, build folders, app leftovers, duplicates and messy folders. Quarantine first, undo always, no network.">
+<meta property="og:image" content="https://clezcoding.github.io/whittle/shots/overview-dark.png">
+<meta property="og:url" content="https://clezcoding.github.io/whittle/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://clezcoding.github.io/whittle/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/switzer-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script src="boot.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="bg" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#top" aria-label="Whittle, back to top"><span class="mark" aria-hidden="true"></span>whittle</a>
+    <nav class="nav__links" id="links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#app">The app</a>
+      <a href="#safety">Safety</a>
+      <a href="#cli">CLI</a>
+      <a href="#rules">Rules</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav__end">
+      <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark">
+        <svg viewBox="0 0 24 24" class="i-sun" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg viewBox="0 0 24 24" class="i-moon" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+      </button>
+      <a class="btn btn--ghost btn--sm" href="https://github.com/clezcoding/whittle"><span>GitHub</span></a>
+      <a class="btn btn--primary btn--sm" href="https://github.com/clezcoding/whittle/releases/latest"><span>Download</span></a>
+      <button class="icon-btn burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="links">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ═════════════════════════════════ hero ═════════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="wrap hero__grid">
+    <div>
+      <a class="pill reveal" href="https://github.com/clezcoding/whittle/releases/latest"><b>v0.1</b> First public release, open source <span aria-hidden="true">→</span></a>
+      <h1 aria-label="Shave your Mac down to what you use.">
+        <span class="line" aria-hidden="true"><span>Shave your Mac</span></span>
+        <span class="line" aria-hidden="true"><span>down to <em>what</em></span></span>
+        <span class="line" aria-hidden="true"><span>you use.</span></span>
+      </h1>
+      <p class="lede reveal d2">A Swiss army knife for your Mac. Whittle finds what uninstalled apps left behind, clears caches and build folders that rebuild themselves, and tidies messy folders. <b>Nothing is ever removed without a way back.</b></p>
+      <div class="hero__cta reveal d3">
+        <a class="btn btn--primary" href="https://github.com/clezcoding/whittle/releases/latest"><span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Download for macOS</span></a>
+        <a class="btn btn--ghost" href="#app"><span>See the app</span></a>
+      </div>
+      <div class="brew reveal d4">
+        <code id="brew-cmd"><i>$</i> brew install --cask clezcoding/tap/whittle</code>
+        <button class="copy" type="button" data-copy="brew tap clezcoding/tap&#10;brew install --cask clezcoding/tap/whittle" aria-label="Copy the Homebrew commands">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span>
+        </button>
+      </div>
+      <div class="hero__meta reveal d5">
+        <span>macOS 11+</span><span>Apple silicon and Intel</span><span>MIT or Apache-2.0</span>
+      </div>
+    </div>
+
+    <div class="stage reveal d2">
+      <div class="shot" id="shot">
+        <img id="hero-shot" src="shots/overview-dark.png" data-dark="shots/overview-dark.png" data-light="shots/overview-light.png" width="2620" height="1780" fetchpriority="high" alt="Whittle's overview: 35.3 GB can be removed, 31.6 GB of it safe, with a bar per category.">
+      </div>
+      <div class="stage__chip stage__chip--a" aria-hidden="true"><b data-count="31.6" data-dec="1">31.6</b><small>GB safe to remove</small></div>
+      <div class="stage__chip stage__chip--b" aria-hidden="true"><b>30 days</b><small>in quarantine, then gone</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ facts ═════════════════════════════════ -->
+<section class="facts" aria-label="Facts">
+  <div class="wrap facts__row">
+    <div class="fact reveal"><b data-count="0">0</b><span>network requests. No telemetry, no account, no update check.</span></div>
+    <div class="fact reveal d1"><b data-count="30">30<small>days</small></b><span>default quarantine, set it anywhere from 1 to 365.</span></div>
+    <div class="fact reveal d2"><b data-count="5">5</b><span>modules: caches, dev projects, app leftovers, duplicates, tidy.</span></div>
+    <div class="fact reveal d3"><b data-count="17">17</b><span>built-in rules, all plain YAML you can read and extend.</span></div>
+    <div class="fact reveal d4"><b data-count="2">2</b><span>ways in: a native app and a command line, one engine.</span></div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ how ═════════════════════════════════ -->
+<section id="how">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">How it works</span>
+      <h2 class="reveal d1">Read first. Cut second. Undo anytime.</h2>
+      <p class="lede reveal d2">A scan reads and measures and changes nothing. You decide what goes. What goes is moved, not destroyed, until you say otherwise.</p>
+    </div>
+    <ol class="steps">
+      <li class="step reveal"><div class="step__n"><svg viewBox="0 0 66 66" aria-hidden="true"><path d="M20 3h26l17 17v26L46 63H20L3 46V20z"/></svg>01</div><h3>Scan</h3><p>Rules and five app sources are read. Nothing is touched. Every item is measured and explained.</p></li>
+      <li class="step reveal d1"><div class="step__n"><svg viewBox="0 0 66 66" aria-hidden="true"><path d="M20 3h26l17 17v26L46 63H20L3 46V20z"/></svg>02</div><h3>Review</h3><p>Each finding says what it is, why it is listed and what happens without it. Only <b>safe</b> items are pre-selected.</p></li>
+      <li class="step reveal d2"><div class="step__n"><svg viewBox="0 0 66 66" aria-hidden="true"><path d="M20 3h26l17 17v26L46 63H20L3 46V20z"/></svg>03</div><h3>Clean</h3><p>Items move to a quarantine at <code>~/.whittle/quarantine</code>. The journal records every step.</p></li>
+      <li class="step reveal d3"><div class="step__n"><svg viewBox="0 0 66 66" aria-hidden="true"><path d="M20 3h26l17 17v26L46 63H20L3 46V20z"/></svg>04</div><h3>Undo</h3><p>One click, or <code>whittle undo</code>, puts everything back where it was. After the retention time it is freed for good.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ app showcase ═════════════════════════════════ -->
+<section id="app">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">The app</span>
+      <h2 class="reveal d1">Nine screens. No mystery items.</h2>
+      <p class="lede reveal d2">One big number, a dense honest table and a drawer that explains any row. Jump anywhere with <kbd>⌘</kbd> <kbd>K</kbd>. Every screen below is the real interface running on demo data.</p>
+    </div>
+
+    <div class="show reveal">
+      <div class="tabs" role="tablist" aria-label="App views" id="tabs">
+        <button class="tab" role="tab" id="t-overview" aria-controls="p-overview" aria-selected="true"><kbd>⌘1</kbd><b>Overview</b><small>One number: what can go.</small></button>
+        <button class="tab" role="tab" id="t-review" aria-controls="p-review" aria-selected="false" tabindex="-1"><kbd>⌘2</kbd><b>Review</b><small>Every finding, explained.</small></button>
+        <button class="tab" role="tab" id="t-insights" aria-controls="p-insights" aria-selected="false" tabindex="-1"><kbd>⌘5</kbd><b>Insights</b><small>Where the space sits.</small></button>
+        <button class="tab" role="tab" id="t-treemap" aria-controls="p-treemap" aria-selected="false" tabindex="-1"><b>Treemap</b><small>Area equals size.</small></button>
+        <button class="tab" role="tab" id="t-apps" aria-controls="p-apps" aria-selected="false" tabindex="-1"><kbd>⌘6</kbd><b>Apps</b><small>Leftovers, grouped per app.</small></button>
+        <button class="tab" role="tab" id="t-rules" aria-controls="p-rules" aria-selected="false" tabindex="-1"><kbd>⌘7</kbd><b>Rules</b><small>Where Whittle looks and why.</small></button>
+        <button class="tab" role="tab" id="t-quarantine" aria-controls="p-quarantine" aria-selected="false" tabindex="-1"><kbd>⌘8</kbd><b>Quarantine</b><small>What can still come back.</small></button>
+        <button class="tab" role="tab" id="t-inspector" aria-controls="p-inspector" aria-selected="false" tabindex="-1"><b>Details drawer</b><small>What, why, impact, undo.</small></button>
+        <button class="tab" role="tab" id="t-palette" aria-controls="p-palette" aria-selected="false" tabindex="-1"><kbd>⌘K</kbd><b>Command palette</b><small>Everything from the keyboard.</small></button>
+      </div>
+
+      <div>
+        <div class="panel is-on" role="tabpanel" id="p-overview" aria-labelledby="t-overview"><figure>
+          <picture><img src="shots/overview-dark.png" data-dark="shots/overview-dark.png" data-light="shots/overview-light.png" width="2620" height="1780" loading="lazy" alt="Overview: the headline number, reclaimable space by category."></picture>
+          <figcaption><p><b>Overview.</b> The one number that matters, split into categories with risk written out as a word and a shape. Manual items are listed but never counted in the headline.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-review" aria-labelledby="t-review" hidden><figure>
+          <img src="shots/review-dark.png" width="2620" height="1780" loading="lazy" alt="Review: a dense table of findings with risk, size and age, grouped by module.">
+          <figcaption><p><b>Review.</b> A dense table with a reason for every row. Safe items are ticked, everything else is your call. You choose how it goes: kept in quarantine for your retention time, to the Trash, or deleted for good.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-insights" aria-labelledby="t-insights" hidden><figure>
+          <img src="shots/insights-dark.png" data-dark="shots/insights-dark.png" data-light="shots/insights-light.png" width="2620" height="1780" loading="lazy" alt="Insights: space by category, by risk and by age, plus the largest single items.">
+          <figcaption><p><b>Insights.</b> Space by category, by risk and by age, the biggest single items, and a report you can copy in one click. Charts are data, not decoration: no score, no gradient ring.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-treemap" aria-labelledby="t-treemap" hidden><figure>
+          <img src="shots/treemap-dark.png" width="2620" height="1780" loading="lazy" alt="Treemap: rectangles sized by how much space each finding takes, coloured by risk.">
+          <figcaption><p><b>Treemap.</b> Every finding as a rectangle, area proportional to size, hatching for review and outline for manual. Click one to open its drawer.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-apps" aria-labelledby="t-apps" hidden><figure>
+          <img src="shots/apps-dark.png" width="2620" height="1780" loading="lazy" alt="Apps: leftover files grouped per uninstalled app with total size and confidence.">
+          <figcaption><p><b>Apps.</b> Leftovers grouped by the app they belonged to, with a confidence for each. Whittle detects installed apps from five sources, not just <code>/Applications</code>, so an app that lives elsewhere is not mistaken for gone.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-rules" aria-labelledby="t-rules" hidden><figure>
+          <img src="shots/rules-dark.png" width="2620" height="1780" loading="lazy" alt="Rules: every built-in rule with paths, risk, minimum age and size.">
+          <figcaption><p><b>Rules.</b> Nothing is hidden: each rule shows its paths, exclusions, risk, minimum age and size and whether it needs Full Disk Access. The same YAML you can extend yourself.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-quarantine" aria-labelledby="t-quarantine" hidden><figure>
+          <img src="shots/quarantine-dark.png" width="2620" height="1780" loading="lazy" alt="Quarantine: runs that can still be undone with the days left before they are freed.">
+          <figcaption><p><b>Quarantine.</b> Every run that can still be undone, how much space it holds and in plain words when it will be freed.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-inspector" aria-labelledby="t-inspector" hidden><figure>
+          <img src="shots/inspector-dark.png" width="2620" height="1780" loading="lazy" alt="Details drawer open over the review table: what it is, why it is listed, what happens, how to undo.">
+          <figcaption><p><b>Details drawer.</b> Double-click any row. Four answers, always the same: what it is, why it is listed, what happens if it goes, and how to get it back. Plus the exact path, and a button that shows it in Finder.</p></figcaption></figure></div>
+        <div class="panel" role="tabpanel" id="p-palette" aria-labelledby="t-palette" hidden><figure>
+          <img src="shots/palette-dark.png" width="2620" height="1780" loading="lazy" alt="Command palette searching for findings, rules and actions.">
+          <figcaption><p><b>Command palette.</b> One field for views, actions, appearance, individual findings and rules. Fuzzy, forgiving and fast. <kbd>↑</kbd> <kbd>↓</kbd> to move, <kbd>↵</kbd> to run, <kbd>esc</kbd> to leave.</p></figcaption></figure></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ modules ═════════════════════════════════ -->
+<section id="modules">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">What it finds</span>
+      <h2 class="reveal d1">Five modules, one engine.</h2>
+    </div>
+    <div class="bento">
+      <article class="card card--1 reveal">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 14h32M8 24h32M8 34h20"/><path class="cutline" d="M34 31l6 6"/></svg>
+        <h3>Caches and logs</h3>
+        <p>App caches, old logs and crash reports, Xcode DerivedData and archives, simulator caches, Homebrew, npm, yarn, pnpm, pip, CocoaPods, Cargo, Go and Gradle, installers left in Downloads, old iPhone backups.</p>
+        <div class="tags"><span>Xcode</span><span>Homebrew</span><span>npm</span><span>pnpm</span><span>Cargo</span><span>Gradle</span><span>Electron</span></div>
+        <div class="size">typically 5 to 40 GB</div>
+      </article>
+      <article class="card card--2 reveal d1">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 12h14l4 4h18v22H6z"/><path class="cutline" d="M16 28h16"/></svg>
+        <h3>Dev projects</h3>
+        <p><code>node_modules</code>, <code>target</code>, <code>.venv</code>, <code>build</code> of projects you have not touched for a while. Reinstalling is one command.</p>
+        <div class="size">typically 2 to 30 GB</div>
+      </article>
+      <article class="card card--3 reveal">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="8" width="32" height="32" rx="8"/><path class="cutline" d="M18 24h12"/></svg>
+        <h3>App leftovers</h3>
+        <p>Support files, caches, preferences and broken LaunchAgents of apps that are gone. Installed apps are detected from five sources, so nothing in use is flagged.</p>
+        <div class="size">typically 0.5 to 10 GB</div>
+      </article>
+      <article class="card card--4 card--opt reveal d1">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="22" height="26" rx="3"/><path class="cutline" d="M20 16h20v26H20z"/></svg>
+        <h3>Duplicates</h3>
+        <p>By size, then a fast hash, then a full hash. Never by name.</p>
+      </article>
+      <article class="card card--5 reveal d2">
+        <svg class="glyph" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 12h32M8 24h32M8 36h32"/><path class="cutline" d="M14 6v36"/></svg>
+        <h3>Tidy a folder</h3>
+        <p>Sorts loose files in Downloads or Desktop into sub-folders by type and date. Screenshots go by month, German names included. Always a preview first.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ risk ═════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">Risk</span>
+      <h2 class="reveal d1">Shape and word. Never only colour.</h2>
+      <p class="lede reveal d2">Three levels, readable in greyscale and by screen readers. Only the first is ever selected for you.</p>
+    </div>
+    <div class="risk reveal">
+      <div>
+        <svg viewBox="0 0 54 54" aria-hidden="true"><circle class="fill" cx="27" cy="27" r="20"/></svg>
+        <h3>Safe <small>solid</small></h3>
+        <p>Regenerates on its own: caches, build output, package-manager stores. The app that made it makes it again.</p>
+        <span class="sel">Selected for you <i>· yes</i></span>
+      </div>
+      <div>
+        <svg viewBox="0 0 54 54" aria-hidden="true"><circle class="stroke" cx="27" cy="27" r="19"/><path class="fill" d="M27 7a20 20 0 0 1 0 40z"/></svg>
+        <h3>Review <small>half</small></h3>
+        <p>Probably not needed, like the data of an app you uninstalled. It will not be recreated, so you look first.</p>
+        <span class="sel">Selected for you <i>· no</i></span>
+      </div>
+      <div>
+        <svg viewBox="0 0 54 54" aria-hidden="true"><circle class="stroke" cx="27" cy="27" r="19"/></svg>
+        <h3>Manual <small>outlined</small></h3>
+        <p>Only you can tell: device backups, folders Whittle cannot place. Listed, explained and never counted in the headline.</p>
+        <span class="sel">Selected for you <i>· no</i></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ safety ═════════════════════════════════ -->
+<section id="safety">
+  <div class="wrap safety">
+    <div class="head">
+      <span class="eyebrow reveal">Safety is the product</span>
+      <h2 class="reveal d1">A bug in a rule cannot ruin your day.</h2>
+      <p class="lede reveal d2">A cleaner is only as good as its worst day. Whittle is built in layers, so no single mistake reaches your files.</p>
+      <div class="hero__cta reveal d3"><a class="btn btn--ghost" href="https://github.com/clezcoding/whittle/blob/main/docs/ASSURANCE.md"><span>Read the assurance case</span></a></div>
+    </div>
+    <ol class="layers">
+      <li class="reveal"><h3>A refusal layer under everything</h3><p>Every action passes <code>Safety::check</code> before it touches disk, whatever rule produced it. System paths, your home folder, <code>.git</code> folders, real <code>.app</code> bundles, Keychains, Mail, Photos and iCloud data, and your own never-touch list are refused outright.</p></li>
+      <li class="reveal"><h3>Quarantine by default</h3><p>Clean moves items to <code>~/.whittle/quarantine</code> and keeps them for 30 days. Trash and permanent delete are explicit choices, never the default.</p></li>
+      <li class="reveal"><h3>An append-only journal</h3><p>Every change is recorded in <code>~/.whittle/journal.jsonl</code>, which is only ever appended to. History and undo are built from it.</p></li>
+      <li class="reveal"><h3>The interface only sends ids</h3><p>The window never sends a path to delete. It sends ids of findings from the last scan; the Rust backend looks the paths up itself. Even a compromised web view can only act on what a scan found.</p></li>
+      <li class="reveal"><h3>No network, by capability</h3><p>No telemetry, no account, no update check. The app’s content security policy forbids network requests, so it cannot phone home even by mistake.</p></li>
+      <li class="reveal"><h3>A supply chain you can check</h3><p>Releases are signed with Sigstore and carry build provenance and an SBOM. Every GitHub Action is pinned to a commit. Fuzzing and property tests cover the safety layer.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ keyboard ═════════════════════════════════ -->
+<section>
+  <div class="wrap keys">
+    <div>
+      <div class="head">
+        <span class="eyebrow reveal">Keyboard first</span>
+        <h2 class="reveal d1">Everything is one keystroke away.</h2>
+        <p class="lede reveal d2">The palette finds views, actions, findings and rules. The rest are shortcuts you will learn in a day.</p>
+      </div>
+      <dl class="kbd-grid reveal d2">
+        <dt><kbd>⌘</kbd><kbd>K</kbd></dt><dd>Command palette</dd>
+        <dt><kbd>⌘</kbd><kbd>1</kbd>…<kbd>8</kbd></dt><dd>Jump between views</dd>
+        <dt><kbd>esc</kbd></dt><dd>Close a dialog or the drawer</dd>
+        <dt><kbd>⌘</kbd><kbd>R</kbd></dt><dd>Scan again</dd>
+        <dt><kbd>⌘</kbd><kbd>,</kbd></dt><dd>Settings</dd>
+        <dt><kbd>?</kbd></dt><dd>All shortcuts</dd>
+      </dl>
+    </div>
+    <div class="reveal d1">
+      <picture><img src="shots/palette-dark.png" width="2620" height="1780" loading="lazy" alt="The command palette over the review view."></picture>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ cli ═════════════════════════════════ -->
+<section id="cli">
+  <div class="wrap cli">
+    <div>
+      <div class="head">
+        <span class="eyebrow reveal">The command line</span>
+        <h2 class="reveal d1">The same engine, without the window.</h2>
+        <p class="lede reveal d2">Everything is a dry run until you say otherwise. Pipe <code>--json</code> into whatever you like.</p>
+      </div>
+      <div class="cmds reveal d2">
+        <div><code>whittle scan</code><span>what could go? changes nothing</span></div>
+        <div><code>whittle clean --dry-run</code><span>show the plan</span></div>
+        <div><code>whittle clean</code><span>safe items to quarantine, with a confirmation</span></div>
+        <div><code>whittle undo</code><span>put the last run back</span></div>
+        <div><code>whittle tidy ~/Downloads</code><span>preview a sort, <code>--apply</code> does it</span></div>
+        <div><code>whittle ignore &lt;path&gt;</code><span>never touch this, shared with the app</span></div>
+      </div>
+    </div>
+    <div class="term reveal d1" role="img" aria-label="A terminal session: whittle scan, whittle clean, whittle undo">
+      <div class="term__bar"><i></i><i></i><i></i><span>whittle, zsh · illustrative output</span></div>
+      <pre id="term" aria-hidden="true"></pre>
+      <noscript><pre>$ whittle scan
+35.3 GB can go (31.6 GB safe)
+$ whittle clean
+Moved 31.6 GB to quarantine for 30 days
+$ whittle undo
+Put 31.6 GB back</pre></noscript>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ rules ═════════════════════════════════ -->
+<section id="rules">
+  <div class="wrap rules">
+    <div>
+      <div class="head">
+        <span class="eyebrow reveal">Rules are data</span>
+        <h2 class="reveal d1">A new cache location is one YAML entry.</h2>
+        <p class="lede reveal d2">Where Whittle looks lives in <code>rules/*.yaml</code>, not in Rust. Add your own in <code>~/.config/whittle/rules/</code> or send a pull request.</p>
+      </div>
+      <ul class="ticks reveal d2">
+        <li><span><b>Declarative.</b> Paths, exclusions, minimum age and size, risk, platform.</span></li>
+        <li><span><b>Gated.</b> A rule only produces findings. The safety layer still decides.</span></li>
+        <li><span><b>Explained.</b> The <code>note</code> is what you read in the drawer.</span></li>
+        <li><span><b>The easiest contribution.</b> One entry, one pull request, no toolchain needed.</span></li>
+      </ul>
+    </div>
+    <div class="code reveal d1">
+      <div class="code__bar"><span>rules/caches.yaml</span><button class="copy" type="button" data-copy-target="rule-code" aria-label="Copy the rule"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span></button></div>
+<pre id="rule-code"><span class="k">- id:</span> <span class="s">xcode-derived-data</span>
+  <span class="k">name:</span> <span class="s">Xcode DerivedData</span>
+  <span class="k">category:</span> <span class="s">dev</span>
+  <span class="k">risk:</span> <span class="s">safe</span>
+  <span class="k">regenerable:</span> <span class="s">true</span>
+  <span class="k">note:</span> <span class="s">Build products and indexes. Xcode rebuilds them.</span>
+  <span class="k">paths:</span> [<span class="s">"~/Library/Developer/Xcode/DerivedData/*"</span>]
+  <span class="k">exclude:</span> [<span class="s">"ModuleCache.noindex"</span>]
+  <span class="k">min_age_days:</span> <span class="s">7</span>
+  <span class="k">platform:</span> <span class="s">macos</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ install ═════════════════════════════════ -->
+<section id="install">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">Install</span>
+      <h2 class="reveal d1">Pick your way in.</h2>
+      <p class="lede reveal d2">A universal build for Apple silicon and Intel, macOS 11 or later.</p>
+    </div>
+    <div class="install reveal">
+      <div class="install__tabs" role="tablist" aria-label="Install methods">
+        <button class="itab" role="tab" id="i-brew" aria-controls="ip-brew" aria-selected="true">Homebrew</button>
+        <button class="itab" role="tab" id="i-dmg" aria-controls="ip-dmg" aria-selected="false" tabindex="-1">Download</button>
+        <button class="itab" role="tab" id="i-src" aria-controls="ip-src" aria-selected="false" tabindex="-1">From source</button>
+        <button class="itab" role="tab" id="i-ver" aria-controls="ip-ver" aria-selected="false" tabindex="-1">Verify a release</button>
+      </div>
+
+      <div class="ipanel is-on" role="tabpanel" id="ip-brew" aria-labelledby="i-brew">
+        <p><b>Recommended.</b> The cask installs the app and removes the macOS quarantine flag for you. The formula installs only the command line.</p>
+        <div class="cmd"><pre><i># the app</i>
+brew tap clezcoding/tap
+brew install --cask clezcoding/tap/whittle
+
+<i># or the command line only</i>
+brew install --formula clezcoding/tap/whittle</pre><button class="copy" type="button" data-copy="brew tap clezcoding/tap&#10;brew install --cask clezcoding/tap/whittle" aria-label="Copy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span></button></div>
+      </div>
+
+      <div class="ipanel" role="tabpanel" id="ip-dmg" aria-labelledby="i-dmg" hidden>
+        <p>Download the universal <b>.dmg</b> from the latest release and drag Whittle to Applications.</p>
+        <a class="btn btn--primary" href="https://github.com/clezcoding/whittle/releases/latest"><span>Latest release</span></a>
+        <div class="note"><b>First launch.</b> Until the app is notarized with an Apple Developer ID, macOS shows “Whittle can’t be opened”. That is Gatekeeper, not a bug. Right-click the app, choose <b>Open</b>, then <b>Open</b> again, or run once:
+          <div class="cmd"><pre>xattr -dr com.apple.quarantine /Applications/Whittle.app</pre><button class="copy" type="button" data-copy="xattr -dr com.apple.quarantine /Applications/Whittle.app" aria-label="Copy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span></button></div></div>
+      </div>
+
+      <div class="ipanel" role="tabpanel" id="ip-src" aria-labelledby="i-src" hidden>
+        <p>You need the Xcode command line tools, <a href="https://rustup.rs"><b>Rust</b></a>, Node 20+ and pnpm.</p>
+        <div class="cmd"><pre>git clone https://github.com/clezcoding/whittle
+cd whittle
+./scripts/install-mac.sh</pre><button class="copy" type="button" data-copy="git clone https://github.com/clezcoding/whittle&#10;cd whittle&#10;./scripts/install-mac.sh" aria-label="Copy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span></button></div>
+      </div>
+
+      <div class="ipanel" role="tabpanel" id="ip-ver" aria-labelledby="i-ver" hidden>
+        <p>Every release file is signed with Sigstore, keyless, from the release workflow, and has a build-provenance attestation. There is no long-lived private key to steal.</p>
+        <div class="cmd"><pre><i># the checksum list is signed; check your download against it</i>
+cosign verify-blob \
+  --bundle SHA256SUMS.sigstore.json \
+  --certificate-identity-regexp '^https://github\.com/clezcoding/whittle/\.github/workflows/release\.yml@refs/tags/v' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  SHA256SUMS
+shasum -a 256 -c SHA256SUMS --ignore-missing
+
+<i># who built it, from which commit</i>
+gh attestation verify Whittle_0.1.0_universal.dmg --repo clezcoding/whittle</pre><button class="copy" type="button" data-copy-target-prev="1" aria-label="Copy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span></button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ trust ═════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">Open and checkable</span>
+      <h2 class="reveal d1">Built the way you would want it built.</h2>
+      <p class="lede reveal d2">The project follows the OpenSSF best practices and publishes how, criterion by criterion. Read the source, the threat model and the checklist.</p>
+    </div>
+    <div class="trust">
+      <a class="reveal" href="https://github.com/clezcoding/whittle/blob/main/docs/ASSURANCE.md">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        <b>Assurance case</b><span>Threat model, trust boundaries and the weaknesses countered.</span></a>
+      <a class="reveal d1" href="https://github.com/clezcoding/whittle/blob/main/docs/OPENSSF.md">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M18 16l2 2 3-3"/></svg>
+        <b>OpenSSF checklist</b><span>Best-practices status, criterion by criterion.</span></a>
+      <a class="reveal d2" href="https://github.com/clezcoding/whittle/blob/main/SECURITY.md">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v4"/></svg>
+        <b>Signed releases</b><span>Sigstore signatures, provenance and an SBOM on every file.</span></a>
+      <a class="reveal d3" href="https://github.com/clezcoding/whittle/blob/main/CONTRIBUTING.md">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-6 3-12 5.5"/></svg>
+        <b>Contribute</b><span>A new rule is the easiest first pull request. DCO sign-off, friendly review.</span></a>
+    </div>
+    <div class="badges reveal">
+      <a href="https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle"><img alt="OpenSSF Scorecard" src="https://api.scorecard.dev/projects/github.com/clezcoding/whittle/badge" height="20"></a>
+      <a href="https://github.com/clezcoding/whittle/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/ci.yml?branch=main&amp;label=CI&amp;style=flat-square&amp;labelColor=0e1012&amp;color=e8d2ae" height="20"></a>
+      <a href="https://github.com/clezcoding/whittle/actions/workflows/codeql.yml"><img alt="CodeQL status" src="https://img.shields.io/github/actions/workflow/status/clezcoding/whittle/codeql.yml?branch=main&amp;label=CodeQL&amp;style=flat-square&amp;labelColor=0e1012&amp;color=e8d2ae" height="20"></a>
+      <a href="https://github.com/clezcoding/whittle/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/clezcoding/whittle?include_prereleases&amp;style=flat-square&amp;labelColor=0e1012&amp;color=e8d2ae" height="20"></a>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ roadmap ═════════════════════════════════ -->
+<section>
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">Roadmap</span>
+      <h2 class="reveal d1">Honest about what is next.</h2>
+    </div>
+    <div class="road">
+      <div class="reveal"><h3>Shipped · 0.1</h3><ul><li>Core engine, quarantine and journal</li><li>Five modules and 17 rules</li><li>Native app with eight views and a command palette</li><li>Command line, Homebrew tap</li><li>Signed releases with SBOM</li></ul></div>
+      <div class="reveal d1"><h3>Next</h3><ul><li>Notarized, signed releases</li><li>pnpm store migrator</li><li>German interface</li><li>More rules from the community</li></ul></div>
+      <div class="reveal d2"><h3>Later</h3><ul><li>Docker audit</li><li>Port inspector</li><li>Scheduled scans</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ faq ═════════════════════════════════ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow reveal">FAQ</span>
+      <h2 class="reveal d1">Questions people ask first.</h2>
+    </div>
+    <div class="faq reveal">
+      <details><summary>Will it delete my files?</summary><div><p>Not unless you choose that. Clean moves items to a quarantine and keeps them for 30 days by default. You can undo from the app or with <code>whittle undo</code>. Trash and permanent delete are separate, explicit choices.</p></div></details>
+      <details><summary>Does it talk to the internet?</summary><div><p>No. No telemetry, no account, no update check. The app has no permission to make network requests and its content security policy forbids them. You can check this in the source, or with a firewall.</p></div></details>
+      <details><summary>Why does macOS say it cannot be opened?</summary><div><p>The app is not yet notarized with an Apple Developer ID, so Gatekeeper warns on first launch. Right-click, choose Open, or use the Homebrew cask, which clears the flag. The signatures on each release let you verify the download independently. Notarized releases are on the roadmap.</p></div></details>
+      <details><summary>How does it know an app is really gone?</summary><div><p>Installed apps are read from five sources, not just <code>/Applications</code>. Leftovers always come with a confidence and are rated <b>review</b>, never pre-selected.</p></div></details>
+      <details><summary>Can I protect a folder?</summary><div><p>Yes. Add it to the never-touch list in Settings, or run <code>whittle ignore &lt;path&gt;</code>. The list is shared between the app and the command line, and the safety layer enforces it for every rule.</p></div></details>
+      <details><summary>Can I add my own locations?</summary><div><p>Write a YAML rule in <code>~/.config/whittle/rules/</code>. It appears in the Rules view straight away. If it would help others, send it as a pull request.</p></div></details>
+      <details><summary>Which macOS versions work?</summary><div><p>macOS 11 or later, on Apple silicon and Intel, from one universal build.</p></div></details>
+      <details><summary>Is it free?</summary><div><p>Yes. Whittle is open source under MIT or Apache-2.0, your choice.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════ closing ═════════════════════════════════ -->
+<section class="closing">
+  <div class="wrap">
+    <span class="mark closing__mark" aria-hidden="true"></span>
+    <h2 class="reveal">Take off only what is not part of the shape.</h2>
+    <div class="hero__cta reveal d1">
+      <a class="btn btn--primary" href="https://github.com/clezcoding/whittle/releases/latest"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Download Whittle</span></a>
+      <a class="btn btn--ghost" href="https://github.com/clezcoding/whittle"><span>Star on GitHub</span></a>
+    </div>
+    <div class="brew reveal d2">
+      <code><i>$</i> brew install --cask clezcoding/tap/whittle</code>
+      <button class="copy" type="button" data-copy="brew tap clezcoding/tap&#10;brew install --cask clezcoding/tap/whittle" aria-label="Copy the Homebrew commands"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy</span></button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div>
+        <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span>whittle</a>
+        <p>A Swiss army knife for your Mac. Quarantine first, undo always, no network.</p>
+      </div>
+      <div><h4>Project</h4><ul>
+        <li><a href="https://github.com/clezcoding/whittle">Repository</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/releases">Releases</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/CHANGELOG.md">Changelog</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/docs/ROADMAP.md">Roadmap</a></li></ul></div>
+      <div><h4>Trust</h4><ul>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/SECURITY.md">Security policy</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/docs/ASSURANCE.md">Assurance case</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/docs/OPENSSF.md">OpenSSF checklist</a></li>
+        <li><a href="https://scorecard.dev/viewer/?uri=github.com/clezcoding/whittle">Scorecard</a></li></ul></div>
+      <div><h4>Community</h4><ul>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/CONTRIBUTING.md">Contributing</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></li>
+        <li><a href="https://github.com/clezcoding/whittle/issues">Issues</a></li>
+        <li><a href="https://github.com/clezcoding/homebrew-tap">Homebrew tap</a></li></ul></div>
+    </div>
+    <div class="foot__credit">
+      <span>Made by clezcoding by Puzzless Foundation, and contributors.</span>
+      <span>MIT or Apache-2.0 · Type set in Switzer and Geist Mono</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>

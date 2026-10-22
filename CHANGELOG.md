@@ -14,6 +14,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - Command palette on ⌘K: go to any page, scan, select or clear safe findings, switch theme or motion, open project links, and search findings and rules. Shortcuts ⌘5 to ⌘8 open the new pages.
 - "Copy report": a plain-text summary of the last scan with names and sizes only.
 - The desktop app lists the active rules (`list_rules` command).
+- Project site on GitHub Pages (`site/`): hero, animated walkthrough of every app view, safety layers, command line, rules, install and verify steps, FAQ. Built by `scripts/build-site.sh` and deployed by the `Pages` workflow; light and dark theme, strict content security policy, no scripts from other hosts.
 - Signed releases: every release file gets a Sigstore signature and a build-provenance attestation, plus a CycloneDX SBOM and SHA-256 sums. How to verify: `SECURITY.md`.
 - Fuzzing (cargo-fuzz via ClusterFuzzLite, AddressSanitizer) for the safety layer, the rule parser and the settings parser; property tests for the safety layer.
 - Coverage workflow with a floor of 80 % of lines.
