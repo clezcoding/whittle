@@ -42,13 +42,17 @@
 </p>
 
 <p align="center">
+  <a href="https://clezcoding.github.io/whittle/"><b>🌐 Website</b></a> &nbsp;·&nbsp; <a href="https://github.com/clezcoding/whittle/releases">Releases</a> &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a> &nbsp;·&nbsp; <a href="SECURITY.md">Security</a> &nbsp;·&nbsp; <a href="docs/ARCHITECTURE.md">Architecture</a>
+</p>
+
+<p align="center">
   <b>A Swiss army knife for your Mac.</b><br>
   Whittle finds what uninstalled apps left behind, clears caches and build folders that rebuild themselves,<br>
   and tidies messy folders. Nothing is ever deleted without a way back.
 </p>
 
 <p align="center">
-  <a href="https://github.com/clezcoding/whittle/releases/latest"><b>⬇ Download for macOS</b></a> &nbsp;·&nbsp; <a href="#homebrew">Homebrew</a> &nbsp;·&nbsp; <a href="#the-command-line">CLI</a> &nbsp;·&nbsp; <a href="#from-source">From source</a>
+  <a href="https://github.com/clezcoding/whittle/releases/latest"><b>⬇ Download for macOS</b></a> &nbsp;·&nbsp; <a href="#homebrew">Homebrew</a> &nbsp;·&nbsp; <a href="#the-command-line">CLI</a> &nbsp;·&nbsp; <a href="#from-source">From source</a> &nbsp;·&nbsp; <a href="https://clezcoding.github.io/whittle/">Website</a>
 </p>
 
 ```sh
@@ -70,11 +74,22 @@ brew install --cask clezcoding/tap/whittle
 
 ## Contents
 
-[What it does](#what-it-does) · [See it work](#see-it-work) · [Safety](#safety-is-the-product) · [The app](#the-app) · [The command line](#the-command-line) · [Install](#install) · [Settings](#settings) · [Rules](#rules-are-data-not-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [How the project is run](#how-the-project-is-run) · [Contributing](#contributing)
+[Quick start](#quick-start) · [What it does](#what-it-does) · [See it work](#see-it-work) · [Safety](#safety-is-the-product) · [The app](#the-app) · [Shortcuts](#keyboard) · [The command line](#the-command-line) · [Install](#install) · [Settings](#settings) · [Rules](#rules-are-data-not-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [How the project is run](#how-the-project-is-run) · [Contributing](#contributing)
 
 | **Undo, always** | **No network** | **No mystery items** | **Rules are data** |
 |---|---|---|---|
 | Clean moves to a quarantine. One command or one click puts everything back. | No telemetry, no account, no update check. The app is not allowed to make a request. | Every finding says what it is, why it is listed and what happens if it goes. | Where Whittle looks is YAML. A new cache location is one entry, no Rust. |
+
+## Quick start
+
+```sh
+brew tap clezcoding/tap && brew install --cask clezcoding/tap/whittle   # 1. install the app (or --formula for the CLI only)
+whittle scan                                                              # 2. see what could go, nothing is touched
+whittle clean --dry-run && whittle clean                                  # 3. preview, then move the safe items to quarantine
+whittle undo                                                              # 4. changed your mind? put the last run back
+```
+
+Prefer a window? Open **Whittle** from Applications, press <kbd>⌘</kbd><kbd>R</kbd> to scan, review, and clean. Same engine, same undo.
 
 ## What it does
 
@@ -153,20 +168,80 @@ A cleaner is only as good as its worst day. Whittle is built so that a bug in a 
 
 ## The app
 
-Whittle's interface is a native-feeling macOS window built with [Tauri](https://tauri.app) (Rust backend, React front end). It shows measured progress, never a fake spinner: percentage, seconds elapsed and time left, per module.
+Whittle's interface is a native-feeling macOS window built with [Tauri](https://tauri.app) (Rust backend, React front end). It shows measured progress, never a fake spinner: percentage, seconds elapsed and time left, per module. Every screen below is the real interface running on demo data.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/views-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/views-light.svg">
+    <img alt="The app's views: overview, review, tidy, history, insights, apps, rules, quarantine" src="assets/readme/views-dark.svg" width="100%">
+  </picture>
+</p>
+
+One big number, a dense honest table, and a drawer that explains any row. Eight views, each one `⌘`-number away, and a command palette for everything else.
+
+### The views
 
 <table>
   <tr>
-    <td width="50%"><img alt="Review: every item with the reason it is listed" src="docs/screenshots/review-dark.png"><br><sub><b>Review.</b> Every item, a reason for each, and what happens if you remove it. Tick, untick, or choose <i>Never suggest this again</i>.</sub></td>
-    <td width="50%"><img alt="Settings" src="docs/screenshots/settings-dark.png"><br><sub><b>Settings.</b> Default action, quarantine period, a never-touch list, theme, motion, and a Full Disk Access check.</sub></td>
+    <td width="50%"><img alt="Overview: 35.3 GB can be removed" src="docs/screenshots/overview-dark.png"><br><sub><b>Overview.</b> One number: what can go, split by category, with risk as a word and a shape.</sub></td>
+    <td width="50%"><img alt="Review: every item with the reason it is listed" src="docs/screenshots/review-dark.png"><br><sub><b>Review.</b> Every item, a reason for each, and what happens if you remove it. Tick, untick, or <i>Never suggest this again</i>.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Insights: space by category, risk and age" src="docs/screenshots/insights-dark.png"><br><sub><b>Insights.</b> Where the space sits, by category, by risk and by age, the biggest single items, and a report you can copy.</sub></td>
+    <td width="50%"><img alt="Treemap of findings" src="docs/screenshots/treemap-dark.png"><br><sub><b>Treemap.</b> Every finding as a rectangle, area equals size. Click one to open its details.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Apps: leftovers grouped per app" src="docs/screenshots/apps-dark.png"><br><sub><b>Apps.</b> Leftovers grouped by the app they belonged to, with a confidence for each.</sub></td>
+    <td width="50%"><img alt="Rules: every built-in rule" src="docs/screenshots/rules-dark.png"><br><sub><b>Rules.</b> Nothing is hidden: paths, exclusions, risk, minimum age and size of every rule.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Quarantine: runs that can still be undone" src="docs/screenshots/quarantine-dark.png"><br><sub><b>Quarantine.</b> What can still come back, and in plain words when it is freed.</sub></td>
+    <td width="50%"><img alt="The details drawer over the review table" src="docs/screenshots/inspector-dark.png"><br><sub><b>Details drawer.</b> Double-click a row: what it is, why it is listed, what happens if it goes, how to undo.</sub></td>
   </tr>
   <tr>
     <td width="50%"><img alt="History with undo" src="docs/screenshots/history-dark.png"><br><sub><b>History.</b> Every run, with undo while it is in quarantine.</sub></td>
-    <td width="50%"><img alt="Light theme" src="docs/screenshots/overview-light.png"><br><sub><b>Light and dark.</b> Follows macOS, or pick one. Reduced motion is respected.</sub></td>
+    <td width="50%"><img alt="Settings" src="docs/screenshots/settings-dark.png"><br><sub><b>Settings.</b> Default action, quarantine period, a never-touch list, theme, motion and a Full Disk Access check.</sub></td>
   </tr>
 </table>
 
-Keyboard: `⌘R` scan · `⌘1` to `⌘4` views · `⌘,` settings · `?` all shortcuts.
+### Command palette
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/palette-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/palette-light.svg">
+    <img alt="The command palette: typing xcode finds findings and rules" src="assets/readme/palette-dark.svg" width="100%">
+  </picture>
+</p>
+
+Press `⌘K` and type. Views, actions, appearance, individual findings and rules are all in one fuzzy, forgiving list. It finds `xcode` in a rule name and a finding path, and it does not match scattered letters by accident.
+
+<p align="center">
+  <img alt="The command palette over the review view" src="docs/screenshots/palette-dark.png" width="760">
+</p>
+
+### Light and dark
+
+Follows macOS, or pick one in Settings. Reduced motion is respected everywhere.
+
+<table>
+  <tr>
+    <td width="50%"><img alt="Overview, light theme" src="docs/screenshots/overview-light.png"></td>
+    <td width="50%"><img alt="Insights, light theme" src="docs/screenshots/insights-light.png"></td>
+  </tr>
+</table>
+
+### Keyboard
+
+| Keys | What it does |
+|---|---|
+| `⌘K` | Search and commands |
+| `⌘R` | Scan |
+| `⌘1` … `⌘8` | Overview, Review, Tidy, History, Insights, Apps, Rules, Quarantine |
+| `⌘,` | Settings |
+| `?` | All shortcuts |
+| `Esc` | Close a dialog or the drawer |
 
 ## The command line
 
@@ -324,7 +399,7 @@ Yes. Releases are universal binaries.
 
 | | |
 |---|---|
-| ✅ **Shipped (0.1)** | Core engine, command line, desktop app, quarantine and undo, Homebrew tap, universal DMG, checksums |
+| ✅ **Shipped (0.1)** | Core engine, command line, desktop app with eight views and a command palette, quarantine and undo, Homebrew tap, universal DMG, signed releases |
 | 🔜 **Next** | Signed and notarized releases, a pnpm migrator for npm projects, a German interface |
 | 🧭 **Later** | Docker and runtimes audit, a port inspector, scheduled quiet scans |
 
@@ -364,6 +439,7 @@ Whittle is built in the open and tries to be as careful about its own supply cha
 | **Releases** | A `v*` tag builds the universal DMG and the command-line archives, then writes SHA-256 sums, a software bill of materials, a Sigstore signature per file and build provenance, and updates the Homebrew tap. [How to verify a download](SECURITY.md#verifying-a-release) · [`docs/RELEASING.md`](docs/RELEASING.md). |
 | **Testing** | Unit and integration tests, property tests for the safety layer, three fuzz targets with AddressSanitizer ([`fuzz/`](fuzz)), and a coverage floor of 80 % of lines. |
 | **Security practice** | Written [assurance case](docs/ASSURANCE.md) with threat model, a criterion-by-criterion [OpenSSF Best Practices checklist](docs/OPENSSF.md), [governance](GOVERNANCE.md), a [security policy](SECURITY.md) with response times, and zizmor linting of every workflow. |
+| **Website** | The [project site](https://clezcoding.github.io/whittle/) is built from [`site/`](site) by the [Pages workflow](.github/workflows/pages.yml). Pull requests only build it; deploys happen from `main`. |
 | **Labels** | Pull requests are labelled from the files they touch (`rust`, `frontend`, `tauri`, `rule`, `safety`, `security`, `ci`, `release`, `documentation` …) and the release notes are grouped by them. |
 
 ## Contributing
