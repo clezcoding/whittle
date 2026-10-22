@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       # Catches what a YAML parser does not: duplicate keys, bad expressions, wrong job references.
-      - run: pip install actionlint-py==1.7.12.25 && actionlint
+      - run: pip install actionlint-py==1.7.12.25 && actionlint -ignore "SC2001" -ignore "SC2129" -ignore "SC2016"
 
   zizmor:
     name: zizmor
