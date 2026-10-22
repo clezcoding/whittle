@@ -42,13 +42,17 @@
 </p>
 
 <p align="center">
+  <a href="https://clezcoding.github.io/whittle/"><b>🌐 Webseite</b></a> &nbsp;·&nbsp; <a href="https://github.com/clezcoding/whittle/releases">Releases</a> &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a> &nbsp;·&nbsp; <a href="SECURITY.md">Sicherheit</a> &nbsp;·&nbsp; <a href="docs/ARCHITECTURE.md">Architektur</a>
+</p>
+
+<p align="center">
   <b>Ein Schweizer Taschenmesser für deinen Mac.</b><br>
   Whittle findet, was deinstallierte Apps zurückgelassen haben, räumt Caches und Build-Ordner weg,<br>
   die sich von selbst neu aufbauen, und sortiert unordentliche Ordner. Nichts wird gelöscht, ohne dass es einen Weg zurück gibt.
 </p>
 
 <p align="center">
-  <a href="https://github.com/clezcoding/whittle/releases/latest"><b>⬇ Für macOS herunterladen</b></a> &nbsp;·&nbsp; <a href="#homebrew">Homebrew</a> &nbsp;·&nbsp; <a href="#die-kommandozeile">CLI</a> &nbsp;·&nbsp; <a href="#aus-dem-quelltext">Aus dem Quelltext</a>
+  <a href="https://github.com/clezcoding/whittle/releases/latest"><b>⬇ Für macOS herunterladen</b></a> &nbsp;·&nbsp; <a href="#homebrew">Homebrew</a> &nbsp;·&nbsp; <a href="#die-kommandozeile">CLI</a> &nbsp;·&nbsp; <a href="#aus-dem-quelltext">Aus dem Quelltext</a> &nbsp;·&nbsp; <a href="https://clezcoding.github.io/whittle/">Webseite</a>
 </p>
 
 ```sh
@@ -70,11 +74,22 @@ brew install --cask clezcoding/tap/whittle
 
 ## Inhalt
 
-[Was es kann](#was-es-kann) · [Live ansehen](#live-ansehen) · [Sicherheit](#sicherheit-ist-das-produkt) · [Die App](#die-app) · [Die Kommandozeile](#die-kommandozeile) · [Installation](#installation) · [Einstellungen](#einstellungen) · [Regeln](#regeln-sind-daten-kein-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [Wie das Projekt läuft](#wie-das-projekt-läuft) · [Mitmachen](#mitmachen)
+[Schnellstart](#schnellstart) · [Was es kann](#was-es-kann) · [Live ansehen](#live-ansehen) · [Sicherheit](#sicherheit-ist-das-produkt) · [Die App](#die-app) · [Tastenkürzel](#tastatur) · [Die Kommandozeile](#die-kommandozeile) · [Installation](#installation) · [Einstellungen](#einstellungen) · [Regeln](#regeln-sind-daten-kein-code) · [FAQ](#faq) · [Roadmap](#roadmap) · [Wie das Projekt läuft](#wie-das-projekt-läuft) · [Mitmachen](#mitmachen)
 
 | **Immer rückgängig** | **Kein Netzwerk** | **Keine Rätsel** | **Regeln sind Daten** |
 |---|---|---|---|
 | Aufräumen verschiebt in eine Quarantäne. Ein Befehl oder ein Klick holt alles zurück. | Keine Telemetrie, kein Konto, keine Update-Prüfung. Die App darf keine Anfrage stellen. | Jeder Fund sagt, was er ist, warum er gelistet wird und was passiert, wenn er weg ist. | Wo Whittle sucht, steht in YAML. Ein neuer Cache-Ort ist ein Eintrag, kein Rust. |
+
+## Schnellstart
+
+```sh
+brew tap clezcoding/tap && brew install --cask clezcoding/tap/whittle   # 1. App installieren (oder --formula nur für die CLI)
+whittle scan                                                              # 2. ansehen, was weg könnte, nichts wird angefasst
+whittle clean --dry-run && whittle clean                                  # 3. Vorschau, dann sichere Einträge in die Quarantäne
+whittle undo                                                              # 4. umentschieden? letzten Lauf zurückholen
+```
+
+Lieber mit Fenster? **Whittle** aus „Programme“ öffnen, <kbd>⌘</kbd><kbd>R</kbd> zum Scannen, prüfen und aufräumen. Dieselbe Engine, dasselbe Rückgängig.
 
 ## Was es kann
 
@@ -153,20 +168,80 @@ Ein Aufräumprogramm ist nur so gut wie sein schlechtester Tag. Whittle ist so g
 
 ## Die App
 
-Whittles Oberfläche ist ein Fenster im macOS-Look, gebaut mit [Tauri](https://tauri.app) (Rust-Backend, React-Frontend). Sie zeigt gemessenen Fortschritt, nie einen Fake-Spinner: Prozent, vergangene Sekunden und Restzeit, je Modul.
+Whittles Oberfläche ist ein Fenster im macOS-Look, gebaut mit [Tauri](https://tauri.app) (Rust-Backend, React-Frontend). Sie zeigt gemessenen Fortschritt, nie einen Fake-Spinner: Prozent, vergangene Sekunden und Restzeit, je Modul. Jeder Screenshot unten ist die echte Oberfläche mit Demodaten.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/views-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/views-light.svg">
+    <img alt="Die Ansichten der App: Übersicht, Prüfen, Aufräumen, Verlauf, Einblicke, Apps, Regeln, Quarantäne" src="assets/readme/views-dark.svg" width="100%">
+  </picture>
+</p>
+
+Eine große Zahl, eine dichte ehrliche Tabelle und eine Seitenleiste, die jede Zeile erklärt. Acht Ansichten, jede eine `⌘`-Zahl entfernt, und eine Befehlspalette für alles andere.
+
+### Die Ansichten
 
 <table>
   <tr>
-    <td width="50%"><img alt="Prüfen: jeder Eintrag mit Begründung" src="docs/screenshots/review-dark.png"><br><sub><b>Prüfen.</b> Jeder Eintrag mit Begründung und den Folgen des Entfernens. An- und abwählen oder <i>Nie wieder vorschlagen</i>.</sub></td>
-    <td width="50%"><img alt="Einstellungen" src="docs/screenshots/settings-dark.png"><br><sub><b>Einstellungen.</b> Standardaktion, Quarantänedauer, Nie-anfassen-Liste, Design, Bewegung und ein Check für den Vollzugriff auf die Festplatte.</sub></td>
+    <td width="50%"><img alt="Übersicht: 35,3 GB können weg" src="docs/screenshots/overview-dark.png"><br><sub><b>Overview.</b> Eine Zahl: was weg kann, nach Kategorie, Risiko als Wort und als Form.</sub></td>
+    <td width="50%"><img alt="Prüfen: jeder Eintrag mit Begründung" src="docs/screenshots/review-dark.png"><br><sub><b>Review.</b> Jeder Eintrag mit Begründung und den Folgen des Entfernens. An- und abwählen oder <i>Nie wieder vorschlagen</i>.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img alt="Verlauf mit Rückgängig" src="docs/screenshots/history-dark.png"><br><sub><b>Verlauf.</b> Jeder Lauf, rückgängig machbar, solange er in Quarantäne liegt.</sub></td>
-    <td width="50%"><img alt="Helles Design" src="docs/screenshots/overview-light.png"><br><sub><b>Hell und dunkel.</b> Folgt macOS oder wähle selbst. „Bewegung reduzieren“ wird respektiert.</sub></td>
+    <td width="50%"><img alt="Insights: Platz nach Kategorie, Risiko und Alter" src="docs/screenshots/insights-dark.png"><br><sub><b>Insights.</b> Wo der Platz sitzt: nach Kategorie, Risiko und Alter, die größten Einzelposten und ein Bericht zum Kopieren.</sub></td>
+    <td width="50%"><img alt="Treemap der Funde" src="docs/screenshots/treemap-dark.png"><br><sub><b>Treemap.</b> Jeder Fund als Rechteck, Fläche gleich Größe. Ein Klick öffnet die Details.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Apps: Überreste je App" src="docs/screenshots/apps-dark.png"><br><sub><b>Apps.</b> Überreste gruppiert nach der App, zu der sie gehörten, mit einer Sicherheit je Gruppe.</sub></td>
+    <td width="50%"><img alt="Rules: alle eingebauten Regeln" src="docs/screenshots/rules-dark.png"><br><sub><b>Rules.</b> Nichts ist versteckt: Pfade, Ausnahmen, Risiko, Mindestalter und Mindestgröße jeder Regel.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Quarantäne: Läufe, die sich noch zurückholen lassen" src="docs/screenshots/quarantine-dark.png"><br><sub><b>Quarantine.</b> Was noch zurückkommen kann, und in Klartext, wann es freigegeben wird.</sub></td>
+    <td width="50%"><img alt="Die Detailansicht über der Prüfen-Tabelle" src="docs/screenshots/inspector-dark.png"><br><sub><b>Detailansicht.</b> Doppelklick auf eine Zeile: was es ist, warum es gelistet ist, was passiert, wie man es zurückholt.</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img alt="Verlauf mit Rückgängig" src="docs/screenshots/history-dark.png"><br><sub><b>History.</b> Jeder Lauf, rückgängig machbar, solange er in Quarantäne liegt.</sub></td>
+    <td width="50%"><img alt="Einstellungen" src="docs/screenshots/settings-dark.png"><br><sub><b>Settings.</b> Standardaktion, Quarantänedauer, Nie-anfassen-Liste, Design, Bewegung und ein Check für den Vollzugriff auf die Festplatte.</sub></td>
   </tr>
 </table>
 
-Tastatur: `⌘R` scannen · `⌘1` bis `⌘4` Ansichten · `⌘,` Einstellungen · `?` alle Kürzel.
+### Befehlspalette
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/readme/palette-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/readme/palette-light.svg">
+    <img alt="Die Befehlspalette: „xcode“ findet Funde und Regeln" src="assets/readme/palette-dark.svg" width="100%">
+  </picture>
+</p>
+
+`⌘K` drücken und tippen. Ansichten, Aktionen, Darstellung, einzelne Funde und Regeln stehen in einer einzigen, fehlertoleranten Liste. Sie findet `xcode` in Regelnamen und Fundpfaden, ohne zufällig verstreute Buchstaben zu treffen.
+
+<p align="center">
+  <img alt="Die Befehlspalette über der Prüfen-Ansicht" src="docs/screenshots/palette-dark.png" width="760">
+</p>
+
+### Hell und dunkel
+
+Folgt macOS oder wähle selbst in den Einstellungen. „Bewegung reduzieren“ wird überall respektiert.
+
+<table>
+  <tr>
+    <td width="50%"><img alt="Übersicht, helles Design" src="docs/screenshots/overview-light.png"></td>
+    <td width="50%"><img alt="Insights, helles Design" src="docs/screenshots/insights-light.png"></td>
+  </tr>
+</table>
+
+### Tastatur
+
+| Tasten | Was sie tun |
+|---|---|
+| `⌘K` | Suche und Befehle |
+| `⌘R` | Scannen |
+| `⌘1` … `⌘8` | Übersicht, Prüfen, Aufräumen, Verlauf, Insights, Apps, Rules, Quarantäne |
+| `⌘,` | Einstellungen |
+| `?` | Alle Kürzel |
+| `Esc` | Dialog oder Seitenleiste schließen |
 
 *Hinweis:* Die App-Oberfläche ist derzeit englisch. Die Erklärungen zu jedem Fund ebenso. Eine deutsche Oberfläche steht auf der [Roadmap](docs/ROADMAP.md).
 
@@ -326,7 +401,7 @@ Ja. Releases sind Universal-Binaries.
 
 | | |
 |---|---|
-| ✅ **Fertig (0.1)** | Kern-Engine, Kommandozeile, Desktop-App, Quarantäne und Rückgängig, Homebrew-Tap, universelles DMG, Prüfsummen |
+| ✅ **Fertig (0.1)** | Kern-Engine, Kommandozeile, Desktop-App mit acht Ansichten und Befehlspalette, Quarantäne und Rückgängig, Homebrew-Tap, universelles DMG, signierte Releases |
 | 🔜 **Als Nächstes** | Signierte und notarisierte Releases, ein pnpm-Migrator für npm-Projekte, deutsche Oberfläche |
 | 🧭 **Später** | Docker- und Runtime-Audit, Port-Inspektor, geplante stille Scans |
 
@@ -366,6 +441,7 @@ Whittle entsteht offen und geht mit der eigenen Lieferkette so sorgfältig um wi
 | **Releases** | Ein `v*`-Tag baut das universelle DMG und die Kommandozeilen-Archive und schreibt dann SHA-256-Summen, eine Software-Stückliste (SBOM), pro Datei eine Sigstore-Signatur und Build-Provenance; danach wird der Homebrew-Tap aktualisiert. [Download prüfen](SECURITY.md#verifying-a-release) · [`docs/RELEASING.md`](docs/RELEASING.md). |
 | **Tests** | Unit- und Integrationstests, Property-Tests für die Sicherheitsschicht, drei Fuzz-Targets mit AddressSanitizer ([`fuzz/`](fuzz)) und eine Abdeckungsgrenze von 80 % der Zeilen. |
 | **Sicherheitspraxis** | Schriftlicher [Assurance Case](docs/ASSURANCE.md) mit Bedrohungsmodell, eine [OpenSSF-Checkliste](docs/OPENSSF.md) Kriterium für Kriterium, [Governance](GOVERNANCE.md), eine [Sicherheitsrichtlinie](SECURITY.md) mit Reaktionszeiten und zizmor-Prüfung jedes Workflows. |
+| **Webseite** | Die [Projektseite](https://clezcoding.github.io/whittle/) wird aus [`site/`](site) vom [Pages-Workflow](.github/workflows/pages.yml) gebaut. Pull Requests bauen sie nur, veröffentlicht wird von `main`. |
 | **Labels** | Pull Requests werden anhand der geänderten Dateien beschriftet (`rust`, `frontend`, `tauri`, `rule`, `safety`, `security`, `ci`, `release`, `documentation` …), und die Release Notes werden danach gruppiert. |
 
 ## Mitmachen
