@@ -24,9 +24,10 @@ interface Props {
   onScan: () => void
   onIgnore: (id: string) => void
   onReveal: (id: string) => void
+  onInspect: (f: Finding) => void
 }
 
-export function Review({ findings, selected, onSelected, peeling, home, busy, run, notice, settings, onClean, onScan, onIgnore, onReveal }: Props) {
+export function Review({ findings, selected, onSelected, peeling, home, busy, run, notice, settings, onClean, onScan, onIgnore, onReveal, onInspect }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [disposal, setDisposal] = useState<Disposal>(settings.default_disposal)
   useEffect(() => setDisposal(settings.default_disposal), [settings.default_disposal])
@@ -116,7 +117,7 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
                 {g.items.map((f, i) => {
                   const ex = open.has(f.id) ? explain(f) : null
                   return (
-                  <div key={f.id} role="row" style={{ ['--i' as string]: i }} className={`row ${selected.has(f.id) ? 'is-picked' : ''} ${peeling.has(f.id) ? 'is-peeling' : ''}`} onClick={() => toggle(f.id, !selected.has(f.id))}>
+                  <div key={f.id} role="row" style={{ ['--i' as string]: i }} className={`row ${selected.has(f.id) ? 'is-picked' : ''} ${peeling.has(f.id) ? 'is-peeling' : ''}`} onClick={() => toggle(f.id, !selected.has(f.id))} onDoubleClick={() => onInspect(f)}>
                     <span role="cell"><Check checked={selected.has(f.id)} onChange={(v) => toggle(f.id, v)} label={`Select ${f.title}`} /></span>
                     <span role="cell" className="row__main">
                       <b>{f.title}</b>
@@ -137,6 +138,7 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
                         <div><dt>Risk: {riskWord(f.risk)}</dt><dd>{RISK_HELP[f.risk]} {ex.undo}</dd></div>
                       </dl>
                       <div className="row__actions" onClick={(e) => e.stopPropagation()}>
+                        <button className="link" onClick={() => onInspect(f)}>Open full details</button>
                         <button className="link" onClick={() => onReveal(f.id)}>Show in Finder</button>
                         <button className="link" title="Adds it to Settings, Never touch. You can take it off again there." onClick={() => onIgnore(f.id)}>Never suggest this again</button>
                       </div>

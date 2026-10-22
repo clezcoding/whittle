@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { useFocusTrap } from '../lib/focus'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import type { Risk } from '../types'
 
@@ -100,44 +101,12 @@ export function Stepper({ value, onChange, min, max, unit, label }: { value: num
   )
 }
 
-const FOCUSABLE = 'button:not(:disabled), [href], input:not(:disabled), [tabindex]:not([tabindex="-1"])'
-
 /** A dialog: Escape closes it, Tab stays inside it, and focus returns to where it came from. */
 export function Modal({ title, children, onClose, wide = false }: { title: string; children: ReactNode; onClose: () => void; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   const id = useId()
-  useEffect(() => {
-    const before = document.activeElement as HTMLElement | null
-    const box = ref.current
-    // Land on the primary action if there is one, else the first control.
-    box?.querySelector<HTMLElement>('.cut-btn:not(:disabled)')?.focus()
-    if (!box?.contains(document.activeElement)) box?.querySelector<HTMLElement>(FOCUSABLE)?.focus()
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation()
-        onClose()
-      } else if (e.key === 'Tab' && box) {
-        const items = [...box.querySelectorAll<HTMLElement>(FOCUSABLE)]
-        if (!items.length) return
-        const first = items[0]
-        const last = items[items.length - 1]
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
-      }
-    }
-    window.addEventListener('keydown', onKey, true)
-    return () => {
-      window.removeEventListener('keydown', onKey, true)
-      before?.focus?.()
-    }
-    // onClose is intentionally not a dependency: callers pass fresh closures every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Land on the primary action if there is one, else the first control.
+  useFocusTrap(ref, onClose, '.cut-btn:not(:disabled)')
   return (
     <div className="modal-scrim" onMouseDown={onClose}>
       <div ref={ref} className={`modal ${wide ? 'modal--wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={id} onMouseDown={(e) => e.stopPropagation()}>

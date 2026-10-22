@@ -66,6 +66,15 @@ canvas.save(dst, optimize=True)
   })
   await app('settings-dark', 'dark', async (p) => { await p.keyboard.press('Control+,'); await p.waitForTimeout(900) })
   await app('history-dark', 'dark', async (p) => { await p.keyboard.press('Control+4'); await p.waitForTimeout(900) })
+  const shot = async (key, extra) => async (p) => { await scan(p); await p.keyboard.press('Control+' + key); await p.waitForTimeout(1500); if (extra) await extra(p) }
+  await app('insights-dark', 'dark', await shot('5'))
+  await app('treemap-dark', 'dark', await shot('5', async (p) => { await p.evaluate(() => document.querySelector('.main').scrollTo(0, 560)); await p.waitForTimeout(900) }))
+  await app('apps-dark', 'dark', await shot('6'))
+  await app('rules-dark', 'dark', await shot('7', async (p) => { await p.locator('.rule__head').nth(5).click(); await p.waitForTimeout(500) }))
+  await app('quarantine-dark', 'dark', await shot('8'))
+  await app('palette-dark', 'dark', async (p) => { await scan(p); await p.keyboard.press('Control+k'); await p.waitForTimeout(400); await p.keyboard.type('xcode'); await p.waitForTimeout(500) })
+  await app('inspector-dark', 'dark', async (p) => { await scan(p); await p.keyboard.press('Control+2'); await p.waitForTimeout(700); await p.locator('.row').first().dblclick(); await p.waitForTimeout(1100) })
+  await app('insights-light', 'light', await shot('5'))
 
   // ---- the command line, for real, against a throw-away home
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'whittle-home-'))

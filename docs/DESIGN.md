@@ -85,6 +85,21 @@ Avoided on purpose: green-on-black "terminal" accent, purple gradients, cream + 
 Each section uses a different layout family (hero number, bar table, dense review list, tree
 diff for tidy, history timeline). No equal-card grids.
 
+### Analysis pages (Insights, Apps, Rules, Quarantine)
+
+- **One data colour.** Charts use birch fading into the surface (`--t1` … `--t6`). Red stays "the
+  cut": it marks only *manual* risk (an outlined tile or segment) and focus.
+- **Risk is a shape and a word.** Safe is solid, review is hatched, manual is outlined, in every
+  chart (risk bar, treemap tiles, legends). Never colour alone.
+- **A donut is allowed as data, not as a verdict.** It shows share by category in one hue. There is
+  no score, no gradient ring and no "health" number anywhere.
+- **Numbers carry the chart.** Every bar, tile and segment has its size printed next to it, in
+  mono, right-aligned.
+- **Motion is the same verb.** Bars and arcs grow along the 28° wipe, tiles settle in with a
+  stagger, the drawer slides 36 px. Under reduced motion everything is instant.
+- **Palette and drawer** are the only overlays besides dialogs: Escape closes, focus stays inside
+  and returns to where it came from.
+
 ## Genericness test
 
 *"Would a generic model land here for 'beautiful macOS cleaner'?"* It would: translucent
