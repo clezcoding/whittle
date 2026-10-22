@@ -13,7 +13,7 @@ rule:
       - any-glob-to-any-file: ["rules/**"]
 documentation:
   - changed-files:
-      - any-glob-to-any-file: ["docs/**", "README*.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md", "CODE_OF_CONDUCT.md", "GOVERNANCE.md"]
+      - any-glob-to-any-file: ["docs/**", "site/**", "README*.md", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md", "SUPPORT.md", "CODE_OF_CONDUCT.md", "GOVERNANCE.md"]
 ci:
   - changed-files:
       - any-glob-to-any-file: [".github/**", "scripts/**", "Makefile"]
