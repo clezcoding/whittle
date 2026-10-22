@@ -379,13 +379,39 @@ export function App() {
   return (
     <div className="app">
       <div className="titlebar" data-tauri-drag-region />
-      <Sidebar view={view} onView={setView} onAbout={() => setDialog('about')} reviewCount={findings.length} quarantine={quarantine} version={info.version} demo={info.demo} />
+      <Sidebar view={view} onView={setView} onAbout={() => setDialog('about')} onPalette={() => { setInspectId(null); setPalette(true) }} reviewCount={findings.length} quarantine={quarantine} version={info.version} demo={info.demo} />
       <main className="main">
         {view === 'overview' && (
           <Overview phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} />
         )}
         {view === 'review' && (
-          <Review findings={findings} selected={selected} onSelected={setSelected} peeling={peeling} home={info.home} busy={busy} run={applyRun} notice={notice} settings={prefs} onClean={(d) => void clean(d)} onScan={() => void scan()} onIgnore={(id) => void ignoreFinding(id)} onReveal={(id) => void api.revealFinding(id).catch((e) => setNotice({ text: errorText(e) }))} />
+          <Review findings={findings} selected={selected} onSelected={setSelected} peeling={peeling} home={info.home} busy={busy} run={applyRun} notice={notice} settings={prefs} onClean={(d) => void clean(d)} onScan={() => void scan()} onIgnore={(id) => void ignoreFinding(id)} onReveal={(id) => void api.revealFinding(id).catch((e) => setNotice({ text: errorText(e) }))} onInspect={(f) => setInspectId(f.id)} />
+        )}
+        {view === 'insights' && (
+          <Insights findings={findings} runs={runs} home={info.home} onInspect={(f) => setInspectId(f.id)} onScan={() => void scan()} onReport={() => setDialog('report')} />
+        )}
+        {view === 'apps' && (
+          <Apps findings={findings} home={info.home} selected={selected} onSelectMany={selectMany} onInspect={(f) => setInspectId(f.id)} onReview={() => setView('review')} onScan={() => void scan()} />
+        )}
+        {view === 'rules' && (
+          <Rules rules={rules} findings={findings} focus={ruleFocus} onFocused={() => setRuleFocus(null)} onGuide={() => openExternal('repository')} />
+        )}
+        {view === 'quarantine' && (
+          <Quarantine
+            runs={runs}
+            quarantine={quarantine}
+            days={prefs.quarantine_days}
+            autoPurge={prefs.auto_purge}
+            onUndo={async (run) => {
+              await api.undo(run)
+              await refreshState()
+            }}
+            onPurge={async () => {
+              await api.purge(0)
+              await refreshState()
+            }}
+            onSettings={() => setView('settings')}
+          />
         )}
         {view === 'tidy' && (
           <Tidy
@@ -437,7 +463,7 @@ export function App() {
             onAbout={() => setDialog('about')}
           />
         )}
-        {(view === 'overview' || view === 'settings') && notice && (
+        {view !== 'review' && notice && (
           <div className="notice notice--floating" role="status">
             <span>{notice.text}</span>
             <button className="link" onClick={() => setNotice(null)}>Dismiss</button>
@@ -458,6 +484,32 @@ export function App() {
       )}
       {dialog === 'about' && <About info={info} onOpen={openExternal} onClose={() => setDialog(null)} />}
       {dialog === 'keys' && <Shortcuts onClose={() => setDialog(null)} />}
+      {dialog === 'report' && <ReportDialog text={buildReport(findings, info.home, new Date())} onClose={() => setDialog(null)} />}
+      {inspected && (
+        <Inspector
+          finding={inspected}
+          all={findings}
+          rule={rules?.find((r) => r.id === inspected.rule)}
+          home={info.home}
+          selected={selected.has(inspected.id)}
+          onSelect={(on) => selectMany([inspected.id], on)}
+          onReveal={() => void api.revealFinding(inspected.id).catch((e) => setNotice({ text: errorText(e) }))}
+          onIgnore={() => void ignoreFinding(inspected.id)}
+          onInspect={(f) => setInspectId(f.id)}
+          onRule={openRule}
+          onClose={() => setInspectId(null)}
+        />
+      )}
+      {palette && (
+        <CommandPalette
+          commands={commands}
+          findings={findings}
+          rules={rules ?? []}
+          onInspect={(f) => setInspectId(f.id)}
+          onRule={openRule}
+          onClose={() => setPalette(false)}
+        />
+      )}
     </div>
   )
 }

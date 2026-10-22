@@ -5,14 +5,24 @@ function wordScore(word: string, text: string): number | null {
   const at = text.indexOf(word)
   if (at === 0) return 100
   if (at > 0) return /[\s/._·-]/.test(text[at - 1]) ? 80 : 60
-  // letters in order, e.g. "xdd" for "Xcode DerivedData"
-  let pos = 0
-  for (const ch of word) {
-    pos = text.indexOf(ch, pos)
-    if (pos === -1) return null
-    pos++
+  // Letters in order, e.g. "xdd" for "Xcode DerivedData". The letters must sit close together,
+  // otherwise "xcode" would match any long path that happens to contain x, c, o, d, e somewhere.
+  if (word.length < 3) return null
+  const window = word.length * 2 + 2
+  for (let start = text.indexOf(word[0]); start !== -1; start = text.indexOf(word[0], start + 1)) {
+    let pos = start
+    let ok = true
+    for (let i = 1; i < word.length; i++) {
+      pos = text.indexOf(word[i], pos + 1)
+      if (pos === -1) {
+        ok = false
+        break
+      }
+    }
+    if (ok && pos - start <= window) return 20
+    if (!ok) return null
   }
-  return word.length >= 3 ? 20 : null
+  return null
 }
 
 /** Higher is better; null means no match. An empty query matches everything equally. */

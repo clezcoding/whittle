@@ -17,6 +17,9 @@ describe('score', () => {
     expect(p).toBeGreaterThan(w)
     expect(w).toBeGreaterThan(i)
   })
+  it('does not match letters scattered across a long path', () => {
+    expect(score('xcode', 'com.getdropbox.dropbox Library/Application Support/com.getdropbox.dropbox')).toBeNull()
+  })
   it('accepts letters in order only for longer words', () => {
     expect(score('xdd', 'Xcode DerivedData')).not.toBeNull()
     expect(score('xd', 'Xcode DerivedData')).toBeNull() // two letters in order are too loose

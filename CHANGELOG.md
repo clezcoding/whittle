@@ -9,6 +9,11 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
 ### Added
+- Four new pages: **Insights** (charts of the last scan: category donut, risk bar, age columns, a treemap of every finding, the largest items), **Apps** (findings grouped by app, dev tool and project, with "select everything safe" per app), **Rules** (every scan rule with its folders, limits and what it matched, plus how to write your own) and **Quarantine** (what waits to be removed, with a countdown ring and "put back" per run).
+- A details drawer for every finding (size, share, confidence, what it is, why it is listed, what happens if you remove it, related findings). Open it with a double-click in Review, from Apps or Insights, or from the palette.
+- Command palette on ⌘K: go to any page, scan, select or clear safe findings, switch theme or motion, open project links, and search findings and rules. Shortcuts ⌘5 to ⌘8 open the new pages.
+- "Copy report": a plain-text summary of the last scan with names and sizes only.
+- The desktop app lists the active rules (`list_rules` command).
 - Signed releases: every release file gets a Sigstore signature and a build-provenance attestation, plus a CycloneDX SBOM and SHA-256 sums. How to verify: `SECURITY.md`.
 - Fuzzing (cargo-fuzz via ClusterFuzzLite, AddressSanitizer) for the safety layer, the rule parser and the settings parser; property tests for the safety layer.
 - Coverage workflow with a floor of 80 % of lines.
