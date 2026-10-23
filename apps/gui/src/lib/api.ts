@@ -12,6 +12,7 @@ import type {
   AppInfo,
   Disposal,
   External,
+  InstalledApp,
   Finding,
   ModuleId,
   Permissions,
@@ -193,6 +194,13 @@ export const api = {
   },
   permissions(): Promise<Permissions> {
     return isTauri ? call('permissions') : mock.permissions()
+  },
+  installedApps(): Promise<InstalledApp[]> {
+    return isTauri ? call('installed_apps') : mock.installedApps()
+  },
+  /** Finds what an installed app left behind. The findings join the Review list. */
+  appLeftovers(appPath: string): Promise<Finding[]> {
+    return isTauri ? call('app_leftovers', { appPath }) : mock.appLeftovers(appPath)
   },
   async openExternal(target: External): Promise<void> {
     if (isTauri) return call('open_external', { target })

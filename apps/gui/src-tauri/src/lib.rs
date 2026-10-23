@@ -16,6 +16,7 @@ use serde::Serialize;
 use system::{External, Permissions};
 use tauri::{AppHandle, Emitter, State};
 use whittle_core::engine::{self, ModuleId, ProgressEvent, ScanOptions};
+use whittle_core::modules::uninstall::{self, InstalledApp};
 use whittle_core::modules::{migrate, tidy};
 use whittle_core::plan::{self, ApplyProgress, ApplyReport, PurgeReport, RunSummary, UndoReport};
 use whittle_core::{Context, Disposal, Finding, Plan, Settings};
@@ -483,6 +484,36 @@ fn permissions(state: State<'_, AppState>) -> Permissions {
     system::permissions(&state.base.home)
 }
 
+/// Applications folders that Whittle looks in for apps to uninstall.
+fn app_dirs(home: &std::path::Path) -> Vec<PathBuf> {
+    vec![PathBuf::from("/Applications"), home.join("Applications")]
+}
+
+/// Apps installed in the Applications folders, for the uninstall list.
+#[tauri::command]
+fn installed_apps(state: State<'_, AppState>) -> Vec<InstalledApp> {
+    uninstall::installed_apps(&app_dirs(&state.base.home))
+}
+
+/// Finds what an installed app left behind and adds it to the findings, so Review and clean work
+/// on it like any scan result. The app must be a `.app` directly in an Applications folder.
+#[tauri::command]
+fn app_leftovers(state: State<'_, AppState>, app_path: String) -> CmdResult<Vec<Finding>> {
+    let path = PathBuf::from(&app_path);
+    let dirs = app_dirs(&state.base.home);
+    let in_apps_folder = path.parent().is_some_and(|p| dirs.iter().any(|d| d == p));
+    if !in_apps_folder || path.extension().and_then(|e| e.to_str()) != Some("app") {
+        return Err("Only apps in an Applications folder can be uninstalled.".into());
+    }
+    let others: Vec<String> = uninstall::installed_apps(&dirs).into_iter().map(|a| a.bundle_id).collect();
+    let found = uninstall::leftovers(&path, &state.base.home, &others).map_err(err)?;
+    let mut map = lock(&state.last_scan);
+    for f in &found {
+        map.insert(f.id.clone(), f.clone());
+    }
+    Ok(found)
+}
+
 #[tauri::command]
 fn open_external(target: External) -> CmdResult<()> {
     system::open(&target.url()).map_err(err)
@@ -561,6 +592,8 @@ pub fn run() {
             remove_exclusion,
             ignore_finding,
             permissions,
+            installed_apps,
+            app_leftovers,
             open_external,
             open_data_folder,
             reveal_finding
