@@ -520,7 +520,7 @@ export function App() {
       <Sidebar view={view} onView={setView} onAbout={() => setDialog('about')} onPalette={() => { setInspectId(null); setPalette(true) }} reviewCount={findings.length} quarantine={quarantine} version={info.version} demo={info.demo} />
       <main className="main">
         {view === 'overview' && (
-          <Overview onStop={stopTask} phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} onQuickClean={() => { setSelected(new Set(findings.filter((f) => f.risk === 'safe').map((f) => f.id))); setConfirmRequest((n) => n + 1); setView('review') }} />
+          <Overview permissions={permissions} onRecheck={recheck} onOpenAccess={() => openExternal('full-disk-access')} onStop={stopTask} phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} onQuickClean={() => { setSelected(new Set(findings.filter((f) => f.risk === 'safe').map((f) => f.id))); setConfirmRequest((n) => n + 1); setView('review') }} />
         )}
         {view === 'review' && (
           <Review confirmRequest={confirmRequest} findings={findings} selected={selected} onSelected={setSelected} peeling={peeling} home={info.home} busy={busy} run={applyRun} notice={notice} settings={prefs} onClean={(d) => void clean(d)} onScan={() => void scan()} onIgnore={(id) => void ignoreFinding(id)} onReveal={(id) => void api.revealFinding(id).catch((e) => setNotice({ text: errorText(e) }))} onInspect={(f) => setInspectId(f.id)} />

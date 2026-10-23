@@ -6,7 +6,7 @@ import { CutButton, GhostButton } from '../components/Primitives'
 import { categoryLabel, formatBytes, formatDuration, splitBytes } from '../lib/format'
 import { useCountUp } from '../lib/hooks'
 import { CATEGORY_HELP, MODULE_HELP } from '../lib/explain'
-import type { Finding, ModuleId, ScanRun } from '../types'
+import type { Finding, ModuleId, Permissions, ScanRun } from '../types'
 
 export type Phase = 'idle' | 'scanning' | 'done'
 
@@ -25,9 +25,13 @@ interface Props {
   onReview: () => void
   /** Selects every safe finding, then opens the clean preview on Review. */
   onQuickClean: () => void
+  /** Full Disk Access state. Shown as a notice when it is off, because the scan then misses protected folders. */
+  permissions?: Permissions | null
+  onOpenAccess?: () => void
+  onRecheck?: () => void
 }
 
-export function Overview({ phase, run, progress, tally, scanningModule, findings, modules, onToggleModule, onScan, onReview, onQuickClean, onStop }: Props) {
+export function Overview({ phase, run, progress, tally, scanningModule, findings, modules, onToggleModule, onScan, onReview, onQuickClean, onStop, permissions, onOpenAccess, onRecheck }: Props) {
   const safeFindings = findings.filter((f) => f.risk === 'safe')
   const safeCleanBytes = safeFindings.reduce((s, f) => s + f.bytes, 0)
   // Manual findings are guesses: listed in Review, but not counted as "can be removed".
@@ -61,6 +65,16 @@ export function Overview({ phase, run, progress, tally, scanningModule, findings
           ))}
         </div>
       </header>
+
+      {permissions?.full_disk_access === false && (
+        <div className="notice" role="status">
+          <span>
+            Full Disk Access is off. Whittle cannot see data in Safari, Mail and Messages, so leftovers there may be missing from this scan. Nothing is removed because of it.
+          </span>
+          {onOpenAccess && <button className="link" onClick={onOpenAccess}>Open Privacy settings</button>}
+          {onRecheck && <button className="link" onClick={onRecheck}>Check again</button>}
+        </div>
+      )}
 
       <div className="hero">
         <div className="hero__text">
