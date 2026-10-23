@@ -401,8 +401,8 @@ Yes. Releases are universal binaries.
 
 | | |
 |---|---|
-| ✅ **Shipped (0.1)** | Core engine, command line, desktop app with eight views and a command palette, quarantine and undo, Homebrew tap, universal DMG, signed releases |
-| 🔜 **Next** | Signed and notarized releases, a German interface, a pnpm migrator in the desktop app |
+| ✅ **Shipped (0.1)** | Core engine, command line, desktop app with eight views and a command palette, quarantine and undo, pnpm migrator (command line and app), Homebrew tap, universal DMG, signed releases |
+| 🔜 **Next** | Signed and notarized releases, a German interface |
 | 🧭 **Later** | Docker and runtimes audit, a port inspector, scheduled quiet scans |
 
 Details and reasons: [`docs/ROADMAP.md`](docs/ROADMAP.md).
