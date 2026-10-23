@@ -84,6 +84,8 @@ export function App() {
   const [result, setResult] = useState<ResultView | null>(null)
   const scanId = useRef(0)
   const taskSeq = useRef(0)
+  const stopRef = useRef<(() => void) | null>(null)
+  const stopTask = useCallback(() => stopRef.current?.(), [])
   const [task, setTask] = useState<Task | null>(null)
 
   // Stable on purpose: TaskPopup restarts its auto-close timer whenever this changes. It only clears
@@ -95,10 +97,23 @@ export function App() {
    * appears (SHOW_AFTER_MS), so the window is not cluttered with flashes.
    */
   const runTask = useCallback(
-    async <T,>(title: string, stage: string, fn: (h: TaskHandle) => Promise<T>): Promise<T> => {
+    async <T,>(
+      title: string,
+      stage: string,
+      fn: (h: TaskHandle) => Promise<T>,
+      opts?: { cancel?: () => void },
+    ): Promise<T> => {
       const id = ++taskSeq.current
       const edit = (f: (t: Task) => Task) => setTask((t) => (t && t.id === id ? f(t) : t))
       setTask(startTask(id, title, stage))
+      if (opts?.cancel) {
+        const cancel = opts.cancel
+        stopRef.current = () => {
+          edit((t) => ({ ...t, stage: 'Stopping after the current step…' }))
+          cancel()
+        }
+        edit((t) => ({ ...t, cancellable: true }))
+      }
       const reveal = window.setTimeout(() => edit((t) => ({ ...t, shown: true })), SHOW_AFTER_MS)
       const handle: TaskHandle = {
         update: (patch) => edit((t) => updateTask(t, patch)),
@@ -107,10 +122,12 @@ export function App() {
       try {
         const out = await fn(handle)
         window.clearTimeout(reveal)
+        stopRef.current = null
         edit((t) => finishTask(t, 'done'))
         return out
       } catch (e) {
         window.clearTimeout(reveal)
+        stopRef.current = null
         // A failure is always shown, even when it was quick, so it can never disappear unseen.
         edit((t) => ({ ...finishTask(t, 'failed', errorText(e)), shown: true }))
         throw e
@@ -282,15 +299,21 @@ export function App() {
       setTally(order.reduce((sum, k) => sum + (run.mods[k].state === 'done' ? run.mods[k].bytes : 0), 0))
     }
     try {
-      const found = await runTask('Scanning your Mac', 'Starting', (h) =>
-        api.scan(modules, (e) => {
-          onProgress(e)
-          h.update({
-            stage: e.event === 'step' ? e.phase : `${e.event === 'started' ? 'Scanning' : 'Finished'} ${categoryLabel(e.module)}`,
-            fraction: overallFraction(run),
-          })
-        }),
+      let stopped = false
+      const found = await runTask(
+        'Scanning your Mac',
+        'Starting',
+        (h) =>
+          api.scan(modules, (e) => {
+            onProgress(e)
+            h.update({
+              stage: e.event === 'step' ? e.phase : `${e.event === 'started' ? 'Scanning' : 'Finished'} ${categoryLabel(e.module)}`,
+              fraction: overallFraction(run),
+            })
+          }),
+        { cancel: () => { stopped = true; void api.cancelScan() } },
       )
+      if (stopped) setNotice({ text: 'Scan stopped. The findings of the finished modules are shown.' })
       if (id !== scanId.current) return
       setFindings(found)
       setSelected(new Set(found.filter((f) => f.risk === 'safe').map((f) => f.id)))
@@ -423,6 +446,7 @@ export function App() {
       go('rules', 'Rules', ['⌘', '7']),
       go('quarantine', 'Quarantine', ['⌘', '8']),
       go('settings', 'Settings', ['⌘', ',']),
+      ...(phase === 'scanning' ? [{ id: 'stop-scan', group: 'Actions', label: 'Stop the scan', words: 'cancel abort', run: () => stopTask() }] : []),
       { id: 'scan', group: 'Actions', label: phase === 'scanning' ? 'Scan is running…' : 'Scan now', keys: ['⌘', 'R'], words: 'start find', run: () => { if (phase !== 'scanning') void scan() } },
     ]
     if (hasFindings) {
@@ -613,7 +637,7 @@ export function App() {
       )}
       {dialog === 'about' && <About info={info} onOpen={openExternal} onClose={() => setDialog(null)} />}
       {dialog === 'keys' && <Shortcuts onClose={() => setDialog(null)} />}
-      {task && task.shown && <TaskPopup task={task} onClose={closeTask} />}
+      {task && task.shown && <TaskPopup task={task} onClose={closeTask} onCancel={stopTask} />}
       {result && (
         <ResultDialog
           result={result}

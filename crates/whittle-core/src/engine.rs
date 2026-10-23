@@ -77,12 +77,21 @@ pub struct ScanOptions {
     pub projects: Option<projects::Options>,
     pub dupes: Option<dupes::Options>,
     pub progress: Option<ProgressFn>,
+    /// Set to true to stop the scan before the next module. Findings of finished modules are kept.
+    pub cancel: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>,
 }
 
 pub fn scan(ctx: &Context, modules: &[ModuleId], opts: &ScanOptions) -> Result<Vec<Finding>> {
     let rules = RuleSet::load(ctx)?;
     let mut all = Vec::new();
     for &module in modules {
+        if opts
+            .cancel
+            .as_ref()
+            .is_some_and(|c| c.load(std::sync::atomic::Ordering::Relaxed))
+        {
+            break;
+        }
         if let Some(p) = &opts.progress {
             p(ProgressEvent::Started { module });
         }
