@@ -7,3 +7,4 @@ pub mod migrate;
 pub mod orphans;
 pub mod projects;
 pub mod tidy;
+pub mod uninstall;

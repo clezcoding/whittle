@@ -4,7 +4,7 @@ import { Check, CutButton, GhostButton, RiskTag, Segmented } from '../components
 import { formatBytes } from '../lib/format'
 import { rank } from '../lib/search'
 import { groupBySource, KIND_LABEL, type SourceKind } from '../lib/sources'
-import type { Finding } from '../types'
+import type { Finding, InstalledApp } from '../types'
 
 type Kind = 'all' | SourceKind
 
@@ -16,9 +16,13 @@ interface Props {
   onInspect: (f: Finding) => void
   onReview: () => void
   onScan: () => void
+  /** Apps that can be uninstalled, from the Applications folders. */
+  installed?: InstalledApp[]
+  /** Finds what the app left behind; the items go to Review. */
+  onUninstall?: (app: InstalledApp) => void
 }
 
-export function Apps({ findings, home, selected, onSelectMany, onInspect, onReview, onScan }: Props) {
+export function Apps({ findings, home, selected, onSelectMany, onInspect, onReview, onScan, installed = [], onUninstall }: Props) {
   const [kind, setKind] = useState<Kind>('all')
   const [q, setQ] = useState('')
   const groups = useMemo(() => groupBySource(findings, home), [findings, home])
@@ -120,6 +124,22 @@ export function Apps({ findings, home, selected, onSelectMany, onInspect, onRevi
           )}
         </>
       )}
+      <section className="uninstall" aria-labelledby="h-uninstall">
+        <h2 id="h-uninstall">Uninstall an app</h2>
+        <p className="help">Finds the app and the files it left in your Library. Nothing is removed here: the items go to Review, where you confirm first. The app itself is never preselected.</p>
+        {installed.length === 0 ? (
+          <p className="help">No apps found in Applications.</p>
+        ) : (
+          <ul className="src__items">
+            {installed.map((a) => (
+              <li key={a.path}>
+                <span>{a.name}</span>
+                {onUninstall && <GhostButton onClick={() => onUninstall(a)}>Find leftovers</GhostButton>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </section>
   )
 }
