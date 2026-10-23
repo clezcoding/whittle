@@ -1,5 +1,7 @@
 //! `whittle`: scan, clean and tidy. Everything is a dry run until you say otherwise.
 
+#[macro_use]
+mod out;
 mod ui;
 
 use std::io::{IsTerminal, Write};
@@ -190,7 +192,7 @@ fn run() -> Result<()> {
                 &ctx,
                 older_than.unwrap_or(u64::from(settings.quarantine_days)),
             )?;
-            println!(
+            outln!(
                 "Removed {} quarantined run(s), freed {}.",
                 r.runs_removed,
                 format_bytes(r.bytes_freed)
@@ -259,7 +261,7 @@ fn cmd_scan(ctx: &Context, ui: &ui::Ui, args: &ScanArgs) -> Result<()> {
         eprint!("\r{:40}\r", "");
     }
     if args.json {
-        println!("{}", serde_json::to_string_pretty(&findings)?);
+        outln!("{}", serde_json::to_string_pretty(&findings)?);
         return Ok(());
     }
     ui.print_findings(ctx, &findings, args.all);
@@ -278,7 +280,7 @@ fn cmd_clean(ctx: &Context, ui: &ui::Ui, args: &CleanArgs) -> Result<()> {
         findings.retain(|f| args.only.contains(&f.id));
     }
     if findings.is_empty() {
-        println!(
+        outln!(
             "Nothing to clean at risk level “{}”.",
             Risk::from(args.risk)
         );
@@ -298,14 +300,14 @@ fn cmd_clean(ctx: &Context, ui: &ui::Ui, args: &CleanArgs) -> Result<()> {
     if args.dry_run {
         let report = plan::apply(ctx, &plan, true)?;
         for f in &report.failed {
-            println!(
+            outln!(
                 "{} {}: {}",
                 ui.red("would refuse"),
                 ui.short(ctx, &f.path),
                 f.reason
             );
         }
-        println!("\n{}", ui.dim("Dry run: nothing was changed."));
+        outln!("\n{}", ui.dim("Dry run: nothing was changed."));
         return Ok(());
     }
 
@@ -318,7 +320,7 @@ fn cmd_clean(ctx: &Context, ui: &ui::Ui, args: &CleanArgs) -> Result<()> {
         } else {
             ""
         };
-        print!(
+        out!(
             "\nProceed with {} item(s), {}?{warn} [y/N] ",
             plan.actions.len(),
             format_bytes(plan.total_bytes())
@@ -327,7 +329,7 @@ fn cmd_clean(ctx: &Context, ui: &ui::Ui, args: &CleanArgs) -> Result<()> {
         let mut answer = String::new();
         std::io::stdin().read_line(&mut answer)?;
         if !matches!(answer.trim().to_lowercase().as_str(), "y" | "yes") {
-            println!("Cancelled. Nothing was changed.");
+            outln!("Cancelled. Nothing was changed.");
             return Ok(());
         }
     }
@@ -341,14 +343,14 @@ fn cmd_clean(ctx: &Context, ui: &ui::Ui, args: &CleanArgs) -> Result<()> {
             f.reason
         );
     }
-    println!();
+    outln!();
     match disposal {
-        Disposal::Quarantine => println!(
+        Disposal::Quarantine => outln!(
             "{} {} item(s), {}. Kept in quarantine for {} days. Undo with `whittle undo`, free the space with `whittle purge --older-than 0`.",
             ui.green("Quarantined"), report.applied.len(), format_bytes(report.bytes_handled), Settings::load(ctx).quarantine_days
         ),
-        Disposal::Trash => println!("{} {} item(s), {}. Empty the Trash to free the space.", ui.green("Moved to Trash"), report.applied.len(), format_bytes(report.bytes_handled)),
-        Disposal::Delete => println!("{} {} item(s), freed {}.", ui.green("Deleted"), report.applied.len(), format_bytes(report.bytes_freed)),
+        Disposal::Trash => outln!("{} {} item(s), {}. Empty the Trash to free the space.", ui.green("Moved to Trash"), report.applied.len(), format_bytes(report.bytes_handled)),
+        Disposal::Delete => outln!("{} {} item(s), freed {}.", ui.green("Deleted"), report.applied.len(), format_bytes(report.bytes_freed)),
     }
     Ok(())
 }
@@ -364,12 +366,12 @@ fn cmd_tidy(ctx: &Context, ui: &ui::Ui, args: &TidyArgs) -> Result<()> {
     };
     let entries = tidy::scan(ctx, &dir, &layout, &opts)?;
     if entries.is_empty() {
-        println!("{} is already tidy.", dir.display());
+        outln!("{} is already tidy.", dir.display());
         return Ok(());
     }
     ui.print_tidy(&dir, &entries);
     if !args.apply {
-        println!(
+        outln!(
             "\n{}",
             ui.dim(
                 "Preview only. Run again with --apply to move the files. Undo with `whittle undo`."
@@ -386,7 +388,7 @@ fn cmd_tidy(ctx: &Context, ui: &ui::Ui, args: &TidyArgs) -> Result<()> {
             f.reason
         );
     }
-    println!(
+    outln!(
         "\n{} {} file(s). Undo with `whittle undo`.",
         ui.green("Moved"),
         report.applied.len()
@@ -397,7 +399,7 @@ fn cmd_tidy(ctx: &Context, ui: &ui::Ui, args: &TidyArgs) -> Result<()> {
 fn cmd_history(ctx: &Context, ui: &ui::Ui) -> Result<()> {
     let runs = plan::history(ctx)?;
     if runs.is_empty() {
-        println!("No history yet.");
+        outln!("No history yet.");
         return Ok(());
     }
     for r in runs {
@@ -408,7 +410,7 @@ fn cmd_history(ctx: &Context, ui: &ui::Ui) -> Result<()> {
         } else {
             "final".to_string()
         };
-        println!(
+        outln!(
             "{}  {:>3} item(s)  {:>9}  {}",
             ui.bold(&r.run),
             r.items,
@@ -418,7 +420,7 @@ fn cmd_history(ctx: &Context, ui: &ui::Ui) -> Result<()> {
     }
     let q = plan::quarantine_size(ctx);
     if q > 0 {
-        println!(
+        outln!(
             "\nQuarantine holds {}. `whittle purge` removes items older than {} days.",
             format_bytes(q),
             Settings::load(ctx).quarantine_days
@@ -429,14 +431,14 @@ fn cmd_history(ctx: &Context, ui: &ui::Ui) -> Result<()> {
 
 fn cmd_undo(ctx: &Context, ui: &ui::Ui, run: Option<&str>) -> Result<()> {
     let report = plan::undo(ctx, run)?;
-    println!(
+    outln!(
         "{} {} item(s) from run {}.",
         ui.green("Restored"),
         report.restored,
         report.run
     );
     for s in report.skipped {
-        println!(
+        outln!(
             "  {} {}: {}",
             ui.red("skipped"),
             ui.short(ctx, &s.path),
@@ -454,7 +456,7 @@ fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
     };
     let found = migrate::detect(ctx, &roots);
     for s in &found.skipped {
-        println!(
+        outln!(
             "  {} {}: {}",
             ui.dim("skipped"),
             ui.short(ctx, &s.project),
@@ -462,12 +464,12 @@ fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
         );
     }
     if found.candidates.is_empty() {
-        println!("No npm or yarn projects without a pnpm lockfile found.");
+        outln!("No npm or yarn projects without a pnpm lockfile found.");
         return Ok(());
     }
-    println!("{} project(s) can move to pnpm:", found.candidates.len());
+    outln!("{} project(s) can move to pnpm:", found.candidates.len());
     for c in &found.candidates {
-        println!(
+        outln!(
             "  {} {} ({}, {})",
             ui.bold(&ui.short(ctx, &c.project)),
             ui.dim("from"),
@@ -476,7 +478,7 @@ fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
         );
     }
     if !args.apply {
-        println!(
+        outln!(
             "\n{}",
             ui.dim("Preview only. Add --apply to convert. Each project is verified with pnpm first; nothing changes if that fails.")
         );
@@ -490,12 +492,12 @@ fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
         if !std::io::stdin().is_terminal() {
             bail!("refusing to install pnpm without a terminal to confirm on");
         }
-        print!("\npnpm is missing. Install it globally with `npm install -g pnpm`? [y/N] ");
+        out!("\npnpm is missing. Install it globally with `npm install -g pnpm`? [y/N] ");
         std::io::stdout().flush()?;
         let mut answer = String::new();
         std::io::stdin().read_line(&mut answer)?;
         if !matches!(answer.trim().to_lowercase().as_str(), "y" | "yes") {
-            println!("Cancelled. Nothing was changed.");
+            outln!("Cancelled. Nothing was changed.");
             return Ok(());
         }
         migrate::install_pnpm()?;
@@ -503,21 +505,21 @@ fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
 
     let mut runs = Vec::new();
     for c in &found.candidates {
-        println!("\nConverting {} …", ui.short(ctx, &c.project));
+        outln!("\nConverting {} …", ui.short(ctx, &c.project));
         match migrate::convert(ctx, c, false) {
             Ok(done) => {
-                println!(
+                outln!(
                     "  {} pnpm-lock.yaml written ({}), verified with pnpm install.",
                     ui.green("done"),
                     format_bytes(done.pnpm_lock_bytes)
                 );
                 runs.push(done.run);
             }
-            Err(e) => println!("  {} {e}", ui.red("skipped")),
+            Err(e) => outln!("  {} {e}", ui.red("skipped")),
         }
     }
     if let Some(run) = runs.last() {
-        println!(
+        outln!(
             "\nUndo everything from this run with `whittle undo {run}`. Remove node_modules and run `pnpm install` to use pnpm's layout."
         );
     }
@@ -527,7 +529,7 @@ fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
 fn cmd_rules(ui: &ui::Ui) -> Result<()> {
     let set = RuleSet::builtin()?;
     for r in set.rules {
-        println!(
+        outln!(
             "{:<26} {:<9} {:<8} {}",
             ui.bold(&r.id),
             r.category,
@@ -542,21 +544,21 @@ fn cmd_ignore(ctx: &Context, settings: &mut Settings, args: &IgnoreArgs) -> Resu
     match (&args.path, args.remove) {
         (None, _) => {
             if settings.exclusions.is_empty() {
-                println!("Nothing is excluded. Add a folder with `whittle ignore <PATH>`.");
+                outln!("Nothing is excluded. Add a folder with `whittle ignore <PATH>`.");
             }
             for e in &settings.exclusions {
-                println!("{e}");
+                outln!("{e}");
             }
         }
         (Some(p), false) => {
             let resolved = settings.add_exclusion(ctx, p)?;
             settings.save(ctx)?;
-            println!("Whittle will leave {} alone.", resolved.display());
+            outln!("Whittle will leave {} alone.", resolved.display());
         }
         (Some(p), true) => {
             settings.remove_exclusion(ctx, p);
             settings.save(ctx)?;
-            println!("{p} is no longer excluded.");
+            outln!("{p} is no longer excluded.");
         }
     }
     Ok(())
@@ -565,7 +567,7 @@ fn cmd_ignore(ctx: &Context, settings: &mut Settings, args: &IgnoreArgs) -> Resu
 fn cmd_apps(ctx: &Context) -> Result<()> {
     let apps = whittle_core::modules::orphans::InstalledApps::detect(ctx);
     for p in apps.app_paths() {
-        println!("{}", p.display());
+        outln!("{}", p.display());
     }
     eprintln!("{} installed apps detected.", apps.app_count());
     Ok(())
