@@ -4,6 +4,10 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+- “Clean safe items” on the overview selects every safe finding and opens the clean preview in one step.
+- Review keyboard: ↑/↓ move between findings, Space selects, Enter opens the preview.
+
 ### Changed
 - Every clean now asks first, and the confirm dialog lists the largest items with their sizes. The “Ask before cleaning” setting is gone because the preview always applies.
 
