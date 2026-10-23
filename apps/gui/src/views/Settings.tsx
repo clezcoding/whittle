@@ -114,9 +114,6 @@ export function Settings(p: Props) {
             ]}
           />
         </Row>
-        <Row title="Ask before cleaning" help="Shows what will happen, and how much, before anything moves. Deleting for good and “Manual” items always ask.">
-          <Toggle checked={s.confirm_before_clean} onChange={(v) => p.onChange({ confirm_before_clean: v })} label="Ask before cleaning" />
-        </Row>
       </Section>
 
       <Section id="s-quarantine" title="Quarantine" lede="Where removed items wait, so that you can change your mind.">

@@ -4,6 +4,7 @@ import { Check, CutButton, GhostButton, Modal, RiskTag, Segmented } from '../com
 import { useCountUp } from '../lib/hooks'
 import { categoryLabel, formatBytes, middleEllipsis, shortPath, splitBytes } from '../lib/format'
 import { CATEGORY_HELP, explain, oneLine, RISK_HELP } from '../lib/explain'
+import { previewPick } from '../lib/preview'
 import type { ApplyRun, Disposal, Finding, Risk, Settings } from '../types'
 
 type Filter = 'all' | 'safe' | 'review'
@@ -52,7 +53,7 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
   const picked = findings.filter((f) => selected.has(f.id))
   const pickedBytes = picked.reduce((s, f) => s + f.bytes, 0)
   const counts = { all: findings.length, safe: findings.filter((f) => f.risk === 'safe').length, review: findings.filter((f) => f.risk !== 'safe').length }
-  const hasManual = picked.some((f) => f.risk === 'manual')
+  const preview = previewPick(picked)
 
   const toggle = (id: string, on: boolean) => {
     const next = new Set(selected)
@@ -68,7 +69,8 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
 
   const cautionCount = picked.filter((f) => f.risk === 'caution').length
   const manualCount = picked.filter((f) => f.risk === 'manual').length
-  const go = () => (settings.confirm_before_clean || disposal === 'delete' || hasManual ? setConfirm(true) : onClean(disposal))
+  // Every clean goes through the confirm dialog, so the user always sees what moves and what it means.
+  const go = () => setConfirm(true)
   const pb = splitBytes(useCountUp(pickedBytes, 450))
 
   return (
@@ -182,6 +184,17 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
           <dl className="sum">
             <div><dt>Items</dt><dd>{picked.length}</dd></div>
             <div><dt>Size</dt><dd className="num">{formatBytes(pickedBytes)}</dd></div>
+            <div>
+              <dt>Items</dt>
+              <dd>
+                <ul className="sum__items">
+                  {preview.items.map((f) => (
+                    <li key={f.id}><span>{f.title}</span> <span className="num">{formatBytes(f.bytes)}</span></li>
+                  ))}
+                </ul>
+                {preview.hidden > 0 && <small>and {preview.hidden} more</small>}
+              </dd>
+            </div>
             <div>
               <dt>What happens</dt>
               <dd>
