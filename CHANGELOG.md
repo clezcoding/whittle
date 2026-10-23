@@ -9,6 +9,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
 ### Added
+- `whittle migrate`: finds npm and classic yarn projects, previews the conversion to pnpm, and with `--apply` converts the lockfile. Each conversion is verified with `pnpm install --frozen-lockfile --ignore-scripts` in a scratch copy first; the old lockfile is quarantined and the change is undoable with `whittle undo`. Yarn Berry projects are reported and skipped. `--install-pnpm` installs pnpm after a confirmation.
 - Four new pages: **Insights** (charts of the last scan: category donut, risk bar, age columns, a treemap of every finding, the largest items), **Apps** (findings grouped by app, dev tool and project, with "select everything safe" per app), **Rules** (every scan rule with its folders, limits and what it matched, plus how to write your own) and **Quarantine** (what waits to be removed, with a countdown ring and "put back" per run).
 - A details drawer for every finding (size, share, confidence, what it is, why it is listed, what happens if you remove it, related findings). Open it with a double-click in Review, from Apps or Insights, or from the palette.
 - Command palette on ⌘K: go to any page, scan, select or clear safe findings, switch theme or motion, open project links, and search findings and rules. Shortcuts ⌘5 to ⌘8 open the new pages.

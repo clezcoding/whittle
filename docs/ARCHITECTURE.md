@@ -36,6 +36,7 @@ scan  →  Findings  →  Plan (Actions)  →  preview  →  apply  →  journal
 | orphans | `modules/orphans.rs` | extracts bundle ids from `~/Library` names, compares with installed apps (Info.plist), matches vendors for confidence, flags broken LaunchAgents |
 | dupes | `modules/dupes.rs` | size, then partial blake3, then full blake3 |
 | tidy | `modules/tidy.rs` | filename patterns, then extension, then magic bytes (`infer`) |
+| migrate | `modules/migrate.rs` | npm (`package-lock.json`) and classic yarn (`yarn.lock`) projects without a pnpm lockfile; `pnpm import` converts offline, `pnpm install --frozen-lockfile --ignore-scripts` verifies in a scratch copy (the only network step); undoable like any change |
 
 ## Safety layer (`safety.rs`)
 

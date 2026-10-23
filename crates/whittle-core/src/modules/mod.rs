@@ -3,6 +3,7 @@
 
 pub mod caches;
 pub mod dupes;
+pub mod migrate;
 pub mod orphans;
 pub mod projects;
 pub mod tidy;

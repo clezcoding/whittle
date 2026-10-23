@@ -156,7 +156,7 @@ Ein Aufräumprogramm ist nur so gut wie sein schlechtester Tag. Whittle ist so g
 - **Eine Verweigerungsschicht unter jeder Aktion.** Systempfade, dein Home-Ordner samt seinen Hauptordnern, Daten anderer Nutzer, `.git`-Ordner, echte `.app`-Bundles, Schlüsselbund, Mail, Fotos und iCloud-Daten werden verweigert, egal was eine Regel sagt. Deine eigene *Nie anfassen*-Liste wird an derselben Stelle durchgesetzt.
 - **Die App schickt nie Pfade zum Löschen.** Die Oberfläche schickt IDs von Funden des letzten Scans. Das Rust-Backend schlägt die Pfade selbst nach. Selbst eine gekaperte Web-Ansicht kann also nur auf Gefundenes zugreifen.
 - **Journal, das nur wächst.** Jede Änderung steht in `~/.whittle/journal.jsonl`.
-- **Kein Netzwerk, keine Telemetrie, kein Konto.** Die Content-Security-Policy der App verbietet Netzwerkanfragen. Whittle spricht nie mit dem Internet.
+- **Kein Netzwerk, keine Telemetrie, kein Konto.** Die Content-Security-Policy der App verbietet Netzwerkanfragen, und Scanner und Aufräumer sprechen nie mit dem Internet. Eine Ausnahme gibt es: `whittle migrate --apply` führt zur Prüfung einer umgestellten pnpm-Lockdatei `pnpm install --frozen-lockfile --ignore-scripts` in einer Arbeitskopie aus. pnpm lädt dabei die Pakete des Projekts aus der npm-Registry. Sonst wird nichts abgerufen, und die Arbeitskopie wird danach gelöscht.
 
 <p align="center">
   <picture>
@@ -272,6 +272,8 @@ whittle history                   # was Whittle geändert hat
 whittle purge                     # Quarantäne endgültig leeren
 whittle tidy ~/Downloads          # Sortierung als Vorschau
 whittle tidy ~/Downloads --apply  # ausführen
+whittle migrate                   # Vorschau: npm- und yarn-Projekte, die zu pnpm wechseln können
+whittle migrate --apply           # umstellen, mit pnpm install prüfen, rückgängig machbar
 whittle ignore ~/Developer/keep   # diesen Pfad nie melden oder anfassen (gilt auch in der App)
 whittle apps                      # welche installierten Apps Whittle erkennt
 whittle rules                     # eingebaute Regeln auflisten
@@ -402,7 +404,7 @@ Ja. Releases sind Universal-Binaries.
 | | |
 |---|---|
 | ✅ **Fertig (0.1)** | Kern-Engine, Kommandozeile, Desktop-App mit acht Ansichten und Befehlspalette, Quarantäne und Rückgängig, Homebrew-Tap, universelles DMG, signierte Releases |
-| 🔜 **Als Nächstes** | Signierte und notarisierte Releases, ein pnpm-Migrator für npm-Projekte, deutsche Oberfläche |
+| 🔜 **Als Nächstes** | Signierte und notarisierte Releases, deutsche Oberfläche, ein pnpm-Migrator in der Desktop-App |
 | 🧭 **Später** | Docker- und Runtime-Audit, Port-Inspektor, geplante stille Scans |
 
 Details und Gründe: [`docs/ROADMAP.md`](docs/ROADMAP.md).
