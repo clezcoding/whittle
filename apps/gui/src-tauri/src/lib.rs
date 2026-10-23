@@ -505,7 +505,10 @@ fn app_leftovers(state: State<'_, AppState>, app_path: String) -> CmdResult<Vec<
     if !in_apps_folder || path.extension().and_then(|e| e.to_str()) != Some("app") {
         return Err("Only apps in an Applications folder can be uninstalled.".into());
     }
-    let others: Vec<String> = uninstall::installed_apps(&dirs).into_iter().map(|a| a.bundle_id).collect();
+    let others: Vec<String> = uninstall::installed_apps(&dirs)
+        .into_iter()
+        .map(|a| a.bundle_id)
+        .collect();
     let found = uninstall::leftovers(&path, &state.base.home, &others).map_err(err)?;
     let mut map = lock(&state.last_scan);
     for f in &found {
