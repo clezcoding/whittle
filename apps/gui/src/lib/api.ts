@@ -45,6 +45,30 @@ async function withEvents<E, T>(event: string, onEvent: ((p: E) => void) | undef
   }
 }
 
+/** Listens to several events for the length of one call, so one command can report progress and phases. */
+async function withListeners<T>(listeners: [string, (payload: never) => void][], run: () => Promise<T>): Promise<T> {
+  const { listen } = await import('@tauri-apps/api/event')
+  const unlisteners = await Promise.all(
+    listeners.map(([event, fn]) => listen<unknown>(event, (e) => fn(e.payload as never))),
+  )
+  try {
+    return await run()
+  } finally {
+    unlisteners.forEach((u) => u())
+  }
+}
+
+/** One line of output from the pnpm installer. */
+export interface InstallLine {
+  line: string
+}
+
+/** Which step a migration is on for one project (for example "Verifying with pnpm install"). */
+export interface MigratePhase {
+  project: string
+  phase: string
+}
+
 async function withApplyEvents<T>(onProgress: ((p: ApplyProgress) => void) | undefined, run: () => Promise<T>): Promise<T> {
   return withEvents<ApplyProgress, T>('apply-progress', onProgress, run)
 }
@@ -120,12 +144,28 @@ export const api = {
   migratePreview(): Promise<MigratePreview> {
     return isTauri ? call('migrate_preview') : mock.migratePreview()
   },
-  migrateInstallPnpm(): Promise<string> {
-    return isTauri ? call('migrate_install_pnpm') : mock.migrateInstallPnpm()
+  /** Installs pnpm. `onLine` receives the installer's output as it arrives. */
+  migrateInstallPnpm(onLine?: (line: string) => void): Promise<string> {
+    if (!isTauri) return mock.migrateInstallPnpm(onLine)
+    return withListeners<string>(
+      [['install-log', (p: InstallLine) => onLine?.(p.line)]],
+      () => call<string>('migrate_install_pnpm'),
+    )
   },
-  async migrateApply(ids: string[], onProgress?: (p: MigrateProgress) => void): Promise<MigrateOutcome[]> {
-    if (!isTauri) return mock.migrateApply(ids, onProgress)
-    return withEvents<MigrateProgress, MigrateOutcome[]>('migrate-progress', onProgress, () => call('migrate_apply', { ids }))
+  /** Converts the chosen projects. `onProgress` fires per project, `onPhase` per step within one. */
+  async migrateApply(
+    ids: string[],
+    onProgress?: (p: MigrateProgress) => void,
+    onPhase?: (p: MigratePhase) => void,
+  ): Promise<MigrateOutcome[]> {
+    if (!isTauri) return mock.migrateApply(ids, onProgress, onPhase)
+    return withListeners<MigrateOutcome[]>(
+      [
+        ['migrate-progress', (p: MigrateProgress) => onProgress?.(p)],
+        ['migrate-phase', (p: MigratePhase) => onPhase?.(p)],
+      ],
+      () => call<MigrateOutcome[]>('migrate_apply', { ids }),
+    )
   },
 
   getSettings(): Promise<Settings> {

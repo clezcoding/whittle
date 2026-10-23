@@ -302,11 +302,31 @@ async fn migrate_preview(state: State<'_, AppState>) -> CmdResult<MigratePreview
     })
 }
 
+#[derive(Clone, Serialize)]
+struct InstallLog {
+    line: String,
+}
+
+#[derive(Clone, Serialize)]
+struct MigratePhase {
+    project: String,
+    phase: String,
+}
+
 /// Runs only after the user clicked the install button in the interface, which asks first.
+/// Every line npm prints is sent to the interface as it arrives.
 #[tauri::command]
-async fn migrate_install_pnpm() -> CmdResult<String> {
-    tauri::async_runtime::spawn_blocking(|| {
-        migrate::install_pnpm().map_err(err)?;
+async fn migrate_install_pnpm(app: AppHandle) -> CmdResult<String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        migrate::install_pnpm_with(&|line| {
+            let _ = app.emit(
+                "install-log",
+                InstallLog {
+                    line: line.to_string(),
+                },
+            );
+        })
+        .map_err(err)?;
         migrate::pnpm_version().map_err(err)
     })
     .await
@@ -322,6 +342,7 @@ async fn migrate_apply(
     ids: Vec<String>,
 ) -> CmdResult<Vec<MigrateOutcome>> {
     let ctx = state.ctx();
+    let emitter = app.clone();
     let picked: Vec<migrate::Candidate> = {
         let known = lock(&state.migrations);
         ids.iter().filter_map(|id| known.get(id).cloned()).collect()
@@ -333,7 +354,18 @@ async fn migrate_apply(
             .enumerate()
             .map(|(i, cand)| {
                 let project = cand.project.display().to_string();
-                let outcome = match migrate::convert(&ctx, cand, false) {
+                let phase_app = emitter.clone();
+                let phase_project = project.clone();
+                let on_phase = move |phase: &str| {
+                    let _ = phase_app.emit(
+                        "migrate-phase",
+                        MigratePhase {
+                            project: phase_project.clone(),
+                            phase: phase.to_string(),
+                        },
+                    );
+                };
+                let outcome = match migrate::convert_with(&ctx, cand, false, &on_phase) {
                     Ok(done) => MigrateOutcome {
                         project: project.clone(),
                         ok: true,

@@ -10,11 +10,13 @@ import { Shortcuts } from './components/Shortcuts'
 import { Sidebar, VIEW_ORDER, type View } from './components/Sidebar'
 import { Migrate } from './views/Migrate'
 import { api } from './lib/api'
-import { formatBytes } from './lib/format'
+import { categoryLabel, formatBytes } from './lib/format'
 import { buildReport } from './lib/insights'
 import { errorText, isExcluded } from './lib/paths'
 import { moduleWeights, overallFraction, rememberDurations } from './lib/timing'
-import type { ApplyRun, AppInfo, Disposal, External, Finding, ModuleId, ModuleRun, Permissions, RuleInfo, RunSummary, ScanProgress, ScanRun, Settings as SettingsT } from './types'
+import { appendLog, finishTask, SHOW_AFTER_MS, startTask, updateTask, type Task } from './lib/tasks'
+import { TaskPopup } from './components/TaskPopup'
+import type { ApplyProgress, ApplyRun, AppInfo, Disposal, External, Finding, ModuleId, ModuleRun, Permissions, RuleInfo, RunSummary, ScanProgress, ScanRun, Settings as SettingsT } from './types'
 import { Apps } from './views/Apps'
 import { History } from './views/History'
 import { Insights } from './views/Insights'
@@ -38,6 +40,18 @@ const FALLBACK_SETTINGS: SettingsT = {
   migrate_roots: [],
   appearance: 'system',
   motion: 'system',
+}
+
+/** Maps a progress event to the popup's fields. */
+function progressPatch(p: ApplyProgress, verb: string) {
+  return { fraction: p.fraction, done: p.done, total: p.total, item: p.title, stage: p.title ? `${verb} ${p.title}` : `${verb}…` }
+}
+
+const basename = (path: string) => path.slice(path.lastIndexOf('/') + 1)
+
+export interface TaskHandle {
+  update(patch: Partial<Pick<Task, 'stage' | 'fraction' | 'done' | 'total' | 'item'>>): void
+  log(line: string): void
 }
 
 export function App() {
@@ -69,6 +83,41 @@ export function App() {
   /** The summary dialog shown when an action finishes. */
   const [result, setResult] = useState<ResultView | null>(null)
   const scanId = useRef(0)
+  const taskSeq = useRef(0)
+  const [task, setTask] = useState<Task | null>(null)
+
+  // Stable on purpose: TaskPopup restarts its auto-close timer whenever this changes. It only clears
+  // a task that has finished, so a stale timer never hides a newer task that is still running.
+  const closeTask = useCallback(() => setTask((t) => (t && t.state !== 'running' ? null : t)), [])
+
+  /**
+   * Runs one action and shows the live popup for it. Quick actions finish before the popup
+   * appears (SHOW_AFTER_MS), so the window is not cluttered with flashes.
+   */
+  const runTask = useCallback(
+    async <T,>(title: string, stage: string, fn: (h: TaskHandle) => Promise<T>): Promise<T> => {
+      const id = ++taskSeq.current
+      const edit = (f: (t: Task) => Task) => setTask((t) => (t && t.id === id ? f(t) : t))
+      setTask(startTask(id, title, stage))
+      const reveal = window.setTimeout(() => edit((t) => ({ ...t, shown: true })), SHOW_AFTER_MS)
+      const handle: TaskHandle = {
+        update: (patch) => edit((t) => updateTask(t, patch)),
+        log: (line) => edit((t) => appendLog(t, line)),
+      }
+      try {
+        const out = await fn(handle)
+        window.clearTimeout(reveal)
+        edit((t) => finishTask(t, 'done'))
+        return out
+      } catch (e) {
+        window.clearTimeout(reveal)
+        // A failure is always shown, even when it was quick, so it can never disappear unseen.
+        edit((t) => ({ ...finishTask(t, 'failed', errorText(e)), shown: true }))
+        throw e
+      }
+    },
+    [],
+  )
   const latest = useRef<SettingsT | null>(null)
   const savedTimer = useRef(0)
   const prefs = settings ?? FALLBACK_SETTINGS
@@ -233,7 +282,15 @@ export function App() {
       setTally(order.reduce((sum, k) => sum + (run.mods[k].state === 'done' ? run.mods[k].bytes : 0), 0))
     }
     try {
-      const found = await api.scan(modules, onProgress)
+      const found = await runTask('Scanning your Mac', 'Starting', (h) =>
+        api.scan(modules, (e) => {
+          onProgress(e)
+          h.update({
+            stage: e.event === 'step' ? e.phase : `${e.event === 'started' ? 'Scanning' : 'Finished'} ${categoryLabel(e.module)}`,
+            fraction: overallFraction(run),
+          })
+        }),
+      )
       if (id !== scanId.current) return
       setFindings(found)
       setSelected(new Set(found.filter((f) => f.risk === 'safe').map((f) => f.id)))
@@ -247,7 +304,7 @@ export function App() {
     } finally {
       setScanning(null)
     }
-  }, [modules])
+  }, [modules, runTask])
 
   const clean = useCallback(
     async (disposal: Disposal) => {
@@ -257,7 +314,13 @@ export function App() {
       try {
         const startedAt = Date.now()
         setApplyRun({ done: 0, total: ids.length, bytes_done: 0, bytes_total: 0, fraction: 0, title: '', startedAt })
-        const report = await api.apply(ids, disposal, (p) => setApplyRun({ ...p, startedAt }))
+        const verb = disposal === 'delete' ? 'Deleting' : disposal === 'trash' ? 'Moving to Trash' : 'Quarantining'
+        const report = await runTask(verb, `${ids.length} item(s)`, (h) =>
+          api.apply(ids, disposal, (p) => {
+            setApplyRun({ ...p, startedAt })
+            h.update(progressPatch(p, verb))
+          }),
+        )
         const gone = new Set(findings.filter((f) => report.applied.some((a) => a.from === f.path)).map((f) => f.id))
         setPeeling(gone)
         window.setTimeout(() => {
@@ -279,7 +342,7 @@ export function App() {
             quarantineDays: prefs.quarantine_days,
             onUndo: disposal === 'quarantine'
               ? async () => {
-                  const undone = await api.undo(report.run)
+                  const undone = await runTask('Undoing', 'Restoring the files', () => api.undo(report.run))
                   await refreshState()
                   await scan()
                   setResult(undoResult(undone))
@@ -299,14 +362,14 @@ export function App() {
         setApplyRun(null)
       }
     },
-    [findings, selected, refreshState, scan, prefs.quarantine_days],
+    [findings, selected, refreshState, scan, prefs.quarantine_days, runTask],
   )
 
   /** Undo a run from History or Quarantine. A failure is shown as a notice, never swallowed. */
   const undoRun = useCallback(
     async (run?: string) => {
       try {
-        const undone = await api.undo(run)
+        const undone = await runTask('Undoing', 'Restoring the files', () => api.undo(run))
         await refreshState()
         setResult(undoResult(undone))
       } catch (e) {
@@ -318,13 +381,13 @@ export function App() {
 
   const purgeAll = useCallback(async () => {
     try {
-      const purged = await api.purge(0)
+      const purged = await runTask('Freeing the quarantine', 'Deleting old files', () => api.purge(0))
       await refreshState()
       setResult(purgeResult(purged))
     } catch (e) {
       setNotice({ text: `Could not free the quarantine: ${errorText(e)}` })
     }
-  }, [refreshState])
+  }, [refreshState, runTask])
 
   const selectMany = useCallback((ids: string[], on: boolean) => {
     setSelected((sel) => {
@@ -458,9 +521,14 @@ export function App() {
         {view === 'tidy' && (
           <Tidy
             home={info.home}
-            preview={api.tidyPreview}
+            preview={(dir) => runTask('Checking the folder', 'Looking at the files', () => api.tidyPreview(dir))}
             apply={async (dir, onProgress) => {
-              const moved = await api.tidyApply(dir, onProgress)
+              const moved = await runTask('Tidying up', 'Moving files', (h) =>
+                api.tidyApply(dir, (p) => {
+                  onProgress(p)
+                  h.update(progressPatch(p, 'Moving'))
+                }),
+              )
               await refreshState()
               setResult(tidyResult(moved, dir))
             }}
@@ -471,9 +539,24 @@ export function App() {
             home={info.home}
             roots={settings?.migrate_roots ?? []}
             onRoots={async (roots) => { await updateSettings({ migrate_roots: roots }) }}
-            preview={api.migratePreview}
-            installPnpm={api.migrateInstallPnpm}
-            apply={api.migrateApply}
+            preview={() => runTask('Finding projects', 'Looking in your folders', () => api.migratePreview())}
+            installPnpm={() =>
+              runTask('Installing pnpm', 'Installing with npm', (h) =>
+                api.migrateInstallPnpm((line) => h.log(line)),
+              )
+            }
+            apply={(ids, onProgress) =>
+              runTask('Converting projects', `${ids.length} project(s)`, (h) =>
+                api.migrateApply(
+                  ids,
+                  (p) => {
+                    onProgress(p)
+                    h.update({ fraction: p.total ? p.done / p.total : null, done: p.done, total: p.total, item: basename(p.project) })
+                  },
+                  (ph) => h.update({ stage: ph.phase, item: basename(ph.project) }),
+                ),
+              )
+            }
             onResult={setResult}
             onChanged={() => void refreshState()}
           />
@@ -530,6 +613,7 @@ export function App() {
       )}
       {dialog === 'about' && <About info={info} onOpen={openExternal} onClose={() => setDialog(null)} />}
       {dialog === 'keys' && <Shortcuts onClose={() => setDialog(null)} />}
+      {task && task.shown && <TaskPopup task={task} onClose={closeTask} />}
       {result && (
         <ResultDialog
           result={result}
