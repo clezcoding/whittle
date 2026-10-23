@@ -120,8 +120,9 @@ export function Review({ confirmRequest, findings, selected, onSelected, peeling
 
       {findings.length === 0 ? (
         <div className="empty">
-          <p>Nothing to review.</p>
-          <button className="link" onClick={onScan}>Scan again</button>
+          <p>Nothing to review yet.</p>
+          <p className="help">Run a scan to find what can be removed. Nothing changes on your Mac until you confirm a clean.</p>
+          <button className="link" onClick={onScan}>Scan this Mac</button>
         </div>
       ) : (
         <div className="list" role="table" aria-label="Findings" onKeyDown={onListKey}>

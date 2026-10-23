@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CutButton, GhostButton, Check } from '../components/Primitives'
+import { CutButton, GhostButton, Check, Term } from '../components/Primitives'
 import { ChooseFolder } from '../components/ChooseFolder'
 import { formatBytes, shortPath } from '../lib/format'
 import type { MigrateOutcome, MigratePreview, MigrateProgress } from '../types'
@@ -113,7 +113,7 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
   return (
     <section className="view migrate" aria-labelledby="h-migrate">
       <header className="view__head"><h1 id="h-migrate">Move projects to pnpm</h1></header>
-      <p className="lede">Finds npm and yarn projects and converts their lockfile to pnpm. Each one is checked with <code>pnpm install</code> in a scratch copy first; if the check fails, that project is not touched. The old lockfile goes to quarantine, and every run can be undone in History. The check downloads the project's packages from the npm registry. Nothing else leaves your Mac.</p>
+      <p className="lede">Finds npm and yarn projects and converts their <Term term="lockfile">lockfile</Term> to <Term term="pnpm">pnpm</Term>. Each one is checked with <code>pnpm install</code> in a scratch copy first; if the check fails, that project is not touched. The old <Term term="lockfile">lockfile</Term> goes to <Term term="quarantine">quarantine</Term>, and every run can be undone in History. The check downloads the project's packages from the npm registry. Nothing else leaves your Mac.</p>
 
       <section className="migrate__folders" aria-labelledby="h-folders">
         <h2 id="h-folders">Folders to search</h2>
@@ -176,7 +176,7 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
       )}
 
       {found && found.candidates.length === 0 && (
-        <div className="empty"><p>No npm or yarn projects without a pnpm lockfile were found.</p></div>
+        <div className="empty"><p>No npm or yarn projects without a pnpm lockfile were found.</p><p className="help">Add a folder above that contains your projects, then press Find projects again.</p></div>
       )}
 
       {found && !found.pnpm && found.candidates.length > 0 && (

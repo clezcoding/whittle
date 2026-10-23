@@ -1,3 +1,4 @@
+import { GLOSSARY, type TermKey } from '../lib/glossary'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useFocusTrap } from '../lib/focus'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
@@ -25,6 +26,15 @@ import { RISK_HELP } from '../lib/explain'
 const RISK_LABEL: Record<Risk, string> = { safe: 'Safe', caution: 'Review', manual: 'Manual' }
 
 /** Risk is never colour alone: a shape and a word. */
+/** A word with a one-sentence explanation on hover, focus and in the accessible name. */
+export function Term({ term, children }: { term: TermKey; children: ReactNode }) {
+  return (
+    <abbr className="term" title={GLOSSARY[term]} tabIndex={0}>
+      {children}
+    </abbr>
+  )
+}
+
 export function RiskTag({ risk }: { risk: Risk }) {
   return (
     <span className={`risk risk--${risk}`} title={RISK_HELP[risk]}>
