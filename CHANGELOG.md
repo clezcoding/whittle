@@ -8,6 +8,10 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - CI is faster: pull requests that only touch docs skip the heavy jobs, the app bundle and the Linux desktop-shell job run in parallel, and build caches are written on `main` only.
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
+### Changed
+- Phone-width layout (below 720 px): the sidebar becomes one scrolling bar at the top, forms wrap, and the page uses the full width.
+- While a scan runs on the overview, its progress is shown there (with a Stop button) instead of a second popup. The popup appears when you leave the overview.
+
 ### Added
 - A **Stop** button on the progress popup and the command palette ("Stop the scan"). A stopped scan keeps the findings of the modules that finished; the stop takes effect before the next module.
 - Progress popups show the installer output on request (**Show details**).
