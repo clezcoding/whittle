@@ -144,6 +144,10 @@ export const api = {
   migratePreview(): Promise<MigratePreview> {
     return isTauri ? call('migrate_preview') : mock.migratePreview()
   },
+  /** Asks the running scan to stop before its next module. */
+  cancelScan(): Promise<void> {
+    return isTauri ? call<void>('cancel_scan') : mock.cancelScan()
+  },
   /** Installs pnpm. `onLine` receives the installer's output as it arrives. */
   migrateInstallPnpm(onLine?: (line: string) => void): Promise<string> {
     if (!isTauri) return mock.migrateInstallPnpm(onLine)

@@ -156,6 +156,8 @@ async function simulate(items: { title: string; bytes: number }[], onProgress?: 
   }
 }
 
+let scanStopped = false
+
 export const mock: Handlers & {
   apply(ids: string[], disposal: Disposal, onProgress?: (p: ApplyProgress) => void): Promise<ApplyReport>
   history(): Promise<RunSummary[]>
@@ -167,6 +169,7 @@ export const mock: Handlers & {
   pickFolder(): Promise<string | null>
   migratePreview(): Promise<MigratePreview>
   migrateInstallPnpm(onLine?: (line: string) => void): Promise<string>
+  cancelScan(): Promise<void>
   migrateApply(
     ids: string[],
     onProgress?: (p: MigrateProgress) => void,
@@ -181,10 +184,15 @@ export const mock: Handlers & {
   permissions(): Promise<Permissions>
   rules(): Promise<RuleInfo[]>
 } = {
+  async cancelScan() {
+    scanStopped = true
+  },
   async scan(modules, onProgress) {
     const order: ModuleId[] = modules.length ? modules : ['caches', 'projects', 'orphans']
     const out: Finding[] = []
+    scanStopped = false
     for (const module of order) {
+      if (scanStopped) break
       onProgress({ event: 'started', module })
       const phases = PHASES[module]
       const steps = 14

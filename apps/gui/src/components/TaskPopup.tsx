@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatDuration, formatRemaining } from '../lib/format'
 import { useNow } from '../lib/hooks'
 import { DONE_HIDE_MS, type Task } from '../lib/tasks'
@@ -9,8 +9,9 @@ import { EtaSmoother } from '../lib/timing'
  * measurable, the item being worked on, the time taken and left, and the last lines of output.
  * It never blocks the window, so you can keep working while it runs.
  */
-export function TaskPopup({ task, onClose }: { task: Task; onClose: () => void }) {
+export function TaskPopup({ task, onClose, onCancel }: { task: Task; onClose: () => void; onCancel?: () => void }) {
   const running = task.state === 'running'
+  const [open, setOpen] = useState(false)
   const now = useNow(running)
   const elapsed = Math.max(0, (task.endedAt ?? now) - task.startedAt)
 
@@ -34,6 +35,9 @@ export function TaskPopup({ task, onClose }: { task: Task; onClose: () => void }
       <header className="taskpop__head">
         <span className="taskpop__dot" aria-hidden="true" />
         <b className="taskpop__title">{task.title}</b>
+        {running && task.cancellable && onCancel && (
+          <button type="button" className="taskpop__stop" onClick={onCancel}>Stop</button>
+        )}
         {!running && <button type="button" className="taskpop__close" aria-label="Close" onClick={onClose}>×</button>}
       </header>
 
@@ -63,9 +67,14 @@ export function TaskPopup({ task, onClose }: { task: Task; onClose: () => void }
       </div>
 
       {task.log.length > 0 && (
-        <pre className="taskpop__log" aria-label="Recent output">
-          {task.log.map((l, i) => <div key={`${i}-${l}`}>{l}</div>)}
-        </pre>
+        <>
+          <button type="button" className="taskpop__more" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+            {open ? 'Hide details' : 'Show details'}
+          </button>
+          <pre className={`taskpop__log${open ? ' taskpop__log--open' : ''}`} aria-label="Recent output">
+            {(open ? task.log : task.log.slice(-3)).map((l, i) => <div key={`${i}-${l}`}>{l}</div>)}
+          </pre>
+        </>
       )}
     </aside>
   )

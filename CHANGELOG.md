@@ -9,6 +9,8 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
 ### Added
+- A **Stop** button on the progress popup and the command palette ("Stop the scan"). A stopped scan keeps the findings of the modules that finished; the stop takes effect before the next module.
+- Progress popups show the installer output on request (**Show details**).
 - Live progress popups: every action (scan, clean, undo, free quarantine, tidy, pnpm conversion, pnpm install, previews) shows a small card in the corner with its stage, a bar when progress is measurable, the item in progress, elapsed and remaining time, and the last lines of the pnpm installer. It appears after a short delay so quick actions do not flash, closes itself when done, and stays on screen when it fails with the error. Motion respects reduced-motion settings.
 - A result dialog after every finished action (clean, undo, free quarantine, tidy, pnpm conversion, pnpm install): what happened, the items with reasons where something failed, what it means, and the next step (Undo, Open History).
 - Explanations on the pages: how a conversion and a tidy work, what a run is, and what Never touch protects. A picked folder is now added or previewed at once, with no second click.

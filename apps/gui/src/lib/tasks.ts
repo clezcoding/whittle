@@ -5,6 +5,8 @@
 export type TaskState = 'running' | 'done' | 'failed'
 
 export interface Task {
+  /** The action can be stopped early; the popup then shows a Stop button. */
+  cancellable?: boolean
   id: number
   title: string
   stage: string

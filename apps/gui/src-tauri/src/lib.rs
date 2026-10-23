@@ -28,6 +28,8 @@ struct AppState {
     last_scan: Mutex<HashMap<String, Finding>>,
     /// Projects the last migration preview found, by id. Like findings, the only ones the UI can convert.
     migrations: Mutex<HashMap<String, migrate::Candidate>>,
+    /// Set by `cancel_scan`; the running scan checks it between modules.
+    scan_cancel: std::sync::Arc<std::sync::atomic::AtomicBool>,
 }
 
 impl AppState {
@@ -72,6 +74,14 @@ fn app_info(state: State<'_, AppState>) -> AppInfo {
     }
 }
 
+/// Asks the running scan to stop before its next module. Takes no arguments on purpose.
+#[tauri::command]
+fn cancel_scan(state: State<'_, AppState>) {
+    state
+        .scan_cancel
+        .store(true, std::sync::atomic::Ordering::Relaxed);
+}
+
 #[tauri::command]
 async fn scan(
     app: AppHandle,
@@ -85,7 +95,10 @@ async fn scan(
         modules
     };
     let emitter = app.clone();
+    let cancel = state.scan_cancel.clone();
+    cancel.store(false, std::sync::atomic::Ordering::Relaxed);
     let opts = ScanOptions {
+        cancel: Some(cancel),
         progress: Some(Arc::new(move |e: ProgressEvent| {
             let _ = emitter.emit("scan-progress", e);
         })),
@@ -515,11 +528,13 @@ pub fn run() {
             settings: Mutex::new(settings),
             last_scan: Mutex::new(HashMap::new()),
             migrations: Mutex::new(HashMap::new()),
+            scan_cancel: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
         })
         .invoke_handler(tauri::generate_handler![
             list_rules,
             app_info,
             scan,
+            cancel_scan,
             apply_findings,
             history,
             undo,
