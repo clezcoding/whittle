@@ -5,13 +5,16 @@ import type { MigrateOutcome, MigratePreview, MigrateProgress } from '../types'
 
 interface Props {
   home: string
+  /** The folders to search, as saved in settings. Empty means the usual developer folders. */
+  roots: string[]
+  onRoots: (roots: string[]) => Promise<void>
   preview: () => Promise<MigratePreview>
   installPnpm: () => Promise<string>
   apply: (ids: string[], onProgress: (p: MigrateProgress) => void) => Promise<MigrateOutcome[]>
   onChanged: () => void
 }
 
-export function Migrate({ home, preview, installPnpm, apply, onChanged }: Props) {
+export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onChanged }: Props) {
   const [found, setFound] = useState<MigratePreview | null>(null)
   const [picked, setPicked] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState<'find' | 'install' | 'convert' | null>(null)
@@ -19,6 +22,28 @@ export function Migrate({ home, preview, installPnpm, apply, onChanged }: Props)
   const [progress, setProgress] = useState<MigrateProgress | null>(null)
   const [outcomes, setOutcomes] = useState<MigrateOutcome[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [newRoot, setNewRoot] = useState('')
+  const [rootError, setRootError] = useState<string | null>(null)
+
+  // Saves the folder list. The old result belongs to the old folders, so it is cleared.
+  const changeRoots = async (next: string[]) => {
+    setRootError(null)
+    try {
+      await onRoots(next)
+      setFound(null); setOutcomes(null); setPicked(new Set())
+      return true
+    } catch (e) {
+      setRootError(String(e))
+      return false
+    }
+  }
+
+  const addRoot = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const value = newRoot.trim()
+    if (!value || roots.includes(value)) return
+    if (await changeRoots([...roots, value])) setNewRoot('')
+  }
 
   const find = async () => {
     setBusy('find'); setError(null); setOutcomes(null); setConfirmInstall(false)
@@ -77,6 +102,29 @@ export function Migrate({ home, preview, installPnpm, apply, onChanged }: Props)
     <section className="view migrate" aria-labelledby="h-migrate">
       <header className="view__head"><h1 id="h-migrate">Move projects to pnpm</h1></header>
       <p className="lede">Finds npm and yarn projects and converts their lockfile to pnpm. Each one is checked with <code>pnpm install</code> in a scratch copy first; if the check fails, that project is not touched. The old lockfile goes to quarantine, and every run can be undone in History. The check downloads the project's packages from the npm registry. Nothing else leaves your Mac.</p>
+
+      <section className="migrate__folders" aria-labelledby="h-folders">
+        <h2 id="h-folders">Folders to search</h2>
+        {roots.length === 0 ? (
+          <p className="tree__help">The usual developer folders that exist on this Mac, such as Developer, Projects and Code.</p>
+        ) : (
+          <ul className="migrate__chips">
+            {roots.map((r) => (
+              <li key={r}>
+                <span>{r}</span>
+                <button type="button" className="migrate__remove" aria-label={`Remove ${r}`} disabled={busy !== null} onClick={() => void changeRoots(roots.filter((x) => x !== r))}>×</button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form className="pick" onSubmit={(e) => void addRoot(e)}>
+          <label htmlFor="new-root" className="sr">Folder to search</label>
+          <input id="new-root" value={newRoot} onChange={(e) => setNewRoot(e.target.value)} placeholder="~/Developer" spellCheck={false} autoComplete="off" />
+          <GhostButton type="submit" disabled={!newRoot.trim() || busy !== null}>Add folder</GhostButton>
+          {roots.length > 0 && <GhostButton type="button" disabled={busy !== null} onClick={() => void changeRoots([])}>Use the usual folders</GhostButton>}
+        </form>
+        {rootError && <p className="warn" role="alert">{rootError}</p>}
+      </section>
 
       <form className="pick" onSubmit={(e) => { e.preventDefault(); void find() }}>
         <GhostButton type="submit" disabled={busy !== null}>{busy === 'find' ? 'Looking…' : 'Find projects'}</GhostButton>

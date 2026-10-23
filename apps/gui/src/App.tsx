@@ -33,6 +33,7 @@ const FALLBACK_SETTINGS: SettingsT = {
   confirm_before_clean: true,
   default_modules: DEFAULT_MODULES,
   exclusions: [],
+  migrate_roots: [],
   appearance: 'system',
   motion: 'system',
 }
@@ -428,6 +429,8 @@ export function App() {
         {view === 'migrate' && (
           <Migrate
             home={info.home}
+            roots={settings?.migrate_roots ?? []}
+            onRoots={async (roots) => { await updateSettings({ migrate_roots: roots }) }}
             preview={api.migratePreview}
             installPnpm={api.migrateInstallPnpm}
             apply={api.migrateApply}

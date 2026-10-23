@@ -450,7 +450,7 @@ fn cmd_undo(ctx: &Context, ui: &ui::Ui, run: Option<&str>) -> Result<()> {
 
 fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
     let roots = if args.paths.is_empty() {
-        projects::default_roots(ctx)
+        Settings::load(ctx).migrate_roots(ctx)
     } else {
         args.paths.clone()
     };
