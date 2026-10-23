@@ -166,8 +166,12 @@ export const mock: Handlers & {
   tidyApply(dir: string, onProgress?: (p: ApplyProgress) => void): Promise<ApplyReport>
   pickFolder(): Promise<string | null>
   migratePreview(): Promise<MigratePreview>
-  migrateInstallPnpm(): Promise<string>
-  migrateApply(ids: string[], onProgress?: (p: MigrateProgress) => void): Promise<MigrateOutcome[]>
+  migrateInstallPnpm(onLine?: (line: string) => void): Promise<string>
+  migrateApply(
+    ids: string[],
+    onProgress?: (p: MigrateProgress) => void,
+    onPhase?: (p: { project: string; phase: string }) => void,
+  ): Promise<MigrateOutcome[]>
   getSettings(): Promise<Settings>
   saveSettings(s: Settings): Promise<Settings>
   resetSettings(): Promise<Settings>
@@ -307,15 +311,23 @@ export const mock: Handlers & {
       skipped: [{ project: `${DEMO_HOME}/Projects/old-berry-app`, reason: 'yarn Berry (v2+) is not supported yet' }],
     }
   },
-  async migrateInstallPnpm() {
-    await wait(900)
+  async migrateInstallPnpm(onLine) {
+    const lines = ['npm warn deprecated inflight@1.0.6', 'added 1 package in 2s', 'pnpm 10.28.0 installed']
+    for (const line of lines) {
+      await wait(300)
+      onLine?.(line)
+    }
     return '10.28.0'
   },
-  async migrateApply(ids, onProgress) {
+  async migrateApply(ids, onProgress, onPhase) {
     const outcomes: MigrateOutcome[] = []
+    const steps = ['Reading the lockfile', 'Converting to pnpm', 'Verifying with pnpm install', 'Writing the new lockfile']
     for (const [i, id] of ids.entries()) {
-      await wait(700)
       const project = DEMO_MIGRATE.find((c) => c.id === id)?.project ?? id
+      for (const phase of steps) {
+        onPhase?.({ project, phase })
+        await wait(230)
+      }
       outcomes.push({ project, ok: true, message: 'pnpm-lock.yaml written, verified with pnpm install', run: String(now()).padStart(10, '0') + '-migrate' })
       onProgress?.({ done: i + 1, total: ids.length, project })
     }

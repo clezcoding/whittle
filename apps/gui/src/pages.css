@@ -350,3 +350,36 @@ button.hbar:hover { background: rgb(236 238 240 / 0.04); }
 .explain li { margin-bottom: 0.35rem; }
 .explain p { margin: 0.5rem 0; }
 .result__notes li { list-style: disc; }
+
+/* Live progress popup: follows the current action in the corner without blocking the window. */
+.taskpop { position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 60; width: min(380px, calc(100vw - 2.5rem)); background: var(--raised); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 14px; box-shadow: 0 18px 50px rgb(0 0 0 / 0.35); padding: 0.9rem 1rem 1rem; animation: taskpop-in 260ms ease-out both; }
+@keyframes taskpop-in { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+.taskpop__head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.7rem; }
+.taskpop__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cut); box-shadow: 0 0 0 0 var(--cut); animation: taskpop-pulse 1.4s ease-out infinite; }
+.taskpop--done .taskpop__dot { background: #2e9d62; animation: none; }
+.taskpop--failed .taskpop__dot { background: var(--danger, #b3261e); animation: none; }
+@keyframes taskpop-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cut) 60%, transparent); } 100% { box-shadow: 0 0 0 9px transparent; } }
+.taskpop__title { flex: 1; font-size: 0.95rem; }
+.taskpop__close { background: none; border: 0; color: var(--muted); font-size: 1.1rem; cursor: pointer; line-height: 1; padding: 0.1rem 0.3rem; }
+.taskpop__main { display: flex; gap: 0.9rem; align-items: center; }
+.taskpop__pct { min-width: 3.4rem; font-size: 1.6rem; text-align: right; color: var(--ink); }
+.taskpop__pct small { font-size: 0.75rem; opacity: 0.6; }
+.taskpop--done .taskpop__pct { color: #2e9d62; }
+.taskpop--failed .taskpop__pct { color: var(--danger, #b3261e); }
+.taskpop__spin { display: inline-block; width: 1.1rem; height: 1.1rem; border: 2px solid var(--line-strong); border-top-color: var(--cut); border-radius: 50%; animation: taskpop-spin 0.9s linear infinite; }
+@keyframes taskpop-spin { to { transform: rotate(360deg); } }
+.taskpop__body { flex: 1; min-width: 0; }
+.taskpop__stage { margin: 0 0 0.45rem; font-size: 0.88rem; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.taskpop--failed .taskpop__stage { color: var(--danger, #b3261e); white-space: normal; }
+.taskpop__bar { position: relative; height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.taskpop__bar > span { position: absolute; inset: 0 auto 0 0; width: var(--w, 0%); background: var(--cut); border-radius: 999px; transition: width 380ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.taskpop__bar.is-indeterminate > span { width: 34%; animation: taskpop-slide 1.2s ease-in-out infinite; }
+@keyframes taskpop-slide { 0% { left: -34%; } 100% { left: 100%; } }
+.taskpop__meta { display: flex; flex-wrap: wrap; gap: 0.2rem 0.8rem; margin-top: 0.45rem; font-size: 0.75rem; color: var(--muted); }
+.taskpop__item { margin-top: 0.4rem; font-family: var(--f-mono); font-size: 0.72rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.taskpop__log { margin: 0.7rem 0 0; max-height: 7.5rem; overflow: hidden; font-family: var(--f-mono); font-size: 0.7rem; line-height: 1.5; color: var(--muted); background: var(--surface); border-radius: 8px; padding: 0.5rem 0.6rem; mask-image: linear-gradient(to bottom, #000 60%, transparent); }
+.taskpop__log div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (prefers-reduced-motion: reduce) {
+  .taskpop, .taskpop__dot, .taskpop__spin, .taskpop__bar.is-indeterminate > span { animation: none; }
+  .taskpop__bar > span { transition: none; }
+}

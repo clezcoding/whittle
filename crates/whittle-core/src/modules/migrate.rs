@@ -163,11 +163,30 @@ pub fn pnpm_version() -> Result<String> {
 
 /// Installs pnpm globally with npm. Only called after the user has agreed.
 pub fn install_pnpm() -> Result<()> {
-    let status = Command::new("npm")
+    install_pnpm_with(&|_| {})
+}
+
+/// As `install_pnpm`, but hands every line npm prints to `on_line` while it runs.
+pub fn install_pnpm_with(on_line: &(dyn Fn(&str) + Sync)) -> Result<()> {
+    let mut child = Command::new("npm")
         .args(["install", "-g", "pnpm"])
         .stdin(Stdio::null())
-        .status()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .map_err(|e| Error::Other(format!("could not run npm: {e}")))?;
+    let (out, err) = (child.stdout.take(), child.stderr.take());
+    thread::scope(|scope| {
+        if let Some(out) = out {
+            scope.spawn(move || relay_lines(out, on_line));
+        }
+        if let Some(err) = err {
+            scope.spawn(move || relay_lines(err, on_line));
+        }
+    });
+    let status = child
+        .wait()
+        .map_err(|e| Error::Other(format!("npm did not finish: {e}")))?;
     if status.success() {
         Ok(())
     } else {
@@ -175,9 +194,32 @@ pub fn install_pnpm() -> Result<()> {
     }
 }
 
+fn relay_lines(stream: impl std::io::Read, on_line: &(dyn Fn(&str) + Sync)) {
+    use std::io::BufRead;
+    for line in std::io::BufReader::new(stream)
+        .lines()
+        .map_while(|l| l.ok())
+    {
+        let line = line.trim_end();
+        if !line.is_empty() {
+            on_line(line);
+        }
+    }
+}
+
 /// Converts one project. With `dry_run`, it runs the import and the verification in scratch space
 /// and reports what would change; the project is left as it was.
 pub fn convert(ctx: &Context, cand: &Candidate, dry_run: bool) -> Result<Converted> {
+    convert_with(ctx, cand, dry_run, &|_| {})
+}
+
+/// As `convert`, and reports each stage to `on_phase` as it starts.
+pub fn convert_with(
+    ctx: &Context,
+    cand: &Candidate,
+    dry_run: bool,
+    on_phase: &dyn Fn(&str),
+) -> Result<Converted> {
     ctx.safety.check(&cand.project)?;
     if cand.project.join(PNPM_LOCK).exists() {
         return Err(Error::Other(format!(
@@ -188,7 +230,7 @@ pub fn convert(ctx: &Context, cand: &Candidate, dry_run: bool) -> Result<Convert
     pnpm_version()?;
     let run = plan::new_run_id(ctx);
     let work = ctx.state_dir.join("migrate").join(&run);
-    let produced = verify_in_scratch(cand, &work);
+    let produced = verify_in_scratch(cand, &work, on_phase);
     let _ = fsutil::remove_any(&work);
     let new_lock = produced?;
 
@@ -200,12 +242,14 @@ pub fn convert(ctx: &Context, cand: &Candidate, dry_run: bool) -> Result<Convert
         pnpm_lock_bytes: new_lock.len() as u64,
     };
     if !dry_run {
+        on_phase("Writing the new lockfile");
         write_conversion(ctx, cand, &new_lock, &run)?;
     }
     Ok(converted)
 }
 
-fn verify_in_scratch(cand: &Candidate, work: &Path) -> Result<Vec<u8>> {
+fn verify_in_scratch(cand: &Candidate, work: &Path, on_phase: &dyn Fn(&str)) -> Result<Vec<u8>> {
+    on_phase("Importing the lockfile");
     fs::create_dir_all(work).map_err(|e| Error::io(work, e))?;
     fs::copy(cand.project.join("package.json"), work.join("package.json"))
         .map_err(|e| Error::io(&cand.project, e))?;
@@ -217,6 +261,7 @@ fn verify_in_scratch(cand: &Candidate, work: &Path) -> Result<Vec<u8>> {
     if !produced.is_file() {
         return Err(Error::Other("pnpm import did not write a lockfile".into()));
     }
+    on_phase("Verifying with pnpm install (downloads packages)");
     run_pnpm(
         work,
         &["install", "--frozen-lockfile", "--ignore-scripts"],
