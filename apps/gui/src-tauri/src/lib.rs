@@ -521,8 +521,16 @@ pub fn run() {
             let _ = plan::purge(&ctx, days);
         });
     }
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+    let builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+    // Debug builds only. The bridge listens on the network on purpose (development on a LAN);
+    // release builds never start it.
+    #[cfg(debug_assertions)]
+    let builder = builder.plugin(
+        tauri_plugin_mcp_bridge::Builder::new()
+            .bind_address("0.0.0.0")
+            .build(),
+    );
+    builder
         .manage(AppState {
             base,
             settings: Mutex::new(settings),

@@ -14,6 +14,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - While a scan runs on the overview, its progress is shown there (with a Stop button) instead of a second popup. The popup appears when you leave the overview.
 
 ### Added
+- Development: debug builds start the Tauri MCP bridge (`tauri-plugin-mcp-bridge`) on the network, so the running app can be inspected from a development tool. Release builds never start it.
 - A **Stop** button on the progress popup and the command palette ("Stop the scan"). A stopped scan keeps the findings of the modules that finished; the stop takes effect before the next module.
 - Progress popups show the installer output on request (**Show details**).
 - Live progress popups: every action (scan, clean, undo, free quarantine, tidy, pnpm conversion, pnpm install, previews) shows a small card in the corner with its stage, a bar when progress is measurable, the item in progress, elapsed and remaining time, and the last lines of the pnpm installer. It appears after a short delay so quick actions do not flash, closes itself when done, and stays on screen when it fails with the error. Motion respects reduced-motion settings.
