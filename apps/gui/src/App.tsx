@@ -54,6 +54,9 @@ export interface TaskHandle {
   log(line: string): void
 }
 
+/** The scan shows its own progress on the overview, so its popup only appears on other pages. */
+const SCAN_TITLE = 'Scanning your Mac'
+
 export function App() {
   const [info, setInfo] = useState<AppInfo>({ home: '', version: '', demo: false, os: '', state_dir: '', config_dir: '', repo: '' })
   const [settings, setSettings] = useState<SettingsT | null>(null)
@@ -301,7 +304,7 @@ export function App() {
     try {
       let stopped = false
       const found = await runTask(
-        'Scanning your Mac',
+        SCAN_TITLE,
         'Starting',
         (h) =>
           api.scan(modules, (e) => {
@@ -515,7 +518,7 @@ export function App() {
       <Sidebar view={view} onView={setView} onAbout={() => setDialog('about')} onPalette={() => { setInspectId(null); setPalette(true) }} reviewCount={findings.length} quarantine={quarantine} version={info.version} demo={info.demo} />
       <main className="main">
         {view === 'overview' && (
-          <Overview phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} />
+          <Overview onStop={stopTask} phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} />
         )}
         {view === 'review' && (
           <Review findings={findings} selected={selected} onSelected={setSelected} peeling={peeling} home={info.home} busy={busy} run={applyRun} notice={notice} settings={prefs} onClean={(d) => void clean(d)} onScan={() => void scan()} onIgnore={(id) => void ignoreFinding(id)} onReveal={(id) => void api.revealFinding(id).catch((e) => setNotice({ text: errorText(e) }))} onInspect={(f) => setInspectId(f.id)} />
@@ -637,7 +640,7 @@ export function App() {
       )}
       {dialog === 'about' && <About info={info} onOpen={openExternal} onClose={() => setDialog(null)} />}
       {dialog === 'keys' && <Shortcuts onClose={() => setDialog(null)} />}
-      {task && task.shown && <TaskPopup task={task} onClose={closeTask} onCancel={stopTask} />}
+      {task && task.shown && !(view === 'overview' && task.title === SCAN_TITLE) && <TaskPopup task={task} onClose={closeTask} onCancel={stopTask} />}
       {result && (
         <ResultDialog
           result={result}

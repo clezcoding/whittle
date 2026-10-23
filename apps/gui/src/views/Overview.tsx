@@ -16,6 +16,8 @@ interface Props {
   progress: number
   tally: number
   scanningModule: ModuleId | null
+  /** Stops a running scan. Shown next to the progress, where the user is looking. */
+  onStop?: () => void
   findings: Finding[]
   modules: ModuleId[]
   onToggleModule: (m: ModuleId) => void
@@ -23,7 +25,7 @@ interface Props {
   onReview: () => void
 }
 
-export function Overview({ phase, run, progress, tally, scanningModule, findings, modules, onToggleModule, onScan, onReview }: Props) {
+export function Overview({ phase, run, progress, tally, scanningModule, findings, modules, onToggleModule, onScan, onReview, onStop }: Props) {
   // Manual findings are guesses: listed in Review, but not counted as "can be removed".
   const total = findings.filter((f) => f.risk !== 'manual').reduce((s, f) => s + f.bytes, 0)
   const safe = findings.filter((f) => f.risk === 'safe').reduce((s, f) => s + f.bytes, 0)
@@ -90,6 +92,7 @@ export function Overview({ phase, run, progress, tally, scanningModule, findings
                 )}
               </p>
               <div className="hero__actions">
+                {phase === 'scanning' && onStop && <GhostButton onClick={onStop}>Stop</GhostButton>}
                 {phase === 'done' && findings.length > 0 && <CutButton onClick={onReview}>Review &amp; clean</CutButton>}
                 {phase === 'done' && <GhostButton onClick={onScan}>Scan again</GhostButton>}
               </div>
