@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { GhostButton, Modal, CutButton, Segmented, Stepper, Toggle } from '../components/Primitives'
+import { ChooseFolder } from '../components/ChooseFolder'
 import { formatBytes, shortPath } from '../lib/format'
 import { MODULES } from '../lib/modules'
 import type { Appearance, AppInfo, Disposal, External, ModuleId, Motion, Permissions, Settings as SettingsT } from '../types'
@@ -142,6 +143,7 @@ export function Settings(p: Props) {
             onChange={(e) => { setPath(e.target.value); setPathError(null) }}
             onKeyDown={(e) => e.key === 'Enter' && void add()}
           />
+          <ChooseFolder onPick={(p) => { setPath(p); setPathError(null) }} disabled={adding} onError={setPathError} />
           <GhostButton disabled={!path.trim() || adding} onClick={() => void add()}>Add</GhostButton>
         </div>
         {pathError && <p id="path-error" className="warn" role="alert">{pathError}</p>}

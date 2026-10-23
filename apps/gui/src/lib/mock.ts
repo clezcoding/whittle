@@ -158,6 +158,7 @@ export const mock: Handlers & {
   quarantineSize(): Promise<number>
   tidyPreview(dir: string): Promise<TidyEntry[]>
   tidyApply(dir: string, onProgress?: (p: ApplyProgress) => void): Promise<ApplyReport>
+  pickFolder(): Promise<string | null>
   migratePreview(): Promise<MigratePreview>
   migrateInstallPnpm(): Promise<string>
   migrateApply(ids: string[], onProgress?: (p: MigrateProgress) => void): Promise<MigrateOutcome[]>
@@ -286,6 +287,11 @@ export const mock: Handlers & {
       e('export.zip', 'Archives', 88, 'file type'),
       e('Bildschirmaufnahme 2026-10-09 um 11.20.mov', 'Screen Recordings/2026-10', 210, 'screen recording'),
     ]
+  },
+  async pickFolder() {
+    // Stands in for the Finder dialog in a plain browser.
+    await wait(200)
+    return `${DEMO_HOME}/Developer/chosen-folder`
   },
   async migratePreview() {
     await wait(350)

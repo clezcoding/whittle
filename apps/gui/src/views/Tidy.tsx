@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ApplyBar } from '../components/Progress'
 import { CutButton, GhostButton } from '../components/Primitives'
+import { ChooseFolder } from '../components/ChooseFolder'
 import { formatBytes, shortPath } from '../lib/format'
 import { TIDY_REASON, tidyFolderHelp } from '../lib/explain'
 import type { ApplyProgress, ApplyRun, TidyEntry } from '../types'
@@ -48,6 +49,7 @@ export function Tidy({ home, preview, apply }: Props) {
       <form className="pick" onSubmit={(e) => { e.preventDefault(); void run() }}>
         <label htmlFor="dir" className="sr">Folder</label>
         <input id="dir" value={dir} onChange={(e) => setDir(e.target.value)} spellCheck={false} autoComplete="off" />
+        <ChooseFolder onPick={setDir} disabled={busy} onError={setError} />
         <GhostButton type="submit" disabled={busy || !dir.trim()}>{busy && !entries ? 'Looking…' : 'Preview'}</GhostButton>
       </form>
 

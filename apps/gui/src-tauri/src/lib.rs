@@ -211,6 +211,26 @@ async fn tidy_apply(
     .map_err(err)?
 }
 
+// ───────────────────────────── folders ─────────────────────────────
+
+/// Opens the system folder picker and returns the folder the user chose, or `None` if they cancel.
+/// The path comes from the native dialog, which the user operates, so the webview cannot name one.
+#[tauri::command]
+async fn pick_folder(app: AppHandle) -> CmdResult<Option<String>> {
+    use tauri_plugin_dialog::DialogExt;
+    tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .set_title("Choose a folder")
+            .blocking_pick_folder()
+            .map(|p| p.into_path().map(|path| path.display().to_string()))
+            .transpose()
+            .map_err(err)
+    })
+    .await
+    .map_err(err)?
+}
+
 // ───────────────────────────── migrate ─────────────────────────────
 
 #[derive(Serialize)]
@@ -457,6 +477,7 @@ pub fn run() {
         });
     }
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState {
             base,
             settings: Mutex::new(settings),
@@ -474,6 +495,7 @@ pub fn run() {
             quarantine_size,
             tidy_preview,
             tidy_apply,
+            pick_folder,
             migrate_preview,
             migrate_install_pnpm,
             migrate_apply,

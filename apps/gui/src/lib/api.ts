@@ -113,6 +113,10 @@ export const api = {
     return withApplyEvents(onProgress, () => call<ApplyReport>('tidy_apply', { dir }))
   },
 
+  /** The native folder picker. Resolves to the chosen folder, or null when the user cancels. */
+  pickFolder(): Promise<string | null> {
+    return isTauri ? call<string | null>('pick_folder') : mock.pickFolder()
+  },
   migratePreview(): Promise<MigratePreview> {
     return isTauri ? call('migrate_preview') : mock.migratePreview()
   },

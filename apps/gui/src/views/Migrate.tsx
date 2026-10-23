@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CutButton, GhostButton, Check } from '../components/Primitives'
+import { ChooseFolder } from '../components/ChooseFolder'
 import { formatBytes, shortPath } from '../lib/format'
 import type { MigrateOutcome, MigratePreview, MigrateProgress } from '../types'
 
@@ -120,6 +121,7 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
         <form className="pick" onSubmit={(e) => void addRoot(e)}>
           <label htmlFor="new-root" className="sr">Folder to search</label>
           <input id="new-root" value={newRoot} onChange={(e) => setNewRoot(e.target.value)} placeholder="~/Developer" spellCheck={false} autoComplete="off" />
+          <ChooseFolder onPick={setNewRoot} disabled={busy !== null} onError={setRootError} />
           <GhostButton type="submit" disabled={!newRoot.trim() || busy !== null}>Add folder</GhostButton>
           {roots.length > 0 && <GhostButton type="button" disabled={busy !== null} onClick={() => void changeRoots([])}>Use the usual folders</GhostButton>}
         </form>
