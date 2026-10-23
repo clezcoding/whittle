@@ -20,9 +20,9 @@ export function Tidy({ home, preview, apply }: Props) {
   const [done, setDone] = useState<number | null>(null)
   const [moving, setMoving] = useState<ApplyRun | null>(null)
 
-  const run = async () => {
+  const run = async (target = dir) => {
     setBusy(true); setError(null); setDone(null)
-    try { setEntries(await preview(dir)) } catch (e) { setError(String(e)); setEntries(null) } finally { setBusy(false) }
+    try { setEntries(await preview(target)) } catch (e) { setError(String(e)); setEntries(null) } finally { setBusy(false) }
   }
   const go = async () => {
     setBusy(true); setError(null)
@@ -46,10 +46,20 @@ export function Tidy({ home, preview, apply }: Props) {
       <header className="view__head"><h1 id="h-tidy">Tidy a folder</h1></header>
       <p className="lede">Sorts loose files into sub-folders by type and date. Screenshots go by month. Sub-folders, hidden files, app bundles and fresh downloads are never touched. You see every move first, and you can undo it.</p>
 
+      <details className="explain">
+        <summary>How tidying works</summary>
+        <ol>
+          <li><b>Preview.</b> Whittle lists the loose files in the folder and the sub-folder each would move to. Nothing moves yet.</li>
+          <li><b>Sort.</b> Files are grouped by type (documents, images, archives and so on). Screenshots are grouped by month.</li>
+          <li><b>Protect.</b> Sub-folders, hidden files, app bundles, and files modified in the last ten minutes stay where they are, so downloads that are still running are not moved.</li>
+          <li><b>Record.</b> Every move is written to the journal. Undo the run in History to put all files back.</li>
+        </ol>
+      </details>
+
       <form className="pick" onSubmit={(e) => { e.preventDefault(); void run() }}>
         <label htmlFor="dir" className="sr">Folder</label>
         <input id="dir" value={dir} onChange={(e) => setDir(e.target.value)} spellCheck={false} autoComplete="off" />
-        <ChooseFolder onPick={setDir} disabled={busy} onError={setError} />
+        <ChooseFolder onPick={(p) => { setDir(p); void run(p) }} disabled={busy} onError={setError} />
         <GhostButton type="submit" disabled={busy || !dir.trim()}>{busy && !entries ? 'Looking…' : 'Preview'}</GhostButton>
       </form>
 

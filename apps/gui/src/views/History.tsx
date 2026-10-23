@@ -26,8 +26,14 @@ export function History({ runs, quarantine, days, onUndo, onPurge }: Props) {
           ? `Quarantine holds ${formatBytes(quarantine)}. Items stay for ${days} day${days === 1 ? '' : 's'}, then Whittle removes them for good. Until then every run can be undone.`
           : 'Everything Whittle changes is listed here, and can be undone while it is in quarantine.'}
       </p>
+      <details className="explain" open>
+        <summary>What is a run?</summary>
+        <p>A run is one action: a clean, a tidy, a migration, or a free-up. Each run lists what changed and when. While its items are in quarantine, the whole run can be undone with one click, and undoing puts every item back where it came from.</p>
+        <p>Runs that are fully removed (Free quarantine now, or the automatic cleanup) stay listed as <b>final</b>: they can no longer be undone.</p>
+      </details>
+
       {runs.length === 0 ? (
-        <div className="empty"><p>No runs yet.</p></div>
+        <div className="empty"><p>No runs yet. Once you clean, tidy or convert something, it appears here.</p></div>
       ) : (
         <ul className="runs">
           {runs.map((r, i) => (

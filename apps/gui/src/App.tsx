@@ -4,6 +4,8 @@ import { CommandPalette, type Command } from './components/CommandPalette'
 import { Inspector } from './components/Inspector'
 import { Onboarding } from './components/Onboarding'
 import { ReportDialog } from './components/ReportDialog'
+import { ResultDialog } from './components/ResultDialog'
+import { cleanResult, purgeResult, tidyResult, undoResult, type ResultView } from './lib/results'
 import { Shortcuts } from './components/Shortcuts'
 import { Sidebar, VIEW_ORDER, type View } from './components/Sidebar'
 import { Migrate } from './views/Migrate'
@@ -64,6 +66,8 @@ export function App() {
   const [quarantine, setQuarantine] = useState(0)
   const [scanRun, setScanRun] = useState<ScanRun | null>(null)
   const [applyRun, setApplyRun] = useState<ApplyRun | null>(null)
+  /** The summary dialog shown when an action finishes. */
+  const [result, setResult] = useState<ResultView | null>(null)
   const scanId = useRef(0)
   const latest = useRef<SettingsT | null>(null)
   const savedTimer = useRef(0)
@@ -268,9 +272,24 @@ export function App() {
               ? `Moved ${gone.size} item(s), ${formatBytes(report.bytes_handled)}, to the Trash.`
               : `Quarantined ${gone.size} item(s), ${formatBytes(report.bytes_handled)}. Kept for ${prefs.quarantine_days} days.`
         const failed = report.failed.length ? ` ${report.failed.length} could not be handled.` : ''
+        setResult(
+          cleanResult({
+            report,
+            disposal,
+            quarantineDays: prefs.quarantine_days,
+            onUndo: disposal === 'quarantine'
+              ? async () => {
+                  const undone = await api.undo(report.run)
+                  await refreshState()
+                  await scan()
+                  setResult(undoResult(undone))
+                }
+              : undefined,
+          }),
+        )
         setNotice({
           text: text + failed,
-          undo: disposal === 'quarantine' ? async () => { await api.undo(report.run); await refreshState(); await scan() } : undefined,
+          undo: disposal === 'quarantine' ? async () => { await undoRun(report.run); await scan() } : undefined,
         })
         await refreshState()
       } catch (e) {
@@ -282,6 +301,30 @@ export function App() {
     },
     [findings, selected, refreshState, scan, prefs.quarantine_days],
   )
+
+  /** Undo a run from History or Quarantine. A failure is shown as a notice, never swallowed. */
+  const undoRun = useCallback(
+    async (run?: string) => {
+      try {
+        const undone = await api.undo(run)
+        await refreshState()
+        setResult(undoResult(undone))
+      } catch (e) {
+        setNotice({ text: `Could not undo: ${errorText(e)}` })
+      }
+    },
+    [refreshState],
+  )
+
+  const purgeAll = useCallback(async () => {
+    try {
+      const purged = await api.purge(0)
+      await refreshState()
+      setResult(purgeResult(purged))
+    } catch (e) {
+      setNotice({ text: `Could not free the quarantine: ${errorText(e)}` })
+    }
+  }, [refreshState])
 
   const selectMany = useCallback((ids: string[], on: boolean) => {
     setSelected((sel) => {
@@ -406,13 +449,9 @@ export function App() {
             days={prefs.quarantine_days}
             autoPurge={prefs.auto_purge}
             onUndo={async (run) => {
-              await api.undo(run)
-              await refreshState()
+              await undoRun(run)
             }}
-            onPurge={async () => {
-              await api.purge(0)
-              await refreshState()
-            }}
+            onPurge={purgeAll}
             onSettings={() => setView('settings')}
           />
         )}
@@ -421,8 +460,9 @@ export function App() {
             home={info.home}
             preview={api.tidyPreview}
             apply={async (dir, onProgress) => {
-              await api.tidyApply(dir, onProgress)
+              const moved = await api.tidyApply(dir, onProgress)
               await refreshState()
+              setResult(tidyResult(moved, dir))
             }}
           />
         )}
@@ -434,6 +474,7 @@ export function App() {
             preview={api.migratePreview}
             installPnpm={api.migrateInstallPnpm}
             apply={api.migrateApply}
+            onResult={setResult}
             onChanged={() => void refreshState()}
           />
         )}
@@ -442,14 +483,8 @@ export function App() {
             runs={runs}
             quarantine={quarantine}
             days={prefs.quarantine_days}
-            onUndo={async (run) => {
-              await api.undo(run)
-              await refreshState()
-            }}
-            onPurge={async () => {
-              await api.purge(0)
-              await refreshState()
-            }}
+            onUndo={undoRun}
+            onPurge={purgeAll}
           />
         )}
         {view === 'settings' && settings && (
@@ -462,10 +497,7 @@ export function App() {
             onChange={(patch) => void updateSettings(patch)}
             onAddExclusion={addExclusion}
             onRemoveExclusion={(p) => void removeExclusion(p)}
-            onPurge={async () => {
-              await api.purge(0)
-              await refreshState()
-            }}
+            onPurge={purgeAll}
             onReset={async () => {
               adoptSettings(await api.resetSettings())
               setModules((await api.getSettings()).default_modules)
@@ -498,6 +530,13 @@ export function App() {
       )}
       {dialog === 'about' && <About info={info} onOpen={openExternal} onClose={() => setDialog(null)} />}
       {dialog === 'keys' && <Shortcuts onClose={() => setDialog(null)} />}
+      {result && (
+        <ResultDialog
+          result={result}
+          onClose={() => setResult(null)}
+          onNext={(v) => { setResult(null); setView(v) }}
+        />
+      )}
       {dialog === 'report' && <ReportDialog text={buildReport(findings, info.home, new Date())} onClose={() => setDialog(null)} />}
       {inspected && (
         <Inspector
