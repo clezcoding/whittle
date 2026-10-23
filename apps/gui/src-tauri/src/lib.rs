@@ -16,7 +16,7 @@ use serde::Serialize;
 use system::{External, Permissions};
 use tauri::{AppHandle, Emitter, State};
 use whittle_core::engine::{self, ModuleId, ProgressEvent, ScanOptions};
-use whittle_core::modules::{migrate, projects, tidy};
+use whittle_core::modules::{migrate, tidy};
 use whittle_core::plan::{self, ApplyProgress, ApplyReport, PurgeReport, RunSummary, UndoReport};
 use whittle_core::{Context, Disposal, Finding, Plan, Settings};
 
@@ -249,12 +249,10 @@ struct MigrateProgress {
 #[tauri::command]
 async fn migrate_preview(state: State<'_, AppState>) -> CmdResult<MigratePreview> {
     let ctx = state.ctx();
-    let found = tauri::async_runtime::spawn_blocking(move || {
-        let roots = projects::default_roots(&ctx);
-        migrate::detect(&ctx, &roots)
-    })
-    .await
-    .map_err(err)?;
+    let roots = lock(&state.settings).migrate_roots(&ctx);
+    let found = tauri::async_runtime::spawn_blocking(move || migrate::detect(&ctx, &roots))
+        .await
+        .map_err(err)?;
     let pnpm = tauri::async_runtime::spawn_blocking(|| migrate::pnpm_version().ok())
         .await
         .map_err(err)?;

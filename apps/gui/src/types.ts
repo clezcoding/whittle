@@ -166,6 +166,8 @@ export interface Settings {
   confirm_before_clean: boolean
   default_modules: ModuleId[]
   exclusions: string[]
+  /** Folders the pnpm migrator searches. Empty means the usual developer folders. */
+  migrate_roots: string[]
   appearance: Appearance
   motion: Motion
 }

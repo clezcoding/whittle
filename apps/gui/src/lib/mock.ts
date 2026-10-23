@@ -114,6 +114,7 @@ let settings: Settings = {
   confirm_before_clean: true,
   default_modules: ['caches', 'projects', 'orphans'],
   exclusions: [],
+  migrate_roots: [],
   appearance: 'system',
   motion: 'system',
 }

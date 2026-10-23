@@ -19,6 +19,8 @@ use crate::error::{Error, Result};
 use crate::model::Disposal;
 
 pub const MAX_EXCLUSIONS: usize = 500;
+/// Folders the migrator may search. Few on purpose: each one is walked.
+pub const MAX_MIGRATE_ROOTS: usize = 20;
 pub const MIN_QUARANTINE_DAYS: u32 = 1;
 pub const MAX_QUARANTINE_DAYS: u32 = 365;
 
@@ -58,6 +60,8 @@ pub struct Settings {
     pub default_modules: Vec<ModuleId>,
     /// Paths Whittle never reports and never touches. `~` is allowed.
     pub exclusions: Vec<String>,
+    /// Folders the pnpm migrator searches. Empty means the usual developer folders. `~` is allowed.
+    pub migrate_roots: Vec<String>,
     pub appearance: Appearance,
     pub motion: Motion,
 }
@@ -72,6 +76,7 @@ impl Default for Settings {
             confirm_before_clean: true,
             default_modules: ModuleId::DEFAULT.to_vec(),
             exclusions: Vec::new(),
+            migrate_roots: Vec::new(),
             appearance: Appearance::System,
             motion: Motion::System,
         }
@@ -131,7 +136,31 @@ impl Settings {
         for raw in &self.exclusions {
             Settings::resolve_exclusion(ctx, raw)?;
         }
+        if self.migrate_roots.len() > MAX_MIGRATE_ROOTS {
+            return Err(Error::Other(format!(
+                "at most {MAX_MIGRATE_ROOTS} folders for the pnpm migrator"
+            )));
+        }
+        for raw in &self.migrate_roots {
+            let path = Settings::resolve_exclusion(ctx, raw)
+                .map_err(|_| Error::Other(format!("not a usable folder: {raw}")))?;
+            if !path.is_dir() {
+                return Err(Error::Other(format!("not a folder: {raw}")));
+            }
+        }
         Ok(())
+    }
+
+    /// The folders the migrator searches: the chosen ones, or the usual developer folders.
+    pub fn migrate_roots(&self, ctx: &Context) -> Vec<PathBuf> {
+        if self.migrate_roots.is_empty() {
+            return crate::modules::projects::default_roots(ctx);
+        }
+        self.migrate_roots
+            .iter()
+            .filter_map(|raw| Settings::resolve_exclusion(ctx, raw).ok())
+            .filter(|p| p.is_dir())
+            .collect()
     }
 
     /// Turns what the user typed into an absolute path, or says why it cannot be used.
@@ -175,6 +204,16 @@ impl Settings {
                 }
                 _ => false,
             });
+        let mut roots: Vec<PathBuf> = Vec::new();
+        self.migrate_roots
+            .retain(|raw| match Settings::resolve_exclusion(ctx, raw) {
+                Ok(p) if !roots.contains(&p) => {
+                    roots.push(p);
+                    true
+                }
+                _ => false,
+            });
+        self.migrate_roots.truncate(MAX_MIGRATE_ROOTS);
         let mut mods: Vec<ModuleId> = Vec::new();
         for m in self.default_modules.drain(..) {
             if !mods.contains(&m) {
@@ -303,6 +342,26 @@ mod tests {
         assert!(s.save(&ctx).is_err());
         s.exclusions = vec!["/a/../b".into()];
         assert!(s.save(&ctx).is_err());
+    }
+
+    #[test]
+    fn migrate_roots_are_validated_and_used() {
+        let (d, ctx) = ctx();
+        std::fs::create_dir_all(d.path().join("Work/app")).unwrap();
+        let mut s = Settings::default();
+        // Empty means the usual folders, which here do not exist.
+        assert!(s.migrate_roots(&ctx).is_empty());
+        s.migrate_roots = vec!["~/Work/app".into(), "~/Work/app/".into()];
+        s.sanitize(&ctx);
+        assert_eq!(s.migrate_roots.len(), 1, "same folder twice is one entry");
+        assert_eq!(s.migrate_roots(&ctx), vec![d.path().join("Work/app")]);
+        s.migrate_roots = vec!["~/Work/missing".into()];
+        assert!(
+            s.validate(&ctx).is_err(),
+            "a folder that does not exist is refused"
+        );
+        s.migrate_roots = vec!["relative".into()];
+        assert!(s.validate(&ctx).is_err());
     }
 
     #[test]
