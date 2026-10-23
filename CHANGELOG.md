@@ -9,6 +9,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
 ### Added
+- A **Move to pnpm** page in the desktop app (sidebar and command palette, no `⌘` number): find npm and yarn projects, choose which to convert, see each result, and undo any run in History. Installing pnpm asks for confirmation first.
 - `whittle migrate`: finds npm and classic yarn projects, previews the conversion to pnpm, and with `--apply` converts the lockfile. Each conversion is verified with `pnpm install --frozen-lockfile --ignore-scripts` in a scratch copy first; the old lockfile is quarantined and the change is undoable with `whittle undo`. Yarn Berry projects are reported and skipped. `--install-pnpm` installs pnpm after a confirmation.
 - Four new pages: **Insights** (charts of the last scan: category donut, risk bar, age columns, a treemap of every finding, the largest items), **Apps** (findings grouped by app, dev tool and project, with "select everything safe" per app), **Rules** (every scan rule with its folders, limits and what it matched, plus how to write your own) and **Quarantine** (what waits to be removed, with a countdown ring and "put back" per run).
 - A details drawer for every finding (size, share, confidence, what it is, why it is listed, what happens if you remove it, related findings). Open it with a double-click in Review, from Apps or Insights, or from the palette.
@@ -21,6 +22,9 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - Coverage workflow with a floor of 80 % of lines.
 - `GOVERNANCE.md`, `docs/ASSURANCE.md` (threat model, trust boundaries, secure design, countered weaknesses) and `docs/OPENSSF.md` (criterion-by-criterion OpenSSF Best Practices status).
 - DCO sign-off for outside contributors, zizmor linting of workflows, Security Insights file, importable branch ruleset.
+
+### Fixed
+- The command line ends quietly when its output pipe is closed early (`whittle history | head`) instead of panicking.
 
 ### Security
 - Workspace lints: `unsafe_code` is forbidden in the engine and the command line.

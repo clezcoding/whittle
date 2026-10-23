@@ -1,7 +1,7 @@
 // Demo data for running the interface in a plain browser (`pnpm dev`) without the Rust backend.
 // It mimics what `whittle-core` would return on a developer's Mac.
 
-import type { ApplyProgress, ApplyReport, Disposal, Failure, Finding, ModuleId, Permissions, PurgeReport, RuleInfo, RunSummary, ScanProgress, Settings, TidyEntry, UndoReport } from '../types'
+import type { ApplyProgress, ApplyReport, Disposal, Failure, Finding, MigrateOutcome, MigratePreview, MigrateProgress, ModuleId, Permissions, PurgeReport, RuleInfo, RunSummary, ScanProgress, Settings, TidyEntry, UndoReport } from '../types'
 
 export const DEMO_HOME = '/Users/clez'
 const DAY = 86_400
@@ -157,6 +157,9 @@ export const mock: Handlers & {
   quarantineSize(): Promise<number>
   tidyPreview(dir: string): Promise<TidyEntry[]>
   tidyApply(dir: string, onProgress?: (p: ApplyProgress) => void): Promise<ApplyReport>
+  migratePreview(): Promise<MigratePreview>
+  migrateInstallPnpm(): Promise<string>
+  migrateApply(ids: string[], onProgress?: (p: MigrateProgress) => void): Promise<MigrateOutcome[]>
   getSettings(): Promise<Settings>
   saveSettings(s: Settings): Promise<Settings>
   resetSettings(): Promise<Settings>
@@ -282,6 +285,32 @@ export const mock: Handlers & {
       e('export.zip', 'Archives', 88, 'file type'),
       e('Bildschirmaufnahme 2026-10-09 um 11.20.mov', 'Screen Recordings/2026-10', 210, 'screen recording'),
     ]
+  },
+  async migratePreview() {
+    await wait(350)
+    return {
+      pnpm: '10.28.0',
+      candidates: [
+        { id: 'm0', project: `${DEMO_HOME}/Developer/whittle-site`, lockfile: 'package-lock.json', bytes: 184_000 },
+        { id: 'm1', project: `${DEMO_HOME}/Developer/tax-tools`, lockfile: 'yarn.lock', bytes: 96_000 },
+        { id: 'm2', project: `${DEMO_HOME}/Projects/client-dashboard`, lockfile: 'package-lock.json', bytes: 412_000 },
+      ],
+      skipped: [{ project: `${DEMO_HOME}/Projects/old-berry-app`, reason: 'yarn Berry (v2+) is not supported yet' }],
+    }
+  },
+  async migrateInstallPnpm() {
+    await wait(900)
+    return '10.28.0'
+  },
+  async migrateApply(ids, onProgress) {
+    const outcomes: MigrateOutcome[] = []
+    for (const [i, id] of ids.entries()) {
+      await wait(700)
+      const project = `${DEMO_HOME}/Developer/${id}`
+      outcomes.push({ project, ok: true, message: 'pnpm-lock.yaml written, verified with pnpm install', run: String(now()).padStart(10, '0') + '-migrate' })
+      onProgress?.({ done: i + 1, total: ids.length, project })
+    }
+    return outcomes
   },
   async tidyApply(dir, onProgress) {
     const entries = await mock.tidyPreview(dir)

@@ -31,6 +31,7 @@ export const NAV_HELP = {
   overview: 'Scan your Mac and see how much can go.',
   review: 'Look at every finding and choose what to clean.',
   tidy: 'Sort a messy folder into sub-folders by type and date.',
+  migrate: 'Convert npm and yarn projects to pnpm. Each one is verified first, and every run can be undone.',
   history: 'Everything Whittle changed, with undo.',
   insights: 'Charts of the last scan: categories, risk, age, the biggest items.',
   apps: 'Findings grouped by app, dev tool and project.',
