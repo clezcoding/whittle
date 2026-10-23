@@ -156,7 +156,7 @@ A cleaner is only as good as its worst day. Whittle is built so that a bug in a 
 - **A refusal layer under every action.** System paths, your home folder and its top-level folders, other users' data, `.git` folders, real `.app` bundles, Keychains, Mail, Photos and iCloud data are refused, whatever a rule says. Your own *Never touch* list is enforced in the same place.
 - **The app never sends paths to delete.** The interface sends ids of findings from the last scan. The Rust backend looks the paths up itself, so even a compromised web view can only act on what a scan found.
 - **Append-only journal.** Every change is recorded in `~/.whittle/journal.jsonl`.
-- **No network, no telemetry, no account.** The app's content-security policy forbids network requests. Whittle never talks to the internet.
+- **No network, no telemetry, no account.** The app's content-security policy forbids network requests, and the scanner and cleaner never touch the internet. The one exception is `whittle migrate --apply`: to verify a converted pnpm lockfile it runs `pnpm install --frozen-lockfile --ignore-scripts` in a scratch copy, which downloads the project's packages from the npm registry through pnpm. Nothing else is fetched, and the scratch copy is removed afterwards.
 
 <p align="center">
   <picture>
@@ -270,6 +270,8 @@ whittle history                   # what Whittle changed
 whittle purge                     # free the quarantine for good
 whittle tidy ~/Downloads          # preview a sort
 whittle tidy ~/Downloads --apply  # do it
+whittle migrate                   # preview npm and yarn projects that could move to pnpm
+whittle migrate --apply           # convert, verify with pnpm install, undoable
 whittle ignore ~/Developer/keep   # never report or touch this path (shared with the app)
 whittle apps                      # which installed apps Whittle detects
 whittle rules                     # list the built-in rules
@@ -400,7 +402,7 @@ Yes. Releases are universal binaries.
 | | |
 |---|---|
 | ✅ **Shipped (0.1)** | Core engine, command line, desktop app with eight views and a command palette, quarantine and undo, Homebrew tap, universal DMG, signed releases |
-| 🔜 **Next** | Signed and notarized releases, a pnpm migrator for npm projects, a German interface |
+| 🔜 **Next** | Signed and notarized releases, a German interface, a pnpm migrator in the desktop app |
 | 🧭 **Later** | Docker and runtimes audit, a port inspector, scheduled quiet scans |
 
 Details and reasons: [`docs/ROADMAP.md`](docs/ROADMAP.md).

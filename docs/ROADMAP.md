@@ -12,7 +12,6 @@ Rough order, not promises.
 ## Next
 - **Signed, notarized releases** (the pipeline is ready, it needs an Apple Developer ID; see [RELEASING](RELEASING.md))
 - **German interface** and localized explanations
-- **pnpm migrator**: find npm/yarn projects, convert lockfiles, verify the install, keep a backup
 - **Docker audit**: dangling images, build cache, stopped containers (read-only report first)
 - **Runtimes audit**: old Node, Python, Ruby, Java versions (nvm, pyenv, asdf, Homebrew casks)
 

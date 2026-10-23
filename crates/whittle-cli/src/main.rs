@@ -10,7 +10,7 @@ use anyhow::{bail, Context as _, Result};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use whittle_core::engine::{self, ModuleId, ScanOptions};
 use whittle_core::fsutil::{format_bytes, parse_bytes};
-use whittle_core::modules::{dupes, projects, tidy};
+use whittle_core::modules::{dupes, migrate, projects, tidy};
 use whittle_core::plan;
 use whittle_core::rules::RuleSet;
 use whittle_core::{Context, Disposal, Plan, Risk, Settings};
@@ -52,6 +52,8 @@ enum Cmd {
         #[arg(long)]
         older_than: Option<u64>,
     },
+    /// Convert npm and yarn projects to pnpm. Each one is verified first; undoable. Preview unless --apply.
+    Migrate(MigrateArgs),
     /// Paths Whittle must never report or touch. Shared with the app's settings.
     Ignore(IgnoreArgs),
     /// List the built-in rules.
@@ -136,6 +138,18 @@ struct TidyArgs {
 }
 
 #[derive(Args)]
+struct MigrateArgs {
+    /// Folders to look in. Without them, your usual project folders (Developer, Projects, Code …).
+    paths: Vec<PathBuf>,
+    /// Convert for real. Without it, only the list is shown.
+    #[arg(long)]
+    apply: bool,
+    /// If pnpm is missing, install it with `npm install -g pnpm` (asks first).
+    #[arg(long)]
+    install_pnpm: bool,
+}
+
+#[derive(Args)]
 struct IgnoreArgs {
     /// Folder or file to leave alone (`~` allowed). Without it, the list is shown.
     path: Option<String>,
@@ -183,6 +197,7 @@ fn run() -> Result<()> {
             );
             Ok(())
         }
+        Cmd::Migrate(args) => cmd_migrate(&ctx, &ui, &args),
         Cmd::Ignore(args) => cmd_ignore(&ctx, &mut settings, &args),
         Cmd::Rules => cmd_rules(&ui),
         Cmd::Apps => cmd_apps(&ctx),
@@ -426,6 +441,84 @@ fn cmd_undo(ctx: &Context, ui: &ui::Ui, run: Option<&str>) -> Result<()> {
             ui.red("skipped"),
             ui.short(ctx, &s.path),
             s.reason
+        );
+    }
+    Ok(())
+}
+
+fn cmd_migrate(ctx: &Context, ui: &ui::Ui, args: &MigrateArgs) -> Result<()> {
+    let roots = if args.paths.is_empty() {
+        projects::default_roots(ctx)
+    } else {
+        args.paths.clone()
+    };
+    let found = migrate::detect(ctx, &roots);
+    for s in &found.skipped {
+        println!(
+            "  {} {}: {}",
+            ui.dim("skipped"),
+            ui.short(ctx, &s.project),
+            s.reason
+        );
+    }
+    if found.candidates.is_empty() {
+        println!("No npm or yarn projects without a pnpm lockfile found.");
+        return Ok(());
+    }
+    println!("{} project(s) can move to pnpm:", found.candidates.len());
+    for c in &found.candidates {
+        println!(
+            "  {} {} ({}, {})",
+            ui.bold(&ui.short(ctx, &c.project)),
+            ui.dim("from"),
+            c.source.lockfile_name(),
+            format_bytes(c.bytes)
+        );
+    }
+    if !args.apply {
+        println!(
+            "\n{}",
+            ui.dim("Preview only. Add --apply to convert. Each project is verified with pnpm first; nothing changes if that fails.")
+        );
+        return Ok(());
+    }
+
+    if migrate::pnpm_version().is_err() {
+        if !args.install_pnpm {
+            bail!("pnpm is not installed. Run `npm install -g pnpm` or `corepack enable`, or pass --install-pnpm.");
+        }
+        if !std::io::stdin().is_terminal() {
+            bail!("refusing to install pnpm without a terminal to confirm on");
+        }
+        print!("\npnpm is missing. Install it globally with `npm install -g pnpm`? [y/N] ");
+        std::io::stdout().flush()?;
+        let mut answer = String::new();
+        std::io::stdin().read_line(&mut answer)?;
+        if !matches!(answer.trim().to_lowercase().as_str(), "y" | "yes") {
+            println!("Cancelled. Nothing was changed.");
+            return Ok(());
+        }
+        migrate::install_pnpm()?;
+    }
+
+    let mut runs = Vec::new();
+    for c in &found.candidates {
+        println!("\nConverting {} …", ui.short(ctx, &c.project));
+        match migrate::convert(ctx, c, false) {
+            Ok(done) => {
+                println!(
+                    "  {} pnpm-lock.yaml written ({}), verified with pnpm install.",
+                    ui.green("done"),
+                    format_bytes(done.pnpm_lock_bytes)
+                );
+                runs.push(done.run);
+            }
+            Err(e) => println!("  {} {e}", ui.red("skipped")),
+        }
+    }
+    if let Some(run) = runs.last() {
+        println!(
+            "\nUndo everything from this run with `whittle undo {run}`. Remove node_modules and run `pnpm install` to use pnpm's layout."
         );
     }
     Ok(())

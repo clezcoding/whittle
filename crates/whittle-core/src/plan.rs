@@ -23,6 +23,8 @@ pub enum Op {
     Trash,
     Delete,
     Move,
+    /// A file Whittle wrote (the new pnpm lockfile). Undo removes it.
+    Create,
     Restore,
 }
 
@@ -62,7 +64,7 @@ fn now_secs(ctx: &Context) -> u64 {
     fsutil::unix_secs(ctx.now)
 }
 
-fn new_run_id(ctx: &Context) -> String {
+pub(crate) fn new_run_id(ctx: &Context) -> String {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.subsec_nanos())
@@ -247,7 +249,7 @@ fn execute(
     }
 }
 
-fn append_journal(ctx: &Context, entry: &JournalEntry) -> Result<()> {
+pub(crate) fn append_journal(ctx: &Context, entry: &JournalEntry) -> Result<()> {
     let path = ctx.journal_path();
     if let Some(dir) = path.parent() {
         fs::create_dir_all(dir).map_err(|e| Error::io(dir, e))?;
@@ -309,7 +311,7 @@ pub fn history(ctx: &Context) -> Result<Vec<RunSummary>> {
         let was_restored = restored.contains(&(e.run.clone(), e.from.clone()));
         if was_restored {
             r.restored += 1;
-        } else if matches!(e.op, Op::Quarantine | Op::Move) {
+        } else if matches!(e.op, Op::Quarantine | Op::Move | Op::Create) {
             r.undoable += 1;
         }
     }
@@ -383,6 +385,31 @@ pub fn undo(ctx: &Context, run: Option<&str>) -> Result<UndoReport> {
                             op: Op::Restore,
                             from: e.from.clone(),
                             to: Some(stored.clone()),
+                            bytes: e.bytes,
+                            title: e.title.clone(),
+                        },
+                    )?;
+                    report.restored += 1;
+                }
+            }
+            (Op::Create, _) => {
+                if fs::symlink_metadata(&e.from).is_err() {
+                    report.skipped.push(skip("already gone"));
+                } else if let Err(err) = ctx
+                    .safety
+                    .check(&e.from)
+                    .and_then(|_| fsutil::remove_any(&e.from))
+                {
+                    report.skipped.push(skip(&err.to_string()));
+                } else {
+                    append_journal(
+                        ctx,
+                        &JournalEntry {
+                            run: target.clone(),
+                            ts: now_secs(ctx),
+                            op: Op::Restore,
+                            from: e.from.clone(),
+                            to: None,
                             bytes: e.bytes,
                             title: e.title.clone(),
                         },
