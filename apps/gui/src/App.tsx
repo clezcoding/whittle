@@ -640,7 +640,7 @@ export function App() {
       )}
       {dialog === 'about' && <About info={info} onOpen={openExternal} onClose={() => setDialog(null)} />}
       {dialog === 'keys' && <Shortcuts onClose={() => setDialog(null)} />}
-      {task && task.shown && !(view === 'overview' && task.title === SCAN_TITLE) && <TaskPopup task={task} onClose={closeTask} onCancel={stopTask} />}
+      {task && task.shown && !result && !(view === 'overview' && task.title === SCAN_TITLE) && <TaskPopup task={task} onClose={closeTask} onCancel={stopTask} />}
       {result && (
         <ResultDialog
           result={result}

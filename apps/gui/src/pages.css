@@ -390,3 +390,5 @@ button.hbar:hover { background: rgb(236 238 240 / 0.04); }
 .taskpop__more { margin-top: 0.4rem; background: none; border: 0; color: var(--muted); font-size: 0.72rem; cursor: pointer; padding: 0.1rem 0; text-decoration: underline; text-underline-offset: 2px; }
 .taskpop__log--open { max-height: 14rem; overflow-y: auto; mask-image: none; }
 .taskpop__log--open div { white-space: normal; }
+
+.taskpop--done .taskpop__bar > span { background: #2e9d62; }

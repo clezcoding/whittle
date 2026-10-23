@@ -9,6 +9,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
 ### Changed
+- The progress popup stays out of the way while a result dialog is open, and a finished action shows a green bar.
 - Phone-width layout (below 720 px): the sidebar becomes one scrolling bar at the top, forms wrap, and the page uses the full width.
 - While a scan runs on the overview, its progress is shown there (with a Stop button) instead of a second popup. The popup appears when you leave the overview.
 
