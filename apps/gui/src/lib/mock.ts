@@ -105,6 +105,12 @@ type Handlers = {
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
+const DEMO_MIGRATE = [
+  { id: 'm0', project: `${DEMO_HOME}/Developer/whittle-site`, lockfile: 'package-lock.json' as const, bytes: 184_000 },
+  { id: 'm1', project: `${DEMO_HOME}/Developer/tax-tools`, lockfile: 'yarn.lock' as const, bytes: 96_000 },
+  { id: 'm2', project: `${DEMO_HOME}/Projects/client-dashboard`, lockfile: 'package-lock.json' as const, bytes: 412_000 },
+]
+
 let live = [...MOCK_FINDINGS]
 let settings: Settings = {
   onboarded: false,
@@ -297,11 +303,7 @@ export const mock: Handlers & {
     await wait(350)
     return {
       pnpm: '10.28.0',
-      candidates: [
-        { id: 'm0', project: `${DEMO_HOME}/Developer/whittle-site`, lockfile: 'package-lock.json', bytes: 184_000 },
-        { id: 'm1', project: `${DEMO_HOME}/Developer/tax-tools`, lockfile: 'yarn.lock', bytes: 96_000 },
-        { id: 'm2', project: `${DEMO_HOME}/Projects/client-dashboard`, lockfile: 'package-lock.json', bytes: 412_000 },
-      ],
+      candidates: DEMO_MIGRATE.map(({ project, ...rest }) => ({ ...rest, project })),
       skipped: [{ project: `${DEMO_HOME}/Projects/old-berry-app`, reason: 'yarn Berry (v2+) is not supported yet' }],
     }
   },
@@ -313,7 +315,7 @@ export const mock: Handlers & {
     const outcomes: MigrateOutcome[] = []
     for (const [i, id] of ids.entries()) {
       await wait(700)
-      const project = `${DEMO_HOME}/Developer/${id}`
+      const project = DEMO_MIGRATE.find((c) => c.id === id)?.project ?? id
       outcomes.push({ project, ok: true, message: 'pnpm-lock.yaml written, verified with pnpm install', run: String(now()).padStart(10, '0') + '-migrate' })
       onProgress?.({ done: i + 1, total: ids.length, project })
     }

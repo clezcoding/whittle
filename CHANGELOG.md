@@ -9,6 +9,8 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
 ### Added
+- A result dialog after every finished action (clean, undo, free quarantine, tidy, pnpm conversion, pnpm install): what happened, the items with reasons where something failed, what it means, and the next step (Undo, Open History).
+- Explanations on the pages: how a conversion and a tidy work, what a run is, and what Never touch protects. A picked folder is now added or previewed at once, with no second click.
 - **Choose in Finder…** next to every folder field (Tidy a folder, Move to pnpm, Never touch): the native folder picker fills the field.
 - The pnpm migrator searches the folders you choose (Settings file `migrate_roots`, up to 20). With none set, it uses the usual developer folders. The **Move to pnpm** page edits the list, and `whittle migrate` uses it too.
 - A **Move to pnpm** page in the desktop app (sidebar and command palette, no `⌘` number): find npm and yarn projects, choose which to convert, see each result, and undo any run in History. Installing pnpm asks for confirmation first.
@@ -26,6 +28,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 - DCO sign-off for outside contributors, zizmor linting of workflows, Security Insights file, importable branch ruleset.
 
 ### Fixed
+- Undo and free-quarantine failures are shown as a notice instead of disappearing.
 - The command line ends quietly when its output pipe is closed early (`whittle history | head`) instead of panicking.
 
 ### Security

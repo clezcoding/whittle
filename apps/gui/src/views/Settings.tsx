@@ -62,14 +62,16 @@ export function Settings(p: Props) {
     if (next.length) p.onChange({ default_modules: next })
   }
 
-  const add = async () => {
-    if (!path.trim()) return
+  const addPath = async (value: string) => {
     setAdding(true)
     setPathError(null)
-    const error = await p.onAddExclusion(path)
+    const error = await p.onAddExclusion(value)
     setAdding(false)
     if (error) setPathError(error)
     else setPath('')
+  }
+  const add = async () => {
+    if (path.trim()) await addPath(path)
   }
 
   const fda = p.permissions?.full_disk_access
@@ -129,7 +131,7 @@ export function Settings(p: Props) {
         </Row>
       </Section>
 
-      <Section id="s-never" title="Never touch" lede="Folders and files Whittle never lists and never changes, even if a rule matches them.">
+      <Section id="s-never" title="Never touch" lede="Folders and files Whittle never lists and never changes, even if a rule matches them. Use it for projects you are working on, backups, or anything you do not want to see in a scan. Choose a folder in Finder or type its path. The folder is added as soon as you pick it, and everything inside it is protected, including its sub-folders.">
         <div className="set__add">
           <input
             aria-label="Path to exclude"
@@ -143,7 +145,7 @@ export function Settings(p: Props) {
             onChange={(e) => { setPath(e.target.value); setPathError(null) }}
             onKeyDown={(e) => e.key === 'Enter' && void add()}
           />
-          <ChooseFolder onPick={(p) => { setPath(p); setPathError(null) }} disabled={adding} onError={setPathError} />
+          <ChooseFolder onPick={(picked) => { setPath(picked); void addPath(picked) }} disabled={adding} onError={setPathError} />
           <GhostButton disabled={!path.trim() || adding} onClick={() => void add()}>Add</GhostButton>
         </div>
         {pathError && <p id="path-error" className="warn" role="alert">{pathError}</p>}

@@ -3,6 +3,7 @@ import { CutButton, GhostButton, Check } from '../components/Primitives'
 import { ChooseFolder } from '../components/ChooseFolder'
 import { formatBytes, shortPath } from '../lib/format'
 import type { MigrateOutcome, MigratePreview, MigrateProgress } from '../types'
+import { migrateResult, pnpmInstalledResult, type ResultView } from '../lib/results'
 
 interface Props {
   home: string
@@ -13,9 +14,11 @@ interface Props {
   installPnpm: () => Promise<string>
   apply: (ids: string[], onProgress: (p: MigrateProgress) => void) => Promise<MigrateOutcome[]>
   onChanged: () => void
+  /** Shows the summary dialog when a conversion or the pnpm install finishes. */
+  onResult: (r: ResultView) => void
 }
 
-export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onChanged }: Props) {
+export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onChanged, onResult }: Props) {
   const [found, setFound] = useState<MigratePreview | null>(null)
   const [picked, setPicked] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState<'find' | 'install' | 'convert' | null>(null)
@@ -37,6 +40,12 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
       setRootError(String(e))
       return false
     }
+  }
+
+  // A folder picked in Finder is added straight away; there is no second click.
+  const addPicked = async (path: string) => {
+    if (roots.includes(path)) { setRootError('That folder is already in the list.'); return }
+    await changeRoots([...roots, path])
   }
 
   const addRoot = async (e: React.FormEvent) => {
@@ -66,6 +75,7 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
       const version = await installPnpm()
       setFound((f) => (f ? { ...f, pnpm: version } : f))
       setConfirmInstall(false)
+      onResult(pnpmInstalledResult(version))
     } catch (e) {
       setError(String(e))
     } finally {
@@ -82,6 +92,7 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
       setOutcomes(results)
       setFound(null)
       onChanged()
+      onResult(migrateResult(results))
     } catch (e) {
       setError(String(e))
     } finally {
@@ -121,7 +132,7 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
         <form className="pick" onSubmit={(e) => void addRoot(e)}>
           <label htmlFor="new-root" className="sr">Folder to search</label>
           <input id="new-root" value={newRoot} onChange={(e) => setNewRoot(e.target.value)} placeholder="~/Developer" spellCheck={false} autoComplete="off" />
-          <ChooseFolder onPick={setNewRoot} disabled={busy !== null} onError={setRootError} />
+          <ChooseFolder onPick={(p) => void addPicked(p)} disabled={busy !== null} onError={setRootError} />
           <GhostButton type="submit" disabled={!newRoot.trim() || busy !== null}>Add folder</GhostButton>
           {roots.length > 0 && <GhostButton type="button" disabled={busy !== null} onClick={() => void changeRoots([])}>Use the usual folders</GhostButton>}
         </form>
@@ -131,6 +142,18 @@ export function Migrate({ home, roots, onRoots, preview, installPnpm, apply, onC
       <form className="pick" onSubmit={(e) => { e.preventDefault(); void find() }}>
         <GhostButton type="submit" disabled={busy !== null}>{busy === 'find' ? 'Looking…' : 'Find projects'}</GhostButton>
       </form>
+      <p className="help">Whittle searches the folders above for <code>package-lock.json</code> (npm) and <code>yarn.lock</code> (yarn classic). Projects that already have a <code>pnpm-lock.yaml</code> are left alone. Yarn Berry projects are listed as skipped, because their lockfile format is different.</p>
+
+      <details className="explain">
+        <summary>How a conversion works</summary>
+        <ol>
+          <li><b>Import.</b> pnpm reads the existing lockfile and writes a pnpm lockfile in a scratch folder. Your project is not touched yet.</li>
+          <li><b>Verify.</b> <code>pnpm install --frozen-lockfile --ignore-scripts</code> runs on a copy of the project. This downloads the packages from the npm registry, which is the only network use. If the install fails, the conversion stops here and nothing changes.</li>
+          <li><b>Swap.</b> The old lockfile moves to quarantine, and the verified <code>pnpm-lock.yaml</code> is written into the project.</li>
+          <li><b>Record.</b> Both steps go into the journal. Undo the run in History to restore the old lockfile and remove the new one.</li>
+        </ol>
+        <p>Your source code, <code>node_modules</code> and <code>package.json</code> are never changed. Run <code>pnpm install</code> in the project afterwards to make pnpm your package manager.</p>
+      </details>
 
       {error && <p className="warn" role="alert">{error}</p>}
 
