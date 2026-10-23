@@ -76,6 +76,8 @@ export function App() {
   const [modules, setModules] = useState<ModuleId[]>(DEFAULT_MODULES)
   const [findings, setFindings] = useState<Finding[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  /** Bumped to ask Review to open its clean preview. A counter, so every request fires once. */
+  const [confirmRequest, setConfirmRequest] = useState(0)
   const [peeling, setPeeling] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<{ text: string; undo?: () => void } | null>(null)
@@ -518,10 +520,10 @@ export function App() {
       <Sidebar view={view} onView={setView} onAbout={() => setDialog('about')} onPalette={() => { setInspectId(null); setPalette(true) }} reviewCount={findings.length} quarantine={quarantine} version={info.version} demo={info.demo} />
       <main className="main">
         {view === 'overview' && (
-          <Overview onStop={stopTask} phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} />
+          <Overview onStop={stopTask} phase={phase} run={scanRun} progress={progress} tally={tally} scanningModule={scanning} findings={findings} modules={modules} onToggleModule={toggleModule} onScan={() => void scan()} onReview={() => setView('review')} onQuickClean={() => { setSelected(new Set(findings.filter((f) => f.risk === 'safe').map((f) => f.id))); setConfirmRequest((n) => n + 1); setView('review') }} />
         )}
         {view === 'review' && (
-          <Review findings={findings} selected={selected} onSelected={setSelected} peeling={peeling} home={info.home} busy={busy} run={applyRun} notice={notice} settings={prefs} onClean={(d) => void clean(d)} onScan={() => void scan()} onIgnore={(id) => void ignoreFinding(id)} onReveal={(id) => void api.revealFinding(id).catch((e) => setNotice({ text: errorText(e) }))} onInspect={(f) => setInspectId(f.id)} />
+          <Review confirmRequest={confirmRequest} findings={findings} selected={selected} onSelected={setSelected} peeling={peeling} home={info.home} busy={busy} run={applyRun} notice={notice} settings={prefs} onClean={(d) => void clean(d)} onScan={() => void scan()} onIgnore={(id) => void ignoreFinding(id)} onReveal={(id) => void api.revealFinding(id).catch((e) => setNotice({ text: errorText(e) }))} onInspect={(f) => setInspectId(f.id)} />
         )}
         {view === 'insights' && (
           <Insights findings={findings} runs={runs} home={info.home} onInspect={(f) => setInspectId(f.id)} onScan={() => void scan()} onReport={() => setDialog('report')} />

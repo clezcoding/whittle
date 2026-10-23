@@ -3,7 +3,7 @@ import { Curl } from '../components/Curl'
 import { ScanProgress } from '../components/Progress'
 import { MODULES } from '../lib/modules'
 import { CutButton, GhostButton } from '../components/Primitives'
-import { categoryLabel, formatDuration, splitBytes } from '../lib/format'
+import { categoryLabel, formatBytes, formatDuration, splitBytes } from '../lib/format'
 import { useCountUp } from '../lib/hooks'
 import { CATEGORY_HELP, MODULE_HELP } from '../lib/explain'
 import type { Finding, ModuleId, ScanRun } from '../types'
@@ -23,9 +23,13 @@ interface Props {
   onToggleModule: (m: ModuleId) => void
   onScan: () => void
   onReview: () => void
+  /** Selects every safe finding, then opens the clean preview on Review. */
+  onQuickClean: () => void
 }
 
-export function Overview({ phase, run, progress, tally, scanningModule, findings, modules, onToggleModule, onScan, onReview, onStop }: Props) {
+export function Overview({ phase, run, progress, tally, scanningModule, findings, modules, onToggleModule, onScan, onReview, onQuickClean, onStop }: Props) {
+  const safeFindings = findings.filter((f) => f.risk === 'safe')
+  const safeCleanBytes = safeFindings.reduce((s, f) => s + f.bytes, 0)
   // Manual findings are guesses: listed in Review, but not counted as "can be removed".
   const total = findings.filter((f) => f.risk !== 'manual').reduce((s, f) => s + f.bytes, 0)
   const safe = findings.filter((f) => f.risk === 'safe').reduce((s, f) => s + f.bytes, 0)
@@ -93,7 +97,8 @@ export function Overview({ phase, run, progress, tally, scanningModule, findings
               </p>
               <div className="hero__actions">
                 {phase === 'scanning' && onStop && <GhostButton onClick={onStop}>Stop</GhostButton>}
-                {phase === 'done' && findings.length > 0 && <CutButton onClick={onReview}>Review &amp; clean</CutButton>}
+                {phase === 'done' && safeFindings.length > 0 && <CutButton onClick={onQuickClean}>Clean safe items · {formatBytes(safeCleanBytes)}</CutButton>}
+                {phase === 'done' && findings.length > 0 && <GhostButton onClick={onReview}>Review &amp; clean</GhostButton>}
                 {phase === 'done' && <GhostButton onClick={onScan}>Scan again</GhostButton>}
               </div>
             </>

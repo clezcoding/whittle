@@ -12,6 +12,9 @@ export const SHORTCUTS: { keys: string[]; what: string }[] = [
   { keys: ['⌘', '7'], what: 'Rules' },
   { keys: ['⌘', '8'], what: 'Quarantine' },
   { keys: ['⌘', ','], what: 'Settings' },
+  { keys: ['↑', '↓'], what: 'Move between findings (Review)' },
+  { keys: ['Space'], what: 'Select the focused finding (Review)' },
+  { keys: ['Enter'], what: 'Open the clean preview (Review)' },
   { keys: ['?'], what: 'This list' },
   { keys: ['Esc'], what: 'Close a dialog or drawer' },
 ]

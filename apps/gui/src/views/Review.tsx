@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react'
 import { ApplyBar } from '../components/Progress'
 import { Check, CutButton, GhostButton, Modal, RiskTag, Segmented } from '../components/Primitives'
 import { useCountUp } from '../lib/hooks'
@@ -12,6 +12,8 @@ type Filter = 'all' | 'safe' | 'review'
 const riskWord = (r: Risk) => (r === 'safe' ? 'Safe' : r === 'caution' ? 'Review' : 'Manual')
 
 interface Props {
+  /** Opens the clean preview each time it changes (the Overview quick clean uses this). */
+  confirmRequest?: number
   findings: Finding[]
   selected: Set<string>
   onSelected: (s: Set<string>) => void
@@ -28,12 +30,13 @@ interface Props {
   onInspect: (f: Finding) => void
 }
 
-export function Review({ findings, selected, onSelected, peeling, home, busy, run, notice, settings, onClean, onScan, onIgnore, onReveal, onInspect }: Props) {
+export function Review({ confirmRequest, findings, selected, onSelected, peeling, home, busy, run, notice, settings, onClean, onScan, onIgnore, onReveal, onInspect }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [disposal, setDisposal] = useState<Disposal>(settings.default_disposal)
   useEffect(() => setDisposal(settings.default_disposal), [settings.default_disposal])
   const days = settings.quarantine_days
   const [confirm, setConfirm] = useState(false)
+  useEffect(() => { if (confirmRequest) setConfirm(true) }, [confirmRequest])
   const [open, setOpen] = useState<Set<string>>(new Set())
   const toggleOpen = (id: string) =>
     setOpen((cur) => {
@@ -71,6 +74,25 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
   const manualCount = picked.filter((f) => f.risk === 'manual').length
   // Every clean goes through the confirm dialog, so the user always sees what moves and what it means.
   const go = () => setConfirm(true)
+
+  // Keyboard in the list: ↑/↓ move between findings, Space selects the focused one, Enter opens the preview.
+  const onListKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (confirm) return
+    const rows = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('.row'))
+    const i = rows.indexOf(document.activeElement as HTMLElement)
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      const next = Math.min(rows.length - 1, Math.max(0, i + (e.key === 'ArrowDown' ? 1 : -1)))
+      rows[next]?.focus()
+    } else if (e.key === ' ' && i >= 0) {
+      e.preventDefault()
+      const id = rows[i].dataset.id
+      if (id) toggle(id, !selected.has(id))
+    } else if (e.key === 'Enter' && i >= 0 && picked.length > 0) {
+      e.preventDefault()
+      go()
+    }
+  }
   const pb = splitBytes(useCountUp(pickedBytes, 450))
 
   return (
@@ -102,7 +124,7 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
           <button className="link" onClick={onScan}>Scan again</button>
         </div>
       ) : (
-        <div className="list" role="table" aria-label="Findings">
+        <div className="list" role="table" aria-label="Findings" onKeyDown={onListKey}>
           {groups.map((g) => {
             const all = g.items.every((f) => selected.has(f.id))
             const some = g.items.some((f) => selected.has(f.id))
@@ -119,7 +141,7 @@ export function Review({ findings, selected, onSelected, peeling, home, busy, ru
                 {g.items.map((f, i) => {
                   const ex = open.has(f.id) ? explain(f) : null
                   return (
-                  <div key={f.id} role="row" style={{ ['--i' as string]: i }} className={`row ${selected.has(f.id) ? 'is-picked' : ''} ${peeling.has(f.id) ? 'is-peeling' : ''}`} onClick={() => toggle(f.id, !selected.has(f.id))} onDoubleClick={() => onInspect(f)}>
+                  <div key={f.id} role="row" tabIndex={-1} data-id={f.id} style={{ ['--i' as string]: i }} className={`row ${selected.has(f.id) ? 'is-picked' : ''} ${peeling.has(f.id) ? 'is-peeling' : ''}`} onClick={() => toggle(f.id, !selected.has(f.id))} onDoubleClick={() => onInspect(f)}>
                     <span role="cell"><Check checked={selected.has(f.id)} onChange={(v) => toggle(f.id, v)} label={`Select ${f.title}`} /></span>
                     <span role="cell" className="row__main">
                       <b>{f.title}</b>

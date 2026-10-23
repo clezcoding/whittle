@@ -4,10 +4,12 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
-### Changed
-- Every clean now asks first, and the confirm dialog lists the largest items with their sizes. The “Ask before cleaning” setting is gone because the preview always applies.
+### Added
+- “Clean safe items” on the overview selects every safe finding and opens the clean preview in one step.
+- Review keyboard: ↑/↓ move between findings, Space selects, Enter opens the preview.
 
 ### Changed
+- Every clean now asks first, and the confirm dialog lists the largest items with their sizes. The “Ask before cleaning” setting is gone because the preview always applies.
 - CI is faster: pull requests that only touch docs skip the heavy jobs, the app bundle and the Linux desktop-shell job run in parallel, and build caches are written on `main` only.
 - README (English and German) reworked with animated graphics that respect reduced motion, more badges and a clearer structure.
 
