@@ -2,12 +2,13 @@ import { Curl } from './Curl'
 import { formatBytes } from '../lib/format'
 import { NAV_HELP } from '../lib/explain'
 
-export type View = 'overview' | 'review' | 'tidy' | 'history' | 'insights' | 'apps' | 'rules' | 'quarantine' | 'settings'
+export type View = 'overview' | 'review' | 'tidy' | 'migrate' | 'history' | 'insights' | 'apps' | 'rules' | 'quarantine' | 'settings'
 
 const ICONS: Record<View, string> = {
   overview: 'M4 12a8 8 0 1 1 16 0M12 12l4-3',
   review: 'M5 7h14M5 12h14M5 17h9',
   tidy: 'M4 6h6l2 2h8v10H4zM9 13h6',
+  migrate: 'M7 4v10a4 4 0 0 0 4 4h6M14 14l3 3-3 3M17 4v4M17 4h-4',
   history: 'M12 7v5l3 2M4 12a8 8 0 1 0 3-6.2M4 5v4h4',
   insights: 'M5 19v-6M12 19V5M19 19v-9',
   apps: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
@@ -20,6 +21,7 @@ const LABEL: Record<View, string> = {
   overview: 'Overview',
   review: 'Review',
   tidy: 'Tidy a folder',
+  migrate: 'Move to pnpm',
   history: 'History',
   insights: 'Insights',
   apps: 'Apps',
@@ -32,7 +34,7 @@ const LABEL: Record<View, string> = {
 export const VIEW_ORDER: View[] = ['overview', 'review', 'tidy', 'history', 'insights', 'apps', 'rules', 'quarantine']
 
 const GROUPS: { label: string | null; items: View[] }[] = [
-  { label: null, items: ['overview', 'review', 'tidy', 'history'] },
+  { label: null, items: ['overview', 'review', 'tidy', 'migrate', 'history'] },
   { label: 'Explore', items: ['insights', 'apps', 'rules', 'quarantine'] },
 ]
 
@@ -63,7 +65,7 @@ export function Sidebar({ view, onView, onAbout, onPalette, reviewCount, quarant
           <ul className="sidebar__list">
             {g.items.map((v) => (
               <li key={v}>
-                <button className={`nav ${view === v ? 'is-on' : ''}`} title={`${NAV_HELP[v]} (⌘${VIEW_ORDER.indexOf(v) + 1})`} aria-current={view === v ? 'page' : undefined} onClick={() => onView(v)}>
+                <button className={`nav ${view === v ? 'is-on' : ''}`} title={VIEW_ORDER.includes(v) ? `${NAV_HELP[v]} (⌘${VIEW_ORDER.indexOf(v) + 1})` : NAV_HELP[v]} aria-current={view === v ? 'page' : undefined} onClick={() => onView(v)}>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d={ICONS[v]} /></svg>
                   <span>{LABEL[v]}</span>
                   {v === 'review' && reviewCount > 0 && <b key={reviewCount} className="nav__count">{reviewCount}</b>}

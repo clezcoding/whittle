@@ -70,6 +70,38 @@ export interface TidyEntry {
   reason: string
 }
 
+export interface MigrateCandidate {
+  id: string
+  project: string
+  lockfile: 'package-lock.json' | 'yarn.lock'
+  bytes: number
+}
+
+export interface MigrateSkipped {
+  project: string
+  reason: string
+}
+
+export interface MigratePreview {
+  candidates: MigrateCandidate[]
+  skipped: MigrateSkipped[]
+  /** The pnpm version, or null when pnpm is not installed. */
+  pnpm: string | null
+}
+
+export interface MigrateOutcome {
+  project: string
+  ok: boolean
+  message: string
+  run: string | null
+}
+
+export interface MigrateProgress {
+  done: number
+  total: number
+  project: string
+}
+
 export type ScanProgress =
   | { event: 'started'; module: ModuleId }
   | { event: 'step'; module: ModuleId; phase: string; fraction: number; done: number; total: number }

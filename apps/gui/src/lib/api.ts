@@ -20,6 +20,9 @@ import type {
   RunSummary,
   ScanProgress,
   Settings,
+  MigrateOutcome,
+  MigratePreview,
+  MigrateProgress,
   TidyEntry,
   UndoReport,
 } from '../types'
@@ -32,14 +35,18 @@ async function call<T>(cmd: string, args?: Record<string, unknown>): Promise<T> 
   return invoke<T>(cmd, args)
 }
 
-async function withApplyEvents<T>(onProgress: ((p: ApplyProgress) => void) | undefined, run: () => Promise<T>): Promise<T> {
+async function withEvents<E, T>(event: string, onEvent: ((p: E) => void) | undefined, run: () => Promise<T>): Promise<T> {
   const { listen } = await import('@tauri-apps/api/event')
-  const unlisten = await listen<ApplyProgress>('apply-progress', (e) => onProgress?.(e.payload))
+  const unlisten = await listen<E>(event, (e) => onEvent?.(e.payload))
   try {
     return await run()
   } finally {
     unlisten()
   }
+}
+
+async function withApplyEvents<T>(onProgress: ((p: ApplyProgress) => void) | undefined, run: () => Promise<T>): Promise<T> {
+  return withEvents<ApplyProgress, T>('apply-progress', onProgress, run)
 }
 
 export const api = {
@@ -104,6 +111,17 @@ export const api = {
   async tidyApply(dir: string, onProgress?: (p: ApplyProgress) => void): Promise<ApplyReport> {
     if (!isTauri) return mock.tidyApply(dir, onProgress)
     return withApplyEvents(onProgress, () => call<ApplyReport>('tidy_apply', { dir }))
+  },
+
+  migratePreview(): Promise<MigratePreview> {
+    return isTauri ? call('migrate_preview') : mock.migratePreview()
+  },
+  migrateInstallPnpm(): Promise<string> {
+    return isTauri ? call('migrate_install_pnpm') : mock.migrateInstallPnpm()
+  },
+  async migrateApply(ids: string[], onProgress?: (p: MigrateProgress) => void): Promise<MigrateOutcome[]> {
+    if (!isTauri) return mock.migrateApply(ids, onProgress)
+    return withEvents<MigrateProgress, MigrateOutcome[]>('migrate-progress', onProgress, () => call('migrate_apply', { ids }))
   },
 
   getSettings(): Promise<Settings> {

@@ -307,3 +307,10 @@ button.hbar:hover { background: rgb(236 238 240 / 0.04); }
 }
 :root[data-motion='reduced'] .flow li:nth-child(2) i { animation: none; }
 :root[data-motion='reduced'] .drawer__close:hover { transform: none; }
+
+/* Migrate view: checkbox and project path on one line. */
+.migrate__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}

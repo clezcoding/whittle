@@ -403,8 +403,8 @@ Ja. Releases sind Universal-Binaries.
 
 | | |
 |---|---|
-| ✅ **Fertig (0.1)** | Kern-Engine, Kommandozeile, Desktop-App mit acht Ansichten und Befehlspalette, Quarantäne und Rückgängig, Homebrew-Tap, universelles DMG, signierte Releases |
-| 🔜 **Als Nächstes** | Signierte und notarisierte Releases, deutsche Oberfläche, ein pnpm-Migrator in der Desktop-App |
+| ✅ **Fertig (0.1)** | Kern-Engine, Kommandozeile, Desktop-App mit acht Ansichten und Befehlspalette, Quarantäne und Rückgängig, pnpm-Migrator (Kommandozeile und App), Homebrew-Tap, universelles DMG, signierte Releases |
+| 🔜 **Als Nächstes** | Signierte und notarisierte Releases, deutsche Oberfläche |
 | 🧭 **Später** | Docker- und Runtime-Audit, Port-Inspektor, geplante stille Scans |
 
 Details und Gründe: [`docs/ROADMAP.md`](docs/ROADMAP.md).

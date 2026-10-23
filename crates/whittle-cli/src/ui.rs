@@ -71,7 +71,7 @@ impl Ui {
 
     pub fn print_findings(&self, ctx: &Context, findings: &[Finding], all: bool) {
         if findings.is_empty() {
-            println!("Nothing found. Your Mac is in good shape.");
+            outln!("Nothing found. Your Mac is in good shape.");
             return;
         }
         let mut groups: BTreeMap<&str, Vec<&Finding>> = BTreeMap::new();
@@ -98,16 +98,16 @@ impl Ui {
             .filter(|f| f.risk == Risk::Safe)
             .map(|f| f.bytes)
             .sum();
-        println!(
+        outln!(
             "{}  can be removed",
             self.bold(&format!("{:>9}", format_bytes(total)))
         );
-        println!(
+        outln!(
             "{}  of it is safe to clear right away\n",
             self.green(&format!("{:>9}", format_bytes(safe)))
         );
         if manual > 0 {
-            println!(
+            outln!(
                 "{}\n",
                 self.dim(&format!(
                     "{:>9}  more that only you can judge (marked manual)",
@@ -118,14 +118,14 @@ impl Ui {
 
         for (cat, items) in order {
             let sum: u64 = items.iter().map(|f| f.bytes).sum();
-            println!(
+            outln!(
                 "{}  {}",
                 self.bold(&format!("{:<18}", cat)),
                 format_args!("{:>9}", format_bytes(sum))
             );
             let limit = if all { items.len() } else { 6 };
             for f in items.iter().take(limit) {
-                println!(
+                outln!(
                     "  {} {:>9}  {}  {}",
                     self.risk(f.risk),
                     format_bytes(f.bytes),
@@ -134,14 +134,14 @@ impl Ui {
                 );
             }
             if items.len() > limit {
-                println!(
+                outln!(
                     "  {}",
                     self.dim(&format!("… and {} more (use --all)", items.len() - limit))
                 );
             }
-            println!();
+            outln!();
         }
-        println!("{}", self.dim("Nothing was changed. `whittle clean` moves the safe items to quarantine (undoable)."));
+        outln!("{}", self.dim("Nothing was changed. `whittle clean` moves the safe items to quarantine (undoable)."));
     }
 
     pub fn print_plan(&self, ctx: &Context, findings: &[Finding], disposal: Disposal) {
@@ -150,14 +150,14 @@ impl Ui {
             Disposal::Trash => "to the Trash",
             Disposal::Delete => "permanently",
         };
-        println!(
+        outln!(
             "{} {} item(s), {} — {how}\n",
             self.bold("Plan:"),
             findings.len(),
             format_bytes(findings.iter().map(|f| f.bytes).sum())
         );
         for f in findings.iter().take(15) {
-            println!(
+            outln!(
                 "  {} {:>9}  {}",
                 self.risk(f.risk),
                 format_bytes(f.bytes),
@@ -165,7 +165,7 @@ impl Ui {
             );
         }
         if findings.len() > 15 {
-            println!(
+            outln!(
                 "  {}",
                 self.dim(&format!("… and {} more", findings.len() - 15))
             );
@@ -180,7 +180,7 @@ impl Ui {
                 .or_default()
                 .push(e);
         }
-        println!(
+        outln!(
             "{} {} file(s) into {} folder(s)\n",
             self.bold("Tidy:"),
             entries.len(),
@@ -188,13 +188,13 @@ impl Ui {
         );
         for (dir, files) in by_dir {
             let rel = dir.strip_prefix(root).unwrap_or(&dir);
-            println!(
+            outln!(
                 "{}/  {}",
                 self.bold(&rel.display().to_string()),
                 self.dim(&format!("({})", files.len()))
             );
             for f in files.iter().take(5) {
-                println!(
+                outln!(
                     "  {}  {}",
                     self.trim(
                         &f.from.file_name().unwrap_or_default().to_string_lossy(),
@@ -204,7 +204,7 @@ impl Ui {
                 );
             }
             if files.len() > 5 {
-                println!("  {}", self.dim(&format!("… and {} more", files.len() - 5)));
+                outln!("  {}", self.dim(&format!("… and {} more", files.len() - 5)));
             }
         }
     }

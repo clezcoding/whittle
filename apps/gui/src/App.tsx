@@ -6,6 +6,7 @@ import { Onboarding } from './components/Onboarding'
 import { ReportDialog } from './components/ReportDialog'
 import { Shortcuts } from './components/Shortcuts'
 import { Sidebar, VIEW_ORDER, type View } from './components/Sidebar'
+import { Migrate } from './views/Migrate'
 import { api } from './lib/api'
 import { formatBytes } from './lib/format'
 import { buildReport } from './lib/insights'
@@ -308,6 +309,7 @@ export function App() {
       go('overview', 'Overview', ['⌘', '1']),
       go('review', 'Review', ['⌘', '2']),
       go('tidy', 'Tidy a folder', ['⌘', '3']),
+      go('migrate', 'Move projects to pnpm'),
       go('history', 'History', ['⌘', '4']),
       go('insights', 'Insights', ['⌘', '5']),
       go('apps', 'Apps', ['⌘', '6']),
@@ -421,6 +423,15 @@ export function App() {
               await api.tidyApply(dir, onProgress)
               await refreshState()
             }}
+          />
+        )}
+        {view === 'migrate' && (
+          <Migrate
+            home={info.home}
+            preview={api.migratePreview}
+            installPnpm={api.migrateInstallPnpm}
+            apply={api.migrateApply}
+            onChanged={() => void refreshState()}
           />
         )}
         {view === 'history' && (

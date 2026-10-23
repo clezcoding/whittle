@@ -16,7 +16,7 @@ use serde::Serialize;
 use system::{External, Permissions};
 use tauri::{AppHandle, Emitter, State};
 use whittle_core::engine::{self, ModuleId, ProgressEvent, ScanOptions};
-use whittle_core::modules::tidy;
+use whittle_core::modules::{migrate, projects, tidy};
 use whittle_core::plan::{self, ApplyProgress, ApplyReport, PurgeReport, RunSummary, UndoReport};
 use whittle_core::{Context, Disposal, Finding, Plan, Settings};
 
@@ -26,6 +26,8 @@ struct AppState {
     settings: Mutex<Settings>,
     /// Findings of the most recent scan, by id. The only paths the UI can act on.
     last_scan: Mutex<HashMap<String, Finding>>,
+    /// Projects the last migration preview found, by id. Like findings, the only ones the UI can convert.
+    migrations: Mutex<HashMap<String, migrate::Candidate>>,
 }
 
 impl AppState {
@@ -209,6 +211,143 @@ async fn tidy_apply(
     .map_err(err)?
 }
 
+// ───────────────────────────── migrate ─────────────────────────────
+
+#[derive(Serialize)]
+struct MigratePreview {
+    candidates: Vec<MigrateItem>,
+    skipped: Vec<migrate::Skipped>,
+    /// The pnpm version, or `None` when pnpm is not installed.
+    pnpm: Option<String>,
+}
+
+#[derive(Serialize)]
+struct MigrateItem {
+    id: String,
+    project: String,
+    lockfile: &'static str,
+    bytes: u64,
+}
+
+#[derive(Serialize)]
+struct MigrateOutcome {
+    project: String,
+    ok: bool,
+    message: String,
+    /// The run to undo in History, when the conversion was written.
+    run: Option<String>,
+}
+
+#[derive(Clone, Serialize)]
+struct MigrateProgress {
+    done: usize,
+    total: usize,
+    project: String,
+}
+
+/// Finds npm and yarn projects in the usual folders. Changes nothing.
+#[tauri::command]
+async fn migrate_preview(state: State<'_, AppState>) -> CmdResult<MigratePreview> {
+    let ctx = state.ctx();
+    let found = tauri::async_runtime::spawn_blocking(move || {
+        let roots = projects::default_roots(&ctx);
+        migrate::detect(&ctx, &roots)
+    })
+    .await
+    .map_err(err)?;
+    let pnpm = tauri::async_runtime::spawn_blocking(|| migrate::pnpm_version().ok())
+        .await
+        .map_err(err)?;
+
+    let mut known = lock(&state.migrations);
+    known.clear();
+    let candidates = found
+        .candidates
+        .into_iter()
+        .enumerate()
+        .map(|(i, c)| {
+            let id = format!("m{i}");
+            let item = MigrateItem {
+                id: id.clone(),
+                project: c.project.display().to_string(),
+                lockfile: c.source.lockfile_name(),
+                bytes: c.bytes,
+            };
+            known.insert(id, c);
+            item
+        })
+        .collect();
+    Ok(MigratePreview {
+        candidates,
+        skipped: found.skipped,
+        pnpm,
+    })
+}
+
+/// Runs only after the user clicked the install button in the interface, which asks first.
+#[tauri::command]
+async fn migrate_install_pnpm() -> CmdResult<String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        migrate::install_pnpm().map_err(err)?;
+        migrate::pnpm_version().map_err(err)
+    })
+    .await
+    .map_err(err)?
+}
+
+/// Converts the projects named by id from the last preview. Each one is verified first; a failed
+/// check leaves that project untouched and the others still run.
+#[tauri::command]
+async fn migrate_apply(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    ids: Vec<String>,
+) -> CmdResult<Vec<MigrateOutcome>> {
+    let ctx = state.ctx();
+    let picked: Vec<migrate::Candidate> = {
+        let known = lock(&state.migrations);
+        ids.iter().filter_map(|id| known.get(id).cloned()).collect()
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        let total = picked.len();
+        picked
+            .iter()
+            .enumerate()
+            .map(|(i, cand)| {
+                let project = cand.project.display().to_string();
+                let outcome = match migrate::convert(&ctx, cand, false) {
+                    Ok(done) => MigrateOutcome {
+                        project: project.clone(),
+                        ok: true,
+                        message: format!(
+                            "pnpm-lock.yaml written ({} bytes), verified with pnpm install",
+                            done.pnpm_lock_bytes
+                        ),
+                        run: Some(done.run),
+                    },
+                    Err(e) => MigrateOutcome {
+                        project: project.clone(),
+                        ok: false,
+                        message: e.to_string(),
+                        run: None,
+                    },
+                };
+                let _ = app.emit(
+                    "migrate-progress",
+                    MigrateProgress {
+                        done: i + 1,
+                        total,
+                        project,
+                    },
+                );
+                outcome
+            })
+            .collect()
+    })
+    .await
+    .map_err(err)
+}
+
 // ───────────────────────────── settings ─────────────────────────────
 
 #[tauri::command]
@@ -324,6 +463,7 @@ pub fn run() {
             base,
             settings: Mutex::new(settings),
             last_scan: Mutex::new(HashMap::new()),
+            migrations: Mutex::new(HashMap::new()),
         })
         .invoke_handler(tauri::generate_handler![
             list_rules,
@@ -336,6 +476,9 @@ pub fn run() {
             quarantine_size,
             tidy_preview,
             tidy_apply,
+            migrate_preview,
+            migrate_install_pnpm,
+            migrate_apply,
             get_settings,
             save_settings,
             reset_settings,
