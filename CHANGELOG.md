@@ -5,8 +5,13 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 ## [Unreleased]
 
 ### Added
+- Hover explanations for “lockfile”, “pnpm” and “quarantine” on the migration page.
 - “Clean safe items” on the overview selects every safe finding and opens the clean preview in one step.
 - Review keyboard: ↑/↓ move between findings, Space selects, Enter opens the preview.
+- Clearer empty states on Review and the migration page, each with a next step.
+
+### Changed
+- Every clean now asks first, and the confirm dialog lists the largest items with their sizes. The “Ask before cleaning” setting is gone because the preview always applies.
 
 ### Changed
 - Every clean now asks first, and the confirm dialog lists the largest items with their sizes. The “Ask before cleaning” setting is gone because the preview always applies.

@@ -492,4 +492,7 @@ kbd { font: 500 12px var(--f-mono); min-width: 24px; height: 24px; padding: 0 7p
 .sum__items { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .sum__items li { display: flex; justify-content: space-between; gap: 12px; }
 .sum__items li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.term { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.term:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 2px; }
 .sum__items .num { white-space: nowrap; flex-shrink: 0; }
