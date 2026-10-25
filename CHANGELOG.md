@@ -5,6 +5,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 ## [Unreleased]
 
 ### Added
+- The overview shows a notice when Full Disk Access is off, with buttons to open Privacy settings and to check again.
 - Hugging Face models and datasets in `~/.cache/huggingface` are found as caution items, one per model, never selected for you. Ollama is not touched, because its files are managed by the ollama CLI.
 - Hover explanations for “lockfile”, “pnpm” and “quarantine” on the migration page.
 - “Clean safe items” on the overview selects every safe finding and opens the clean preview in one step.
