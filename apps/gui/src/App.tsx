@@ -16,7 +16,7 @@ import { errorText, isExcluded } from './lib/paths'
 import { moduleWeights, overallFraction, rememberDurations } from './lib/timing'
 import { appendLog, finishTask, SHOW_AFTER_MS, startTask, updateTask, type Task } from './lib/tasks'
 import { TaskPopup } from './components/TaskPopup'
-import type { ApplyProgress, ApplyRun, AppInfo, Disposal, External, Finding, ModuleId, ModuleRun, Permissions, RuleInfo, RunSummary, ScanProgress, ScanRun, Settings as SettingsT } from './types'
+import type { ApplyProgress, ApplyRun, AppInfo, Disposal, External, Finding, InstalledApp, ModuleId, ModuleRun, Permissions, RuleInfo, RunSummary, ScanProgress, ScanRun, Settings as SettingsT } from './types'
 import { Apps } from './views/Apps'
 import { History } from './views/History'
 import { Insights } from './views/Insights'
@@ -75,6 +75,7 @@ export function App() {
   const [scanning, setScanning] = useState<ModuleId | null>(null)
   const [modules, setModules] = useState<ModuleId[]>(DEFAULT_MODULES)
   const [findings, setFindings] = useState<Finding[]>([])
+  const [installed, setInstalled] = useState<InstalledApp[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   /** Bumped to ask Review to open its clean preview. A counter, so every request fires once. */
   const [confirmRequest, setConfirmRequest] = useState(0)
@@ -148,6 +149,23 @@ export function App() {
     const [r, q] = await Promise.all([api.history(), api.quarantineSize()])
     setRuns(r)
     setQuarantine(q)
+  }, [])
+
+  useEffect(() => {
+    void api.installedApps().then(setInstalled).catch(() => setInstalled([]))
+  }, [])
+
+  /** Adds the app's leftovers to the findings and opens Review. Nothing is removed by this. */
+  const uninstall = useCallback(async (app: InstalledApp) => {
+    try {
+      const found = await api.appLeftovers(app.path)
+      const ids = new Set(found.map((f) => f.id))
+      setFindings((fs) => [...fs.filter((f) => !ids.has(f.id)), ...found])
+      setView('review')
+      setNotice({ text: `${app.name}: ${found.length} item${found.length === 1 ? '' : 's'} found. Nothing is removed until you confirm in Review.` })
+    } catch (e) {
+      setNotice({ text: errorText(e) })
+    }
   }, [])
 
   const recheck = useCallback(() => {
@@ -529,7 +547,7 @@ export function App() {
           <Insights findings={findings} runs={runs} home={info.home} onInspect={(f) => setInspectId(f.id)} onScan={() => void scan()} onReport={() => setDialog('report')} />
         )}
         {view === 'apps' && (
-          <Apps findings={findings} home={info.home} selected={selected} onSelectMany={selectMany} onInspect={(f) => setInspectId(f.id)} onReview={() => setView('review')} onScan={() => void scan()} />
+          <Apps installed={installed} onUninstall={(a) => void uninstall(a)} findings={findings} home={info.home} selected={selected} onSelectMany={selectMany} onInspect={(f) => setInspectId(f.id)} onReview={() => setView('review')} onScan={() => void scan()} />
         )}
         {view === 'rules' && (
           <Rules rules={rules} findings={findings} focus={ruleFocus} onFocused={() => setRuleFocus(null)} onGuide={() => openExternal('repository')} />

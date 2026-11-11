@@ -172,6 +172,13 @@ export interface Settings {
   motion: Motion
 }
 
+/** An app bundle in an Applications folder, for the uninstall list. */
+export interface InstalledApp {
+  name: string
+  path: string
+  bundle_id: string
+}
+
 export interface Permissions {
   /** true granted, false denied, null unknown (not a Mac, or nothing to test with). */
   full_disk_access: boolean | null

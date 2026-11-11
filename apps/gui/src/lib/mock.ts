@@ -1,7 +1,7 @@
 // Demo data for running the interface in a plain browser (`pnpm dev`) without the Rust backend.
 // It mimics what `whittle-core` would return on a developer's Mac.
 
-import type { ApplyProgress, ApplyReport, Disposal, Failure, Finding, MigrateOutcome, MigratePreview, MigrateProgress, ModuleId, Permissions, PurgeReport, RuleInfo, RunSummary, ScanProgress, Settings, TidyEntry, UndoReport } from '../types'
+import type { ApplyProgress, ApplyReport, Disposal, Failure, Finding, InstalledApp, MigrateOutcome, MigratePreview, MigrateProgress, ModuleId, Permissions, PurgeReport, RuleInfo, RunSummary, ScanProgress, Settings, TidyEntry, UndoReport } from '../types'
 
 export const DEMO_HOME = '/Users/clez'
 const DAY = 86_400
@@ -183,6 +183,8 @@ export const mock: Handlers & {
   ignoreFinding(id: string): Promise<Settings>
   permissions(): Promise<Permissions>
   rules(): Promise<RuleInfo[]>
+  installedApps(): Promise<InstalledApp[]>
+  appLeftovers(appPath: string): Promise<Finding[]>
 } = {
   async cancelScan() {
     scanStopped = true
@@ -264,6 +266,19 @@ export const mock: Handlers & {
   async rules() {
     await wait(120)
     return MOCK_RULES
+  },
+  async installedApps() {
+    return [
+      { name: 'Figma', path: '/Applications/Figma.app', bundle_id: 'com.figma.Desktop' },
+      { name: 'Notion', path: '/Applications/Notion.app', bundle_id: 'notion.id' },
+    ]
+  },
+  async appLeftovers(appPath) {
+    const name = appPath.replace(/^.*\//, '').replace(/\.app$/, '')
+    return [
+      { id: 'dm1', module: 'uninstall', rule: 'app-bundle', category: 'apps', title: `${name} (the app)`, path: appPath, bytes: 1.2e9, risk: 'manual', regenerable: false, note: 'Removing the app stops it from opening. Only you can tell whether you still need it.', related: null, confidence: 0.9, modified: now() },
+      { id: 'dm2', module: 'uninstall', rule: 'app-leftover', category: 'app-leftovers', title: `${name} · Caches`, path: DEMO_HOME + `/Library/Caches/${name}`, bytes: 310e6, risk: 'caution', regenerable: false, note: `Left in ~/Library/Caches by ${name}. Removing it resets what the app saved there.`, related: null, confidence: 0.8, modified: now() },
+    ]
   },
   async permissions() {
     return { full_disk_access: false, effect: 'Without Full Disk Access, macOS hides some app data from Whittle. It will miss leftovers in protected folders, but it never touches more than before.' }

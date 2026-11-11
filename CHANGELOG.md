@@ -6,6 +6,7 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ### Added
 - The overview shows a notice when Full Disk Access is off, with buttons to open Privacy settings and to check again.
+- Uninstall an app from the Apps page: its bundle and the files it left in your Library become findings in Review. Nothing is removed until you confirm. The app itself is never preselected.
 - Hover explanations for “lockfile”, “pnpm” and “quarantine” on the migration page.
 - “Clean safe items” on the overview selects every safe finding and opens the clean preview in one step.
 - Review keyboard: ↑/↓ move between findings, Space selects, Enter opens the preview.
