@@ -193,3 +193,30 @@ rules:
     paths: ["~/.gradle/caches/*"]
     min_age_days: 60
     min_size: 100000000
+
+  # ---------------------------------------------------------------- AI models
+  # Ollama is deliberately not here: its blobs are indexed by the ollama CLI, and deleting files by
+  # hand would corrupt that index. Use `ollama rm` for those.
+  - id: hf-models
+    name: Hugging Face models
+    category: caches
+    risk: caution
+    regenerable: false
+    note: Downloaded model weights. Removing one means downloading it again the next time a tool needs it.
+    paths: ["~/.cache/huggingface/hub/models--*"]
+    granularity: each
+    min_age_days: 60
+    min_size: 100000000
+    platform: macos
+
+  - id: hf-datasets
+    name: Hugging Face datasets
+    category: caches
+    risk: caution
+    regenerable: false
+    note: Downloaded datasets. Removing one means downloading it again the next time a tool needs it.
+    paths: ["~/.cache/huggingface/hub/datasets--*"]
+    granularity: each
+    min_age_days: 60
+    min_size: 100000000
+    platform: macos
